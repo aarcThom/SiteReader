@@ -53,7 +53,8 @@ namespace SiteReader
             double density = 0;
             if (!DA.GetData(1, ref density)) return;
 
-            PointCloud ptCld = ImportCloud.Import(path, density);
+            LasFile lf = new LasFile(path);
+            PointCloud ptCld = lf.ImportPtCloud(density);
 
             DA.SetData(0, ptCld);
         }

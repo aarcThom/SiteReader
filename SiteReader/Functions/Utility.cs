@@ -23,11 +23,16 @@ namespace SiteReader.Functions
             filteredIndices = filteredIndices.Select(i => Remap(i, itemCount, filteredPtCount));
 
             return filteredIndices.ToArray();
-
         }
 
-        // helper function for above
-        private static int Remap(int val, int toCount, int fromCount)
+        /// <summary>
+        /// Remap an integer from one range (0->fromCount) to another (0->fromCount)
+        /// </summary>
+        /// <param name="val"></param>
+        /// <param name="toCount"></param>
+        /// <param name="fromCount"></param>
+        /// <returns></returns>
+        public static int Remap(int val, int toCount, int fromCount)
         {
             return (int)((double)val * (toCount - 1) / (fromCount - 1));
         }
