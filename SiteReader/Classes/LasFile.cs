@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Aardvark.Base;
-using Grasshopper.Kernel.Parameters;
 using LASzip.Net;
 using Rhino.Geometry;
+using SiteReader.Functions;
 
-namespace SiteReader.Functions
+namespace SiteReader.Classes
 {
     public class LasFile
     {
@@ -22,9 +18,9 @@ namespace SiteReader.Functions
         private readonly laszip _lasReader = new laszip();
 
         // PROPERTIES =================================================================================================
-        public string filePath => _filePath;
-        public int filePointCount => (int)_filePtCount;
-        public byte filePtFormat => _filePtFormat;
+        public string FilePath => _filePath;
+        public int FilePointCount => (int)_filePtCount;
+        public byte FilePtFormat => _filePtFormat;
 
 
         // CONSTRUCTORS ===============================================================================================
@@ -43,19 +39,22 @@ namespace SiteReader.Functions
             _lasReader.close_reader();
         }
 
-        public PointCloud ImportPtCloud(double density)
+        private bool ContainsRgb()
+        {
+            byte[] rgbFormats = { 2, 3, 5, 7, 8, 10 };
+            return rgbFormats.Contains(_filePtFormat);
+        }
+
+        public PointCloud ImportPtCloud(int[] filteredCldIndices, bool initial = false)
         {
             PointCloud ptCloud = new PointCloud();
 
             _lasReader.open_reader(_filePath, out bool isCompressed);
 
-            int[] filteredCldIndices = Utility.SpacedIndices((int)_filePtCount, density);
-
             int filterIx = 0;
             for (int i = 0; i < _filePtCount; i++)
             {
                 _lasReader.read_point();
-                // var lasPoint = _lasReader.point;
 
                 if (i == filteredCldIndices[filterIx])
                 {
@@ -63,7 +62,17 @@ namespace SiteReader.Functions
                     _lasReader.get_coordinates(pointCoords);
 
                     var rhinoPoint = new Point3d(pointCoords[0], pointCoords[1], pointCoords[2]);
-                    ptCloud.Add(rhinoPoint);
+
+                    if (initial && ContainsRgb())
+                    {
+                        ushort[] rgb = _lasReader.point.rgb;
+                        Color rgbColor = Utility.ConvertRGB(rgb);
+                        ptCloud.Add(rhinoPoint, rgbColor);
+                    }
+                    else
+                    {
+                        ptCloud.Add(rhinoPoint);
+                    }
 
                     filterIx++;
                 }

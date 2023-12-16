@@ -3,7 +3,7 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System;
 using System.Collections.Generic;
-using SiteReader.Functions;
+using SiteReader.Classes;
 
 namespace SiteReader
 {
@@ -29,7 +29,7 @@ namespace SiteReader
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddTextParameter("path", "path", "path", GH_ParamAccess.item);
-            pManager.AddNumberParameter("density", "d", "d", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Density", "d", "d", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -53,8 +53,8 @@ namespace SiteReader
             double density = 0;
             if (!DA.GetData(1, ref density)) return;
 
-            LasFile lf = new LasFile(path);
-            PointCloud ptCld = lf.ImportPtCloud(density);
+            LasCloud lc = new LasCloud(path, density);
+            PointCloud ptCld = lc.PointCloud;
 
             DA.SetData(0, ptCld);
         }
