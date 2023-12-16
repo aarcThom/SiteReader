@@ -3,6 +3,7 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System;
 using System.Collections.Generic;
+using SiteReader.Functions;
 
 namespace SiteReader
 {
@@ -27,6 +28,8 @@ namespace SiteReader
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
+            pManager.AddTextParameter("path", "path", "path", GH_ParamAccess.item);
+            pManager.AddNumberParameter("density", "d", "d", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -34,6 +37,7 @@ namespace SiteReader
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
+            pManager.AddGeometryParameter("cloud", "cloud", "cloud", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -43,6 +47,15 @@ namespace SiteReader
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            string path = string.Empty;
+            if (!DA.GetData(0, ref path)) return;
+
+            double density = 0;
+            if (!DA.GetData(1, ref density)) return;
+
+            PointCloud ptCld = ImportCloud.Import(path, density);
+
+            DA.SetData(0, ptCld);
         }
 
         /// <summary>
