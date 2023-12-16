@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+	
+  <PropertyGroup>
+    <TargetFrameworks>net7.0-windows;net48-windows</TargetFrameworks>
+    <Version>1.0</Version>
+    <Title>SiteReader</Title>
+    <Description>Description of SiteReader</Description>
+    <TargetExt>.gha</TargetExt>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Grasshopper" Version="8.0.23164.14305-wip" IncludeAssets="compile;build" />
+  </ItemGroup>
+
+</Project>
