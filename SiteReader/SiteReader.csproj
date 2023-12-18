@@ -8,6 +8,32 @@
     <TargetExt>.gha</TargetExt>
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
+	
+  <ItemGroup>
+    <None Remove="Resources\filterField.png" />
+    <None Remove="Resources\generic.png" />
+    <None Remove="Resources\menus\greyscale_no.png" />
+    <None Remove="Resources\menus\greyscale_yes.png" />
+    <None Remove="Resources\menus\heatmap_no.png" />
+    <None Remove="Resources\menus\heatmap_yes.png" />
+    <None Remove="Resources\menus\rainbow_no.png" />
+    <None Remove="Resources\menus\rainbow_yes.png" />
+    <None Remove="Resources\menus\red-white-blue_no.png" />
+    <None Remove="Resources\menus\red-white-blue_yes.png" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\filterField.png" />
+    <EmbeddedResource Include="Resources\generic.png" />
+    <EmbeddedResource Include="Resources\menus\greyscale_no.png" />
+    <EmbeddedResource Include="Resources\menus\greyscale_yes.png" />
+    <EmbeddedResource Include="Resources\menus\heatmap_no.png" />
+    <EmbeddedResource Include="Resources\menus\heatmap_yes.png" />
+    <EmbeddedResource Include="Resources\menus\rainbow_no.png" />
+    <EmbeddedResource Include="Resources\menus\rainbow_yes.png" />
+    <EmbeddedResource Include="Resources\menus\red-white-blue_no.png" />
+    <EmbeddedResource Include="Resources\menus\red-white-blue_yes.png" />
+  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="Aardvark.Data.Points.LasZip" Version="5.2.28" />
