@@ -1,6 +1,7 @@
 ﻿using Grasshopper.Kernel;
 using Rhino.Geometry;
 using SiteReader.Classes;
+using SiteReader.Functions;
 using SiteReader.Params;
 
 namespace SiteReader.Components.Clouds
@@ -78,5 +79,17 @@ namespace SiteReader.Components.Clouds
 
         //need to override this to be previewable despite having no geo output with preview method
         public override bool IsPreviewCapable => true;
+
+        /// <summary>
+        /// Zoom in on the cloud in all viewports
+        /// </summary>
+        public void ZoomCloud()
+        {
+            if ((ImportCld == true || !ImportCld.HasValue ) && Cld.PtCloud != null)
+            {
+                var bBox = Cld.PtCloud.GetBoundingBox(true);
+                GeoUtility.ZoomGeo(bBox);
+            }
+        }
     }
 }

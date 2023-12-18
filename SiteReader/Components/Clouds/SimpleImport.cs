@@ -47,6 +47,10 @@ namespace SiteReader.Components.Clouds
         }
 
         //PREVIEW AND UI ==============================================================================================
+        public override void CreateAttributes()
+        {
+            m_attributes = new SiteReader.UI.testUI(this);
+        }
 
         //UTILITY METHODS =============================================================================================
 
