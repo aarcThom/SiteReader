@@ -65,7 +65,7 @@ namespace SiteReader.UI
             {
                 foreach (var uiComp in ComponentList)
                 {
-                    uiComp.Render(graphics);
+                    uiComp.Render(graphics, channel);
                 }
             }
         }

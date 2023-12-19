@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 
 namespace SiteReader.UI.Components
@@ -13,6 +14,6 @@ namespace SiteReader.UI.Components
         GH_Component Owner { get; set;}
 
         void Layout(RectangleF ownerRectangleF, float yPos);
-        void Render(Graphics g);
+        void Render(Graphics g, GH_CanvasChannel channel);
     }
 }

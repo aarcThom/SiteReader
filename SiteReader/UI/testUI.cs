@@ -23,9 +23,9 @@ namespace SiteReader.UI
         {
             ComponentList = new List<IUi>()
             {
-                new Button("hello", 100),
-                new Button("goodbye", 30),
-                new Button("cioa", 50)
+                new SingleClickButton("hello", 100),
+                new SingleClickButton("goodbye", 30),
+                new SingleClickButton("cioa", 50)
             };
         }
 

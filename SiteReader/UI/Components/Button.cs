@@ -11,10 +11,10 @@ using Grasshopper.Kernel;
 
 namespace SiteReader.UI.Components
 {
-    public class Button : IUi
+    public abstract class Button : IUi
     {
         //FIELDS ======================================================================================================
-        private string _text;
+        private readonly string _text;
 
         private RectangleF _bounds;
 
@@ -26,9 +26,7 @@ namespace SiteReader.UI.Components
         public GH_Component Owner { get; set; }
 
         //CONSTRUCTORS ================================================================================================
-
-
-        public Button(string text, float height)
+        protected Button(string text, float height)
         {
             _text = text;
             Height = height;
@@ -51,9 +49,11 @@ namespace SiteReader.UI.Components
             _bounds.Inflate(-SideSpace, 0);
         }
 
-        public void Render(Graphics g)
+        public void Render(Graphics g, GH_CanvasChannel channel)
         {
-            GH_Capsule button = GH_Capsule.CreateTextCapsule(_bounds, _bounds, GH_Palette.Black, _text);
+            (Pen _, GH_Palette palette) = UiUtilityFunctions.GetPalette(Owner, channel);
+
+            GH_Capsule button = GH_Capsule.CreateTextCapsule(_bounds, _bounds, palette, _text);
             button.Render(g, false, Owner.Locked, false);
         }
 
