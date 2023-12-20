@@ -1,4 +1,5 @@
-﻿using Grasshopper.Kernel;
+﻿using System.Collections.Generic;
+using Grasshopper.Kernel;
 using Rhino.Geometry;
 using SiteReader.Classes;
 using SiteReader.Functions;
@@ -9,8 +10,8 @@ namespace SiteReader.Components.Clouds
     public abstract class CloudBase : SiteReaderBase
     {
         //FIELDS ======================================================================================================
-        protected LasCloud Cld;
-        protected bool CldInput; //used to check if their is input in the inheriting components
+        protected  List<LasCloud> Clouds;
+        protected bool CloudInput; //used to check if their is input in the inheriting components
         protected bool? ImportCld; //used if a component has an import cld button. bool? = nullable bool.
 
         //CONSTRUCTORS ================================================================================================
@@ -22,46 +23,38 @@ namespace SiteReader.Components.Clouds
         //IO ==========================================================================================================
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddParameter(new LasCloudParam(), "LAS Cloud", "LCld", "A LAS point cloud and associated data.",
-                GH_ParamAccess.item);
-
-            pManager[0].Optional = true;
+            pManager.AddParameter(new LasCloudParam(), "LAS Clouds", "LCld", "LAS point cloud(s) and associated data.",
+                GH_ParamAccess.list);
         }
 
         //SOLVE =======================================================================================================
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             //Retrieve the input data from the ASPR Cloud input
-            //NOTE: The inheriting component needs to return if CldInput == false
-            LasCloud cld = new LasCloud();
+            //NOTE: The inheriting component needs to return if CloudInput == false
+            List<LasCloud> clouds = new List<LasCloud>();
 
-            if (!DA.GetData(0, ref cld))
+            if (!DA.GetDataList(0, clouds))
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input 'LAS Cloud' failed to collect data.");
-                Cld = null;
-                CldInput = false;
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input 'LAS Clouds' failed to collect data.");
+                clouds = null;
+                CloudInput = false;
+                return;
             }
-            else if (cld.PtCloud == null || cld.PtCloud.Count == 0)
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input 'LAS Cloud' has no points.");
-                CldInput = false;
-            }
-            else
-            {
-                if (Cld == null || cld != Cld)
-                {
-                    Cld = new LasCloud(cld);
-                    CldInput = true;
-                }
-            }
+
         }
 
         //PREVIEW AND UI ==============================================================================================
         public override void DrawViewportWires(IGH_PreviewArgs args)
         {
-            if (Cld != null && Cld.PtCloud != null && (ImportCld == true || !ImportCld.HasValue) && !Locked)
+            if (Clouds == null || Clouds.Count == 0) return;
+            
+            foreach (var cloud in Clouds)
             {
-                args.Display.DrawPointCloud(Cld.PtCloud, 2);
+                if (cloud != null && cloud.PtCloud != null && (ImportCld == true || !ImportCld.HasValue) && !Locked)
+                {
+                    args.Display.DrawPointCloud(cloud.PtCloud, 2);
+                }
             }
         }
 
@@ -69,11 +62,18 @@ namespace SiteReader.Components.Clouds
         {
             get
             {
-                if (Cld != null && Cld.PtCloud != null && (ImportCld == true || !ImportCld.HasValue))
+                if (Clouds == null || Clouds.Count == 0) return base.ClippingBox;
+                
+                BoundingBox box = new BoundingBox();
+                foreach (var cloud in Clouds)
                 {
-                    return Cld.PtCloud.GetBoundingBox(true);
+                    if (cloud != null && cloud.PtCloud != null && (ImportCld == true || !ImportCld.HasValue))
+                    {
+                        box = BoundingBox.Union(box, cloud.PtCloud.GetBoundingBox(true));
+                    }
                 }
-                return base.ClippingBox;
+
+                return (box.IsValid) ? box : base.ClippingBox;
             }
         }
 
@@ -85,11 +85,7 @@ namespace SiteReader.Components.Clouds
         /// </summary>
         public void ZoomCloud()
         {
-            if ((ImportCld == true || !ImportCld.HasValue ) && Cld.PtCloud != null)
-            {
-                var bBox = Cld.PtCloud.GetBoundingBox(true);
-                GeoUtility.ZoomGeo(bBox);
-            }
+            GeoUtility.ZoomGeo(ClippingBox);
         }
     }
 }

@@ -1,59 +1,64 @@
 ﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 
 namespace SiteReader.UI.Components
 {
-    public abstract class Button : IUi
+    /// <summary>
+    /// The base button component
+    /// </summary>
+    public class Button : IUi
     {
         //FIELDS ======================================================================================================
         private readonly string _text;
 
-        private RectangleF _bounds;
-
         //PROPERTIES ==================================================================================================
+        public RectangleF Bounds { get; set; }
         public float Width { get; set; }
         public float Height { get; set; }
         public float Bottom { get; set; }
         public float SideSpace { get; set; }
+        public Pen Outline { get; set; }
+        public GH_Palette Palette { get; set; }
         public GH_Component Owner { get; set; }
 
+        public bool Clicked { get; set; }
+
         //CONSTRUCTORS ================================================================================================
-        protected Button(string text, float height)
+        public Button(string text, float height)
         {
             _text = text;
             Height = height;
+            Clicked = false;
         }
 
         public void Layout(RectangleF ownerRectangleF, float yPos)
         {
-            float buttonWidth = Width == 0 ? ownerRectangleF.Width : Width;
+            float buttonWidth = Width == 0 ? ownerRectangleF.Width - SideSpace * 2 : Width;
 
             if (yPos == 0)
             {
                 throw new Exception("yPos must be defined!");
             }
 
+            Bounds = new RectangleF(ownerRectangleF.Left, yPos, buttonWidth, Height);
 
-            _bounds = new RectangleF(ownerRectangleF.Left, yPos, buttonWidth, Height);
+            Bottom = Bounds.Bottom;
 
-            Bottom = _bounds.Bottom;
-
-            _bounds.Inflate(-SideSpace, 0);
+            Bounds.Inflate(-SideSpace, 0);
         }
 
         public void Render(Graphics g, GH_CanvasChannel channel)
         {
-            (Pen _, GH_Palette palette) = UiUtilityFunctions.GetPalette(Owner, channel);
+            if (Palette == GH_Palette.Normal)
+            {
+                Palette = GH_Palette.Black;
+            }
 
-            GH_Capsule button = GH_Capsule.CreateTextCapsule(_bounds, _bounds, palette, _text);
+            GH_Palette buttonPalette = !Clicked ? Palette : GH_Palette.Pink;
+
+            GH_Capsule button = GH_Capsule.CreateTextCapsule(Bounds, Bounds, buttonPalette, _text);
             button.Render(g, false, Owner.Locked, false);
         }
 

@@ -7,7 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Windows.Forms;
 using SiteReader.UI.Components;
+using Grasshopper.GUI;
 
 namespace SiteReader.UI
 {
@@ -61,6 +63,38 @@ namespace SiteReader.UI
         protected override void Render(GH_Canvas canvas, Graphics graphics, GH_CanvasChannel channel)
         {
             base.Render(canvas, graphics, channel); // handle the wires, draw nickname, name, etc.
+
+            //the main component rendering channel
+            if (channel == GH_CanvasChannel.Objects)
+            {
+                //declare the pens / brushes / pallets we will need to draw the custom objects - defaults for blank / message levels
+                Pen outLine = Palette.BlankOutline;
+                GH_Palette palette = GH_Palette.Normal;
+
+                //use a switch statement to retrieve the proper pens / brushes from our CompColors class
+                switch (Owner.RuntimeMessageLevel)
+                {
+                    case GH_RuntimeMessageLevel.Warning:
+                        // assign warning values
+                        outLine = Palette.WarnOutline;
+                        palette = GH_Palette.Warning;
+                        break;
+
+                    case GH_RuntimeMessageLevel.Error:
+                        // assign warning values
+                        outLine = Palette.ErrorOutline;
+                        palette = GH_Palette.Error;
+                        break;
+                }
+
+                foreach (var uiComp in ComponentList)
+                {
+                    uiComp.Outline = outLine;
+                    uiComp.Palette = palette;
+                }
+            }
+            
+
             if (ComponentList != null && ComponentList.Count > 0)
             {
                 foreach (var uiComp in ComponentList)

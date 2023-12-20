@@ -2,12 +2,18 @@
 using System;
 using SiteReader.Classes;
 using SiteReader.Params;
+using SiteReader.UI;
+using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
+using SiteReader.Functions;
 
 namespace SiteReader.Components.Clouds
 {
     public class SimpleImport : CloudBase
     {
         //FIELDS ======================================================================================================
+        private double _density;
+        private List<string> _paths = new List<string>();
 
         //PROPERTIES ==================================================================================================
 
@@ -22,34 +28,55 @@ namespace SiteReader.Components.Clouds
         //IO ==========================================================================================================
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            base.RegisterInputParams(pManager);
+            pManager.AddTextParameter("File Path", "Path", "Path to LAS or LAZ file.", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Cloud Density", "CldDens",
+                "What factor of points do you want to import. TIP: Smart low - around 0.01. You can always upsample.",
+                GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddParameter(new LasCloudParam(), "LAS Cloud", "LCld",
-                "A LAS point cloud and associated data.", GH_ParamAccess.item);
+            pManager.AddParameter(new LasCloudParam(), "LAS Clouds", "LCld",
+                "A LAS point cloud and associated data.", GH_ParamAccess.list);
         }
 
         //SOLVE =======================================================================================================
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            base.SolveInstance(DA);
-            // clear the UI if cloud input disconnected. RedrawCanvas() only needed for custom UI components that
-            // need to reset (ie. graphs) when cloud input disconnected. If you don't have a custom UI, you can just
-            // leave this at return or reset whatever values needed.
-            if (CldInput == false)
+            if (!DA.GetDataList(0, _paths)) return;
+
+            var fTypes = new List<string>() { ".las", ".laz" };
+
+            foreach (var path in _paths)
             {
-                //  CLEAR UI DATA HERE
-                //  Grasshopper.Instances.RedrawCanvas();
-                return;
+                if (!Utility.TestFile(path, fTypes, out string msg))
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, msg);
+                    return;
+                }
             }
+
+            Clouds = new List<LasCloud>();
+            
+            if (!DA.GetData(1, ref _density)) return;
+
         }
 
         //PREVIEW AND UI ==============================================================================================
         public override void CreateAttributes()
         {
-            m_attributes = new SiteReader.UI.testUI(this);
+            m_attributes = new UiImportCloud(this, ImportCloud);
+        }
+
+        private void ImportCloud()
+        {
+            if (_density != 0 && _paths.Count > 0)
+            {
+                foreach (var path in _paths)
+                {
+                    Clouds.Add(new LasCloud(path, _density));
+                }
+            }
         }
 
         //UTILITY METHODS =============================================================================================

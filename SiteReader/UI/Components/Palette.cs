@@ -9,7 +9,7 @@ using Grasshopper.Kernel;
 
 namespace SiteReader.UI.Components
 {
-    public static class UiUtilityFunctions
+    public static class Palette
     {
         //fields
         private static readonly Color BlankOutlineCol = Color.FromArgb(255, 50, 50, 50);
@@ -23,35 +23,6 @@ namespace SiteReader.UI.Components
         public static Brush HandleFill => new SolidBrush(Color.AliceBlue);
         public static Brush RadioUnclicked => new SolidBrush(Color.AliceBlue);
         public static Brush RadioClicked => new SolidBrush(Color.Black);
-
         public static Brush GraphBackground => new SolidBrush(Color.Silver);
-
-        public static (Pen, GH_Palette) GetPalette(GH_Component owner, GH_CanvasChannel channel)
-        {
-            Pen outLine = BlankOutline;
-            GH_Palette palette = GH_Palette.Normal;
-
-            //the main component rendering channel
-            if (channel == GH_CanvasChannel.Objects)
-            {
-                //use a switch statement to retrieve the proper pens / brushes from our CompColors class
-                switch (owner.RuntimeMessageLevel)
-                {
-                    case GH_RuntimeMessageLevel.Warning:
-                        // assign warning values
-                        outLine = WarnOutline;
-                        palette = GH_Palette.Warning;
-                        break;
-
-                    case GH_RuntimeMessageLevel.Error:
-                        // assign warning values
-                        outLine = ErrorOutline;
-                        palette = GH_Palette.Error;
-                        break;
-                }
-            }
-
-            return (outLine, palette);
-        }
     }
 }
