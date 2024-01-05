@@ -13,7 +13,7 @@ namespace SiteReader.Params
         public LasCloudParam() : base(new GH_InstanceDescription("LAS Cloud", "LCld",
             "A LAS point cloud and associated data.", "SiteReader", "LAS Clouds"))
         {
-            Hidden = true;
+            Hidden = false;
         }
 
         public override Guid ComponentGuid => new Guid("{E902C5B7-6B05-4F44-931D-C7ABAFD4F37A}");
@@ -53,7 +53,15 @@ namespace SiteReader.Params
 
         public void DrawViewportWires(IGH_PreviewArgs args)
         {
-            //Preview_DrawWires(args); // Removed because it's faster to render in a given component
+            if (m_data == null || m_data.DataCount == 0) return;
+
+            foreach (LasCloud cloud in m_data)
+            {
+                if (cloud != null && cloud.PtCloud != null && !Locked)
+                {
+                    args.Display.DrawPointCloud(cloud.PtCloud, 2);
+                }
+            }
         }
 
         protected override GH_GetterResult Prompt_Plural(ref List<LasCloud> values)

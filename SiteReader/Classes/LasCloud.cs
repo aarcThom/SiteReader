@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Rhino.DocObjects;
 using Rhino;
+using System.Xml.Linq;
 
 namespace SiteReader.Classes
 {
@@ -58,7 +59,7 @@ namespace SiteReader.Classes
 
         public void DrawViewportWires(GH_PreviewWireArgs args)
         {
-            // args.Pipeline.DrawPointCloud(m_value, args.Thickness);
+            args.Pipeline.DrawPointCloud(m_value, args.Thickness);
         }
 
         public BoundingBox ClippingBox => m_value.GetBoundingBox(true);
@@ -66,22 +67,32 @@ namespace SiteReader.Classes
         // IGH_BakeAwareObject METHODS
         public void BakeGeometry(RhinoDoc doc, List<Guid> obj_ids)
         {
-            BakeGeometry(doc, new ObjectAttributes(), obj_ids);
+            var defaultAttributes = doc.CreateDefaultAttributes();
+            BakeGeometry(doc, defaultAttributes, obj_ids);
         }
 
         public void BakeGeometry(RhinoDoc doc, ObjectAttributes att, List<Guid> obj_ids)
         {
-            obj_ids.Add(doc.Objects.AddPointCloud(m_value, att));
+
+            foreach (IGH_BakeAwareObject obj in m_value)
+            {
+                if (obj != null)
+                {
+                    List<Guid> idsOut = new List<Guid>();
+                    obj.BakeGeometry(doc, att, idsOut);
+                    obj_ids.AddRange(idsOut);
+                }
+            }
         }
 
-        public bool IsBakeCapable => PtCloud != null;
+        public bool IsBakeCapable => m_value != null;
 
 
         // GH_GOO METHODS
 
         public override string ToString()
         {
-            return $"Point Cloud with {m_value.Count} points.";
+            return $"LAS Point Cloud with {m_value.Count} points.";
         }
 
         public override BoundingBox GetBoundingBox(Transform xform)

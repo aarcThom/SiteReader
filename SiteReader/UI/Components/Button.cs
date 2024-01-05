@@ -42,7 +42,7 @@ namespace SiteReader.UI.Components
                 throw new Exception("yPos must be defined!");
             }
 
-            Bounds = new RectangleF(ownerRectangleF.Left, yPos, buttonWidth, Height);
+            Bounds = new RectangleF(ownerRectangleF.Left + SideSpace, yPos, buttonWidth, Height);
 
             Bottom = Bounds.Bottom;
 

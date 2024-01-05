@@ -6,6 +6,7 @@ using SiteReader.UI;
 using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;
 using SiteReader.Functions;
+using Rhino;
 
 namespace SiteReader.Components.Clouds
 {
@@ -13,7 +14,7 @@ namespace SiteReader.Components.Clouds
     {
         //FIELDS ======================================================================================================
         private double _density;
-        private List<string> _paths = new List<string>();
+        private readonly List<string> _paths = new List<string>();
 
         //PROPERTIES ==================================================================================================
 
@@ -55,10 +56,13 @@ namespace SiteReader.Components.Clouds
                     return;
                 }
             }
-
-            Clouds = new List<LasCloud>();
             
             if (!DA.GetData(1, ref _density)) return;
+
+            if (Clouds != null && Clouds.Count > 0)
+            {
+                DA.SetDataList(0, Clouds);
+            }
 
         }
 
@@ -72,10 +76,13 @@ namespace SiteReader.Components.Clouds
         {
             if (_density != 0 && _paths.Count > 0)
             {
+                Clouds = new List<LasCloud>();
+
                 foreach (var path in _paths)
                 {
                     Clouds.Add(new LasCloud(path, _density));
                 }
+                ExpireSolution(true);
             }
         }
 
