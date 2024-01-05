@@ -66,26 +66,16 @@ namespace SiteReader.Classes
 
         // IGH_BakeAwareObject METHODS
         public void BakeGeometry(RhinoDoc doc, List<Guid> obj_ids)
-        {
-            var defaultAttributes = doc.CreateDefaultAttributes();
-            BakeGeometry(doc, defaultAttributes, obj_ids);
+        { 
+            BakeGeometry(doc, new ObjectAttributes(), obj_ids);
         }
 
         public void BakeGeometry(RhinoDoc doc, ObjectAttributes att, List<Guid> obj_ids)
         {
-
-            foreach (IGH_BakeAwareObject obj in m_value)
-            {
-                if (obj != null)
-                {
-                    List<Guid> idsOut = new List<Guid>();
-                    obj.BakeGeometry(doc, att, idsOut);
-                    obj_ids.AddRange(idsOut);
-                }
-            }
+            obj_ids.Add(doc.Objects.AddPointCloud(m_value, att));
         }
 
-        public bool IsBakeCapable => m_value != null;
+        public bool IsBakeCapable => PtCloud != null;
 
 
         // GH_GOO METHODS
