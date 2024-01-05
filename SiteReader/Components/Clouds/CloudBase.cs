@@ -69,7 +69,7 @@ namespace SiteReader.Components.Clouds
                 {
                     if (cloud != null && cloud.PtCloud != null && (ImportCld == true || !ImportCld.HasValue))
                     {
-                        box = BoundingBox.Union(box, cloud.PtCloud.GetBoundingBox(true));
+                        box = BoundingBox.Union(box, cloud.Boundingbox);
                     }
                 }
 

@@ -4,23 +4,18 @@ using SiteReader.Classes;
 using SiteReader.Params;
 using SiteReader.UI;
 using System.Collections.Generic;
-using System.Reflection.Metadata.Ecma335;
 using SiteReader.Functions;
-using Rhino;
 
 namespace SiteReader.Components.Clouds
 {
-    public class SimpleImport : CloudBase
+    public class ImportLasCloud : CloudBase
     {
         //FIELDS ======================================================================================================
-        private double _density;
-        private readonly List<string> _paths = new List<string>();
-
-        //PROPERTIES ==================================================================================================
+        private bool _importState;
 
         //CONSTRUCTORS ================================================================================================
 
-        public SimpleImport()
+        public ImportLasCloud()
             : base(name: "Simple import", nickname: "tmplt", description: "Change this!!")
         {
             // IconPath = "siteReader.Resources...";
@@ -31,8 +26,8 @@ namespace SiteReader.Components.Clouds
         {
             pManager.AddTextParameter("File Path", "Path", "Path to LAS or LAZ file.", GH_ParamAccess.list);
             pManager.AddNumberParameter("Cloud Density", "CldDens",
-                "What factor of points do you want to import. TIP: Smart low - around 0.01. You can always upsample.",
-                GH_ParamAccess.item);
+                "What factor of points do you want to import. TIP: Smart low - around 0.001. You can always upsample.",
+                GH_ParamAccess.item, 0.001);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -44,11 +39,12 @@ namespace SiteReader.Components.Clouds
         //SOLVE =======================================================================================================
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            if (!DA.GetDataList(0, _paths)) return;
+            List<string> paths = new List<string>();
+            if (!DA.GetDataList(0, paths)) return;
 
             var fTypes = new List<string>() { ".las", ".laz" };
 
-            foreach (var path in _paths)
+            foreach (var path in paths)
             {
                 if (!Utility.TestFile(path, fTypes, out string msg))
                 {
@@ -56,40 +52,42 @@ namespace SiteReader.Components.Clouds
                     return;
                 }
             }
-            
-            if (!DA.GetData(1, ref _density)) return;
 
-            if (Clouds != null && Clouds.Count > 0)
+            double density = 0;
+            if (!DA.GetData(1, ref density)) return;
+
+
+            if (_importState)
             {
-                DA.SetDataList(0, Clouds);
+                Clouds = new List<LasCloud>();
+                foreach (var path in paths)
+                {
+                    Clouds.Add(new LasCloud(path, density));
+                }
             }
-
+            
+            DA.SetDataList(0, Clouds);
+            _importState = false;
         }
 
         //PREVIEW AND UI ==============================================================================================
         public override void CreateAttributes()
         {
-            m_attributes = new UiImportCloud(this, ImportCloud);
+            m_attributes = new UiImportCloud(this, ImportCloud, ZoomClouds);
         }
 
         private void ImportCloud()
         {
-            if (_density != 0 && _paths.Count > 0)
-            {
-                Clouds = new List<LasCloud>();
-
-                foreach (var path in _paths)
-                {
-                    Clouds.Add(new LasCloud(path, _density));
-                }
-                ExpireSolution(true);
-            }
+            _importState = true;
+            ExpireSolution(true);
         }
 
-        //UTILITY METHODS =============================================================================================
+        private void ZoomClouds()
+        {
+            GeoUtility.ZoomClouds(Clouds);
+        }
 
         //GUID ========================================================================================================
-        // make sure to change this if using template
         public override Guid ComponentGuid => new Guid("D6A29408-B14D-45D3-8ABF-ED00098D0400");
     }
 }

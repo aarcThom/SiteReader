@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using SiteReader.UI.Components;
 using Grasshopper.GUI;
@@ -19,19 +20,28 @@ namespace SiteReader.UI
         //FIELDS ======================================================================================================
         private readonly Button _importButton;
         private readonly Action _importAction;
+
+        private readonly Button _zoomButton;
+        private readonly Action _zoomAction;
+
         //PROPERTIES ==================================================================================================
 
         //CONSTRUCTORS ================================================================================================
-        public UiImportCloud(GH_Component owner, Action importAction) : base(owner)
+        public UiImportCloud(GH_Component owner, Action importAction, Action zoomAction) : base(owner)
         {
 
             _importAction = importAction;
-             _importButton = new Button("import", 30);
+            _importButton = new Button("import", 30);
+
+            _zoomAction = zoomAction;
+            _zoomButton = new Button("zoom", 30);
 
             ComponentList = new List<IUi>()
             {
-                _importButton
+                _importButton,
+                _zoomButton
             };
+            
         }
 
         public override GH_ObjectResponse RespondToMouseDown(GH_Canvas sender, GH_CanvasMouseEvent e)
@@ -46,6 +56,19 @@ namespace SiteReader.UI
 
                 return GH_ObjectResponse.Capture;
             }
+
+            if (e.Button == MouseButtons.Left && _zoomButton.Bounds.Contains(e.CanvasLocation))
+            {
+                _zoomButton.Clicked = true;
+
+                // expire layout, but not solution
+                base.ExpireLayout();
+                sender.Refresh();
+
+                return GH_ObjectResponse.Capture;
+            }
+
+
             return base.RespondToMouseDown(sender, e);
         }
 
@@ -62,6 +85,19 @@ namespace SiteReader.UI
                 _importAction();
                 return GH_ObjectResponse.Release;
             }
+
+            if (e.Button == MouseButtons.Left && _zoomButton.Clicked)
+            {
+                _zoomButton.Clicked = false;
+
+                // expire layout, but not solution
+                base.ExpireLayout();
+                sender.Refresh();
+                _zoomAction();
+                return GH_ObjectResponse.Release;
+            }
+
+
             return base.RespondToMouseUp(sender, e);
         }
 
