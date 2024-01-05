@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using SiteReader.Classes;
@@ -63,15 +64,9 @@ namespace SiteReader.Components.Clouds
             get
             {
                 if (Clouds == null || Clouds.Count == 0) return base.ClippingBox;
-                
-                BoundingBox box = new BoundingBox();
-                foreach (var cloud in Clouds)
-                {
-                    if (cloud != null && cloud.PtCloud != null && (ImportCld == true || !ImportCld.HasValue))
-                    {
-                        box = BoundingBox.Union(box, cloud.Boundingbox);
-                    }
-                }
+
+                var boxes = from cloud in Clouds where cloud != null select cloud.Boundingbox;
+                var box = GeoUtility.MergeBoundingBoxes(boxes);
 
                 return (box.IsValid) ? box : base.ClippingBox;
             }

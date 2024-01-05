@@ -73,18 +73,13 @@ namespace SiteReader.Components.Clouds
         //PREVIEW AND UI ==============================================================================================
         public override void CreateAttributes()
         {
-            m_attributes = new UiImportCloud(this, ImportCloud, ZoomClouds);
+            m_attributes = new UiImportCloud(this, ImportCloud, ZoomCloud);
         }
 
         private void ImportCloud()
         {
             _importState = true;
             ExpireSolution(true);
-        }
-
-        private void ZoomClouds()
-        {
-            GeoUtility.ZoomClouds(Clouds);
         }
 
         //GUID ========================================================================================================

@@ -1,10 +1,7 @@
 ﻿using Rhino.Geometry;
 using Rhino;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SiteReader.Classes;
 
 namespace SiteReader.Functions
@@ -25,22 +22,6 @@ namespace SiteReader.Functions
                 view.Redraw();
             }
         }
-
-        /// <summary>
-        /// Zooms in on multiple LasClouds
-        /// </summary>
-        /// <param name="clouds"> List of LasClouds to zoom in on</param>
-        public static void ZoomClouds(List<LasCloud> clouds)
-        {
-            if (clouds != null && clouds.Count > 0)
-            {
-                var boxes = from cloud in clouds select cloud.Boundingbox;
-                var bigBox = MergeBoundingBoxes(boxes);
-
-                ZoomGeo(bigBox);
-            }
-        }
-
 
         /// <summary>
         /// Merges bounding boxes into one containing box.

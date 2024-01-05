@@ -5,7 +5,6 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Rhino.DocObjects;
 using Rhino;
-using System.Xml.Linq;
 
 namespace SiteReader.Classes
 {
