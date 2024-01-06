@@ -12,8 +12,6 @@ namespace SiteReader.Components.Clouds
     {
         //FIELDS ======================================================================================================
         protected  List<LasCloud> Clouds;
-        protected bool CloudInput; //used to check if their is input in the inheriting components
-        protected bool? ImportCld; //used if a component has an import cld button. bool? = nullable bool.
 
         //CONSTRUCTORS ================================================================================================
         protected CloudBase(string name, string nickname, string description)
@@ -31,15 +29,10 @@ namespace SiteReader.Components.Clouds
         //SOLVE =======================================================================================================
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            //Retrieve the input data from the ASPR Cloud input
-            //NOTE: The inheriting component needs to return if CloudInput == false
-            List<LasCloud> clouds = new List<LasCloud>();
-
-            if (!DA.GetDataList(0, clouds))
+            Clouds = new List<LasCloud>();
+            if (!DA.GetDataList(0, Clouds))
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input 'LAS Clouds' failed to collect data.");
-                clouds = null;
-                CloudInput = false;
                 return;
             }
 
@@ -52,7 +45,7 @@ namespace SiteReader.Components.Clouds
             
             foreach (var cloud in Clouds)
             {
-                if (cloud != null && cloud.PtCloud != null && (ImportCld == true || !ImportCld.HasValue) && !Locked)
+                if (cloud != null && cloud.PtCloud != null && !Locked)
                 {
                     args.Display.DrawPointCloud(cloud.PtCloud, 2);
                 }

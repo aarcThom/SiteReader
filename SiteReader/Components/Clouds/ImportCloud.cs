@@ -8,15 +8,16 @@ using SiteReader.Functions;
 
 namespace SiteReader.Components.Clouds
 {
-    public class ImportLasCloud : CloudBase
+    public class ImportCloud : CloudBase
     {
         //FIELDS ======================================================================================================
         private bool _importState;
 
         //CONSTRUCTORS ================================================================================================
 
-        public ImportLasCloud()
-            : base(name: "Simple import", nickname: "tmplt", description: "Change this!!")
+        public ImportCloud()
+            : base(name: "Import LAS Cloud", nickname: "impLas", 
+                description: "Import a point cloud from a .las or .laz file.")
         {
             // IconPath = "siteReader.Resources...";
         }
@@ -39,7 +40,7 @@ namespace SiteReader.Components.Clouds
         //SOLVE =======================================================================================================
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            List<string> paths = new List<string>();
+             List<string> paths = new List<string>();
             if (!DA.GetDataList(0, paths)) return;
 
             var fTypes = new List<string>() { ".las", ".laz" };
@@ -73,10 +74,10 @@ namespace SiteReader.Components.Clouds
         //PREVIEW AND UI ==============================================================================================
         public override void CreateAttributes()
         {
-            m_attributes = new UiImportCloud(this, ImportCloud, ZoomCloud);
+            m_attributes = new UiImportCloud(this, ImportClouds, ZoomCloud);
         }
 
-        private void ImportCloud()
+        private void ImportClouds()
         {
             _importState = true;
             ExpireSolution(true);

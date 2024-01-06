@@ -2,6 +2,8 @@
 using Rhino;
 using System.Collections.Generic;
 using System.Linq;
+using Rhino.DocObjects;
+using Rhino.Input.Custom;
 using SiteReader.Classes;
 
 namespace SiteReader.Functions
@@ -53,6 +55,32 @@ namespace SiteReader.Functions
             Point3d maxPt = new Point3d(xMax, yMax,  zMax);
 
             return new BoundingBox(minPt, maxPt);
+        }
+
+        /// <summary>
+        /// Converts Breps and Meshes to a single mesh
+        /// </summary>
+        /// <param name="geometry">A list of meshes and/or breps</param>
+        /// <returns>A single mesh, or null if other geo present or meshes/breps aren't closed</returns>
+        public static Mesh ConvertToMesh(List<GeometryBase> geometry)
+        {
+            Mesh mesh = new Mesh();
+            foreach (var geo in geometry)
+            {
+                if (geo.ObjectType == ObjectType.Brep && geo.HasBrepForm && Brep.TryConvertBrep(geo).IsSolid)
+                {
+                    mesh.Append(Mesh.CreateFromBrep(Brep.TryConvertBrep(geo), MeshingParameters.FastRenderMesh));
+                }
+                else if (geo.ObjectType == ObjectType.Mesh && ((Mesh)geo).IsClosed)
+                {
+                    mesh.Append((Mesh)geo);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            return mesh;
         }
     }
 }
