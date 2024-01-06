@@ -38,8 +38,6 @@ namespace SiteReader.Components.Clouds
         {
             pManager.AddParameter(new LasCloudParam(), "LAS Cloud", "LCld",
                 "A LAS point cloud and associated data.", GH_ParamAccess.item);
-
-            pManager.AddMeshParameter("test", "test", "t", GH_ParamAccess.item);
         }
 
         //SOLVE =======================================================================================================
@@ -57,7 +55,17 @@ namespace SiteReader.Components.Clouds
                 return;
             }
 
-            DA.SetData(1, cropMesh);
+            var inside = true;
+            if (!DA.GetData(2, ref inside)) inside = true;
+
+            foreach (var cloud in Clouds)
+            {
+                cloud.Filters.CropMesh = cropMesh;
+                cloud.ApplyCrop(inside);
+            }
+
+            DA.SetDataList(0, Clouds);
+
 
         }
 

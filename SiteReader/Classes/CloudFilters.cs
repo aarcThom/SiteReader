@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Rhino.Geometry;
 using SiteReader.Functions;
 
 namespace SiteReader.Classes
@@ -8,6 +9,7 @@ namespace SiteReader.Classes
         // FIELDS =====================================================================================================
         private double _density;
         private readonly int _filePointCount;
+        private Mesh _cropMesh;
 
         // PROPERTIES =================================================================================================
         public double Density
@@ -15,6 +17,8 @@ namespace SiteReader.Classes
             get => _density;
             set => _density = Utility.Clamp(value, 0, 1);
         }
+
+        public Mesh CropMesh { get; set; }
 
         // CONSTRUCTORS ===============================================================================================
         public CloudFilters(int pointCount, double density = 0.1)

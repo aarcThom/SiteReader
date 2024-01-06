@@ -15,7 +15,7 @@ namespace SiteReader.Classes
         // PROPERTIES =================================================================================================
         public LasFile FileMethods { get; }
         public CloudFilters Filters { get; }
-        public PointCloud PtCloud { get; }
+        public PointCloud PtCloud { get; set; }
 
         // CONSTRUCTORS ===============================================================================================
         public LasCloud(string path, double density = 0.1)
@@ -114,6 +114,30 @@ namespace SiteReader.Classes
             var duplicate = m_value.Duplicate();
             duplicate.Transform(xform);
             return new LasCloud((PointCloud)duplicate, this);
+        }
+
+
+        // UTILITY METHODS ============================================================================================
+        /// <summary>
+        /// crops the point cloud inside or outside the crop meshes
+        /// </summary>
+        /// <param name="inside">whether pts are kept inside the shape (true), or outside (false)</param>
+        public void ApplyCrop(bool inside)
+        {
+            if (Filters.CropMesh == null) return;
+
+            PointCloud ptCldOut = new PointCloud();
+
+            foreach (var pt in PtCloud)
+            {
+                if (Filters.CropMesh.IsPointInside(pt.Location, 0.01, false) == inside)
+                {
+                    ptCldOut.Add(pt.Location, pt.Color);
+                }
+            }
+
+            PtCloud = ptCldOut;
+            m_value = ptCldOut;
         }
 
     }
