@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Rhino.DocObjects;
 using Rhino;
+using SiteReader.Functions;
 
 namespace SiteReader.Classes
 {
@@ -16,14 +18,46 @@ namespace SiteReader.Classes
         public LasFile FileMethods { get; }
         public CloudFilters Filters { get; }
         public PointCloud PtCloud { get; set; }
+        public List<Color> PtColors { get; set; }
+
+        // ushort properties - make sure to cover these during import in LasFile.UshortProps
+        public List<ushort> PtIntensities { get; set; }
+        public List<ushort> PtR { get; set; }
+        public List<ushort> PtG { get; set; }
+        public List<ushort> PtB { get; set; }
+
+        // byte properties - make sure to cover these during import in LasFile.ByteProps
+        public List<byte> PtClassifications { get; set; }
+        public List<byte> PtNumReturns { get; set; }
 
         // CONSTRUCTORS ===============================================================================================
         public LasCloud(string path, double density = 0.1)
         {
+            // the cloud properties
+            var pInt = new List<ushort>(); // intensity
+            var pR = new List<ushort>(); // R
+            var pG = new List<ushort>(); // G
+            var pB = new List<ushort>(); // B
+            var pCls = new List<byte>(); // classifications
+            var pNR = new List<byte>(); // number of returns
+            var pClrs = new List<Color>(); // pt RGB colors
+
+
             FileMethods = new LasFile(path);
             Filters= new CloudFilters(FileMethods.FilePointCount, density);
-            PtCloud = FileMethods.ImportPtCloud(Filters.GetDensityFilter(), initial:true);
+            PtCloud = FileMethods.ImportPtCloud(Filters.GetDensityFilter(), ref pInt, ref pR, ref pG, ref pB, ref pCls, 
+                                                ref pNR, ref pClrs, initial:true);
             m_value = PtCloud;
+
+            // need to test if all values are the same before assigning
+            // if all values are the same, it means that the given property is not present in the LAS format
+            PtIntensities = Utility.AllSameValues(pInt) ? new List<ushort>() : pInt;
+            PtR = Utility.AllSameValues(pR) ? new List<ushort>() : pR;
+            PtG = Utility.AllSameValues(pG) ? new List<ushort>() : pG;
+            PtB = Utility.AllSameValues(pB) ? new List<ushort>() : pB;
+            PtClassifications = Utility.AllSameValues(pCls) ? new List<byte>() : pCls;
+            PtNumReturns = Utility.AllSameValues(pNR) ? new List<byte>() : pNR;
+            PtColors = Utility.AllSameValues(pClrs) ? new List<Color>() : pClrs;
         }
 
         // Needed for GH I/O 

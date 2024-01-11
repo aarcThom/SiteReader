@@ -115,5 +115,17 @@ namespace SiteReader.Functions
             }
             return false;
         }
+
+        /// <summary>
+        /// Tests if all values in a given list are the same
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="listIn"></param>
+        /// <returns>True if all values are the same. False if not.</returns>
+        public static bool AllSameValues<T> (List<T> listIn)
+        {
+            var firstVal = listIn.First();
+            return listIn.All(x => firstVal.Equals(x));
+        }
     }
 }

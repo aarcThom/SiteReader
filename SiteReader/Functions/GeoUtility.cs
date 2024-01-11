@@ -3,8 +3,6 @@ using Rhino;
 using System.Collections.Generic;
 using System.Linq;
 using Rhino.DocObjects;
-using Rhino.Input.Custom;
-using SiteReader.Classes;
 
 namespace SiteReader.Functions
 {
