@@ -52,13 +52,13 @@ namespace SiteReader.Classes
 
             // need to test if all values are the same before assigning
             // if all values are the same, it means that the given property is not present in the LAS format
-            PtIntensities = pInt;
-            PtR = pR;
-            PtG = pG;
-            PtB = pB;
-            PtClassifications = pCls;
-            PtNumReturns = pNR;
-            PtColors = pClrs;
+            PtIntensities = Utility.AllSameValues(pInt) ? null : pInt;
+            PtR = Utility.AllSameValues(pR) ? null : pR;
+            PtG = Utility.AllSameValues(pG) ? null : pG;
+            PtB = Utility.AllSameValues(pB) ? null : pB;
+            PtClassifications = Utility.AllSameValues(pCls) ? null : pCls;
+            PtNumReturns = Utility.AllSameValues(pNR) ? null : pNR;
+            PtColors = Utility.AllSameValues(pClrs) ? null : pClrs;
         }
 
         // Needed for GH I/O 
