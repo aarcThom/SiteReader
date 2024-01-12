@@ -7,6 +7,7 @@ using Rhino.Geometry;
 using Rhino.DocObjects;
 using Rhino;
 using SiteReader.Functions;
+using System.Security.Claims;
 
 namespace SiteReader.Classes
 {
@@ -51,13 +52,13 @@ namespace SiteReader.Classes
 
             // need to test if all values are the same before assigning
             // if all values are the same, it means that the given property is not present in the LAS format
-            PtIntensities = Utility.AllSameValues(pInt) ? new List<ushort>() : pInt;
-            PtR = Utility.AllSameValues(pR) ? new List<ushort>() : pR;
-            PtG = Utility.AllSameValues(pG) ? new List<ushort>() : pG;
-            PtB = Utility.AllSameValues(pB) ? new List<ushort>() : pB;
-            PtClassifications = Utility.AllSameValues(pCls) ? new List<byte>() : pCls;
-            PtNumReturns = Utility.AllSameValues(pNR) ? new List<byte>() : pNR;
-            PtColors = Utility.AllSameValues(pClrs) ? new List<Color>() : pClrs;
+            PtIntensities = pInt;
+            PtR = pR;
+            PtG = pG;
+            PtB = pB;
+            PtClassifications = pCls;
+            PtNumReturns = pNR;
+            PtColors = pClrs;
         }
 
         // Needed for GH I/O 
@@ -71,6 +72,16 @@ namespace SiteReader.Classes
             FileMethods = cldIn.FileMethods;
             Filters = cldIn.Filters;
             PtCloud = cldIn.PtCloud;
+
+            PtIntensities = cldIn.PtIntensities;
+            PtR = cldIn.PtR;
+            PtG = cldIn.PtG;
+            PtB = cldIn.PtB;
+            PtClassifications = cldIn.PtClassifications;
+            PtNumReturns = cldIn.PtNumReturns;
+            PtColors = cldIn.PtColors;
+
+
             m_value = PtCloud;
         }
 
@@ -81,6 +92,14 @@ namespace SiteReader.Classes
             Filters = cld.Filters;
             PtCloud = transformedCloud;
             m_value = PtCloud;
+
+            PtIntensities = cld.PtIntensities;
+            PtR = cld.PtR;
+            PtG = cld.PtG;
+            PtB = cld.PtB;
+            PtClassifications = cld.PtClassifications;
+            PtNumReturns = cld.PtNumReturns;
+            PtColors = cld.PtColors;
         }
 
         // INTERFACE METHODS ==========================================================================================

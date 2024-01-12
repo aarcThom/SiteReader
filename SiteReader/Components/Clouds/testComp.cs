@@ -49,9 +49,9 @@ namespace SiteReader.Components.Clouds
 
             foreach (var cld in Clouds)
             {
-                intense.AddRange(cld.PtIntensities.Select(x => (double)x));
-                classif.AddRange(cld.PtClassifications.Select(x => (double)x));
-                numReturns.AddRange(cld.PtNumReturns.Select(x => (double)x));
+                intense.AddRange(cld.PtIntensities.Select( x => Convert.ToDouble(x)));
+                classif.AddRange(cld.PtClassifications.Select(x => Convert.ToDouble(x)));
+                numReturns.AddRange(cld.PtNumReturns.Select(x => Convert.ToDouble(x)));
                 colors.AddRange(cld.PtColors);
             }
 
