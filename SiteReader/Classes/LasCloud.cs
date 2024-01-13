@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using Grasshopper.Kernel.Types;
@@ -19,17 +20,18 @@ namespace SiteReader.Classes
         public LasFile FileMethods { get; }
         public CloudFilters Filters { get; }
         public PointCloud PtCloud { get; set; }
-        public List<Color> PtColors { get; set; }
+        public List<Color> PtColors { get; set; } = new List<Color>();
 
         // ushort properties - make sure to cover these during import in LasFile.UshortProps
-        public List<ushort> PtIntensities { get; set; }
-        public List<ushort> PtR { get; set; }
-        public List<ushort> PtG { get; set; }
-        public List<ushort> PtB { get; set; }
+        public List<ushort> PtIntensities { get; set; } = new List<ushort>();
+        public List<ushort> PtR { get; set; } = new List<ushort>();
+        public List<ushort> PtG { get; set; } = new List<ushort>();
+        public List<ushort> PtB { get; set; } = new List<ushort>();
 
         // byte properties - make sure to cover these during import in LasFile.ByteProps
-        public List<byte> PtClassifications { get; set; }
-        public List<byte> PtNumReturns { get; set; }
+        public List<byte> PtClassifications { get; set; } = new List<byte>();
+        public List<byte> PtNumReturns { get; set; } = new List<byte>();
+
 
         // CONSTRUCTORS ===============================================================================================
         public LasCloud(string path, double density = 0.1)

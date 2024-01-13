@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Drawing;
+using System.Windows.Forms;
+using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Attributes;
 
 namespace SiteReader.UI.Components
 {
     /// <summary>
     /// The base button component
     /// </summary>
-    public class Button : IUi
+    public class ReleaseButton : IUi
     {
         //FIELDS ======================================================================================================
         private readonly string _text;
@@ -25,14 +28,17 @@ namespace SiteReader.UI.Components
 
         public bool Clicked { get; set; }
 
+        public Action ClickAction { get; set; }
+
         //CONSTRUCTORS ================================================================================================
-        public Button(string text, float height)
+        public ReleaseButton(string text, float height)
         {
             _text = text;
             Height = height;
             Clicked = false;
         }
 
+        // LAYOUT AND RENDER ===========================================================================================
         public void Layout(RectangleF ownerRectangleF, float yPos)
         {
             float buttonWidth = Width == 0 ? ownerRectangleF.Width - SideSpace * 2 : Width;
@@ -62,5 +68,48 @@ namespace SiteReader.UI.Components
             button.Render(g, false, Owner.Locked, false);
         }
 
+        // MOUSE EVENTS ===============================================================================================
+        public GH_ObjectResponse MouseDown(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)
+        {
+            if (e.Button == MouseButtons.Left && Bounds.Contains(e.CanvasLocation))
+            {
+                Clicked = true;
+
+                // expire layout, but not solution
+                uiBase.ExpireLayout();
+                sender.Refresh();
+
+                return GH_ObjectResponse.Capture;
+            }
+
+            return GH_ObjectResponse.Ignore;
+        }
+        public GH_ObjectResponse MouseUp(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)        
+        {
+            if (e.Button == MouseButtons.Left && Clicked)
+            {
+                Clicked = false;
+
+                // expire layout, but not solution
+                uiBase.ExpireLayout();
+                sender.Refresh();
+
+                if (ClickAction != null)
+                {
+                    ClickAction();
+                }
+                
+                return GH_ObjectResponse.Release;
+            }
+            return GH_ObjectResponse.Ignore;
+        }
+        public GH_ObjectResponse MouseDoubleClick(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)
+        {
+            return GH_ObjectResponse.Ignore;
+        }
+        public GH_ObjectResponse MouseMove(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)
+        {
+            return GH_ObjectResponse.Ignore;
+        }
     }
 }

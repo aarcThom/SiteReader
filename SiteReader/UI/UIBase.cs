@@ -1,19 +1,14 @@
 ﻿using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
-using System.Windows.Forms;
 using SiteReader.UI.Components;
 using Grasshopper.GUI;
 
 namespace SiteReader.UI
 {
-    public abstract class UIBase : GH_ComponentAttributes
+    public abstract class UiBase : GH_ComponentAttributes
     {   
         //FIELDS ======================================================================================================
         protected RectangleF OwnerRectangle;
@@ -21,14 +16,15 @@ namespace SiteReader.UI
 
         private readonly GH_Component _parent;
 
-        // Values to change if you want to play with layout
+        // Values to change if you want to play with layout Universally
         private const int SideSpace = 2;
         private const int VertSpace = 10;
 
-        //PROPERTIES ==================================================================================================
-
+        //values to override in the child component
+        protected float CompWidth = 0;
+        
         //CONSTRUCTORS ================================================================================================
-        protected UIBase(GH_Component owner) : base(owner)
+        protected UiBase(GH_Component owner) : base(owner)
         {
             _parent = owner;
         }
@@ -38,6 +34,12 @@ namespace SiteReader.UI
         {
             base.Layout(); //handles the basic layout, computes the bounds, etc.
             OwnerRectangle = GH_Convert.ToRectangle(Bounds); //getting component base bounds
+
+            if (CompWidth > 0) // if width is overridden in the child component
+            {
+                OwnerRectangle.Width = CompWidth;
+                Bounds = OwnerRectangle;
+            }
 
             float yPos = OwnerRectangle.Bottom + VertSpace;
             int extraHeight = VertSpace;
@@ -55,6 +57,7 @@ namespace SiteReader.UI
             }
 
             OwnerRectangle.Height += extraHeight;
+
             Bounds = OwnerRectangle;
 
         }
@@ -102,6 +105,60 @@ namespace SiteReader.UI
                     uiComp.Render(graphics, channel);
                 }
             }
+        }
+
+        // MOUSE EVENT HANDLING ==========================================================================
+
+        public override GH_ObjectResponse RespondToMouseDown(GH_Canvas sender, GH_CanvasMouseEvent e)
+        {
+            foreach (var uiComp in ComponentList)
+            {
+                var compResponse = uiComp.MouseDown(sender, e, this);
+                if (compResponse != GH_ObjectResponse.Ignore)
+                {
+                    return compResponse;
+                }
+            }
+            return base.RespondToMouseDown(sender, e);
+        }
+
+        public override GH_ObjectResponse RespondToMouseUp(GH_Canvas sender, GH_CanvasMouseEvent e)
+        {
+            foreach (var uiComp in ComponentList)
+            {
+                var compResponse = uiComp.MouseUp(sender, e, this);
+                if (compResponse != GH_ObjectResponse.Ignore)
+                {
+                    return compResponse;
+                }
+            }
+            return base.RespondToMouseUp(sender, e);
+        }
+
+        public override GH_ObjectResponse RespondToMouseDoubleClick(GH_Canvas sender, GH_CanvasMouseEvent e)
+        {
+            foreach (var uiComp in ComponentList)
+            {
+                var compResponse = uiComp.MouseDoubleClick(sender, e, this);
+                if (compResponse != GH_ObjectResponse.Ignore)
+                {
+                    return compResponse;
+                }
+            }
+            return base.RespondToMouseDoubleClick(sender, e);
+        }
+
+        public override GH_ObjectResponse RespondToMouseMove(GH_Canvas sender, GH_CanvasMouseEvent e)
+        {
+            foreach (var uiComp in ComponentList)
+            {
+                var compResponse = uiComp.MouseMove(sender, e, this);
+                if (compResponse != GH_ObjectResponse.Ignore)
+                {
+                    return compResponse;
+                }
+            }
+            return base.RespondToMouseMove(sender, e);
         }
     }
 }

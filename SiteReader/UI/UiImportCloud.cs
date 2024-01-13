@@ -1,106 +1,35 @@
-﻿using Grasshopper.GUI.Canvas;
-using Grasshopper.Kernel;
-using Grasshopper.Kernel.Attributes;
+﻿using Grasshopper.Kernel;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
-using System.Runtime.CompilerServices;
-using System.Windows.Forms;
 using SiteReader.UI.Components;
-using Grasshopper.GUI;
-using Button = SiteReader.UI.Components.Button;
 
 namespace SiteReader.UI
 {
-    public class UiImportCloud : UIBase
+    public class UiImportCloud : UiBase
     {
         //FIELDS ======================================================================================================
-        private readonly Button _importButton;
+        private readonly ReleaseButton _importButton;
         private readonly Action _importAction;
 
-        private readonly Button _zoomButton;
+        private readonly ReleaseButton _zoomButton;
         private readonly Action _zoomAction;
-
-        //PROPERTIES ==================================================================================================
-
+        
         //CONSTRUCTORS ================================================================================================
         public UiImportCloud(GH_Component owner, Action importAction, Action zoomAction) : base(owner)
         {
-
             _importAction = importAction;
-            _importButton = new Button("import", 30);
+            _importButton = new ReleaseButton("import", 30);
+            _importButton.ClickAction = importAction;
 
             _zoomAction = zoomAction;
-            _zoomButton = new Button("zoom", 30);
+            _zoomButton = new ReleaseButton("zoom", 30);
+            _zoomButton.ClickAction = zoomAction;
 
             ComponentList = new List<IUi>()
             {
                 _importButton,
                 _zoomButton
             };
-            
         }
-
-        public override GH_ObjectResponse RespondToMouseDown(GH_Canvas sender, GH_CanvasMouseEvent e)
-        {
-            if (e.Button == MouseButtons.Left && _importButton.Bounds.Contains(e.CanvasLocation)) 
-            {
-                _importButton.Clicked = true;
-
-                // expire layout, but not solution
-                base.ExpireLayout();
-                sender.Refresh();
-
-                return GH_ObjectResponse.Capture;
-            }
-
-            if (e.Button == MouseButtons.Left && _zoomButton.Bounds.Contains(e.CanvasLocation))
-            {
-                _zoomButton.Clicked = true;
-
-                // expire layout, but not solution
-                base.ExpireLayout();
-                sender.Refresh();
-
-                return GH_ObjectResponse.Capture;
-            }
-
-
-            return base.RespondToMouseDown(sender, e);
-        }
-
-        public override GH_ObjectResponse RespondToMouseUp(GH_Canvas sender, GH_CanvasMouseEvent e)
-        {
-
-            if (e.Button == MouseButtons.Left && _importButton.Clicked)
-            {
-                _importButton.Clicked = false;
-
-                // expire layout, but not solution
-                base.ExpireLayout();
-                sender.Refresh();
-                _importAction();
-                return GH_ObjectResponse.Release;
-            }
-
-            if (e.Button == MouseButtons.Left && _zoomButton.Clicked)
-            {
-                _zoomButton.Clicked = false;
-
-                // expire layout, but not solution
-                base.ExpireLayout();
-                sender.Refresh();
-                _zoomAction();
-                return GH_ObjectResponse.Release;
-            }
-
-
-            return base.RespondToMouseUp(sender, e);
-        }
-
-
     }
 }
