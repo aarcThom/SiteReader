@@ -4,7 +4,7 @@ using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
 
-namespace SiteReader.UI.Components
+namespace SiteReader.UI.UiElements
 {
     public interface IUi
     {

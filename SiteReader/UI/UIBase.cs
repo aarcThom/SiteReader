@@ -3,7 +3,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
 using System.Collections.Generic;
 using System.Drawing;
-using SiteReader.UI.Components;
+using SiteReader.UI.UiElements;
 using Grasshopper.GUI;
 
 namespace SiteReader.UI

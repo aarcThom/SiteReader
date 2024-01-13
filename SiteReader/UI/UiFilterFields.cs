@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
-using SiteReader.UI.Components;
+using SiteReader.UI.UiElements;
 using Grasshopper.GUI;
 
 namespace SiteReader.UI
