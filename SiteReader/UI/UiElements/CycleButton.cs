@@ -11,10 +11,13 @@ namespace SiteReader.UI.UiElements
     /// <summary>
     /// The base button component
     /// </summary>
-    public class ReleaseButton : IUi
+    public class CycleButton : IUi
     {
         //FIELDS ======================================================================================================
         private readonly string _text;
+
+        private RectangleF _lTriBounds;
+        private RectangleF _rTriBounds;
 
         //PROPERTIES ==================================================================================================
         public RectangleF Bounds { get; set; }
@@ -30,8 +33,9 @@ namespace SiteReader.UI.UiElements
 
         public Action ClickAction { get; set; }
 
+
         //CONSTRUCTORS ================================================================================================
-        public ReleaseButton(string text, float height)
+        public CycleButton(string text, float height)
         {
             _text = text;
             Height = height;
@@ -53,6 +57,11 @@ namespace SiteReader.UI.UiElements
             Bottom = Bounds.Bottom;
 
             Bounds.Inflate(-SideSpace, 0);
+
+            // laying out the cycling triangles
+            _lTriBounds = new RectangleF(Bounds.Left + 2, Bounds.Top + 2, Bounds.Height - 4, Bounds.Height - 4);
+            _rTriBounds = new RectangleF(Bounds.Right - 2 - _lTriBounds.Width, _lTriBounds.Top, _lTriBounds.Width, _lTriBounds.Height);
+
         }
 
         public void Render(Graphics g, GH_CanvasChannel channel)
@@ -66,6 +75,14 @@ namespace SiteReader.UI.UiElements
 
             GH_Capsule button = GH_Capsule.CreateTextCapsule(Bounds, Bounds, buttonPalette, _text);
             button.Render(g, false, Owner.Locked, false);
+
+            // rendering the left and right triangle buttons
+            var lPt0 = new PointF(_lTriBounds.Left, _lTriBounds.Top + _lTriBounds.Height / 2); // the left point
+            var lPt1 = new PointF(_rTriBounds.Right, _lTriBounds.Top); // upper right
+            var lPt2 = new PointF(_rTriBounds.Right, _lTriBounds.Bottom); // lower right
+
+
+            g.FillPolygon(new SolidBrush(Color.Black), new PointF[]{lPt0, lPt1, lPt2});
         }
 
         // MOUSE EVENTS ===============================================================================================

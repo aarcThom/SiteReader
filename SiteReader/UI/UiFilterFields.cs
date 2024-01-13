@@ -21,7 +21,7 @@ namespace SiteReader.UI
 
         private readonly ReleaseButton _dropdown;
         
-        private readonly ReleaseButton _filterButton;
+        private readonly CycleButton _filterButton;
 
         //PROPERTIES ==================================================================================================
 
@@ -34,7 +34,7 @@ namespace SiteReader.UI
             
             _dropdown = new ReleaseButton("field", 30);
 
-            _filterButton = new ReleaseButton("filter", 30);
+            _filterButton = new CycleButton("test", 30);
 
             ComponentList = new List<IUi>()
             {

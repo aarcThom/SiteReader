@@ -20,17 +20,20 @@ namespace SiteReader.Classes
         public LasFile FileMethods { get; }
         public CloudFilters Filters { get; }
         public PointCloud PtCloud { get; set; }
-        public List<Color> PtColors { get; set; } = new List<Color>();
+        public List<Color> PtColors { get; set; }
 
         // ushort properties - make sure to cover these during import in LasFile.UshortProps
-        public List<ushort> PtIntensities { get; set; } = new List<ushort>();
-        public List<ushort> PtR { get; set; } = new List<ushort>();
-        public List<ushort> PtG { get; set; } = new List<ushort>();
-        public List<ushort> PtB { get; set; } = new List<ushort>();
+        public List<ushort> PtIntensities { get; set; }
+        public List<ushort> PtR { get; set; }
+        public List<ushort> PtG { get; set; }
+        public List<ushort> PtB { get; set; }
 
         // byte properties - make sure to cover these during import in LasFile.ByteProps
-        public List<byte> PtClassifications { get; set; } = new List<byte>();
-        public List<byte> PtNumReturns { get; set; } = new List<byte>();
+        public List<byte> PtClassifications { get; set; }
+        public List<byte> PtNumReturns { get; set; }
+
+        // the list of field descriptors for filtering components
+        public List<string> CloudFields { get; }
 
 
         // CONSTRUCTORS ===============================================================================================
@@ -61,6 +64,8 @@ namespace SiteReader.Classes
             PtClassifications = Utility.AllSameValues(pCls) ? null : pCls;
             PtNumReturns = Utility.AllSameValues(pNR) ? null : pNR;
             PtColors = Utility.AllSameValues(pClrs) ? null : pClrs;
+
+            CloudFields = PresentFields();
         }
 
         // Needed for GH I/O 
@@ -83,6 +88,8 @@ namespace SiteReader.Classes
             PtNumReturns = cldIn.PtNumReturns;
             PtColors = cldIn.PtColors;
 
+            CloudFields = cldIn.CloudFields;
+
 
             m_value = PtCloud;
         }
@@ -102,6 +109,8 @@ namespace SiteReader.Classes
             PtClassifications = cld.PtClassifications;
             PtNumReturns = cld.PtNumReturns;
             PtColors = cld.PtColors;
+
+            CloudFields = cld.CloudFields;
         }
 
         // INTERFACE METHODS ==========================================================================================
@@ -193,6 +202,29 @@ namespace SiteReader.Classes
 
             PtCloud = ptCldOut;
             m_value = ptCldOut;
+        }
+
+        /// <summary>
+        /// Get the string list of fields present in this cloud
+        /// </summary>
+        /// <returns></returns>
+        private List<string> PresentFields()
+        {
+            var fieldList = new List<string>();
+
+            if (PtIntensities != null) fieldList.Add("Intensity");
+
+            if (PtR != null) fieldList.Add("R");
+
+            if (PtG != null) fieldList.Add("G");
+
+            if (PtB != null) fieldList.Add("B");
+
+            if (PtClassifications != null) fieldList.Add("Classification");
+
+            if (PtNumReturns != null) fieldList.Add("Number of Returns");
+
+            return fieldList;
         }
 
     }
