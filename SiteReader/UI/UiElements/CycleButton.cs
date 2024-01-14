@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
@@ -19,6 +20,9 @@ namespace SiteReader.UI.UiElements
         private RectangleF _lTriBounds;
         private RectangleF _rTriBounds;
 
+        private bool _lClick = false;
+        private bool _rClick = false;
+
         //PROPERTIES ==================================================================================================
         public RectangleF Bounds { get; set; }
         public float Width { get; set; }
@@ -35,11 +39,9 @@ namespace SiteReader.UI.UiElements
 
 
         //CONSTRUCTORS ================================================================================================
-        public CycleButton(string text, float height)
+        public CycleButton(float height)
         {
-            _text = text;
             Height = height;
-            Clicked = false;
         }
 
         // LAYOUT AND RENDER ===========================================================================================
@@ -59,38 +61,60 @@ namespace SiteReader.UI.UiElements
             Bounds.Inflate(-SideSpace, 0);
 
             // laying out the cycling triangles
-            _lTriBounds = new RectangleF(Bounds.Left + 2, Bounds.Top + 2, Bounds.Height - 4, Bounds.Height - 4);
-            _rTriBounds = new RectangleF(Bounds.Right - 2 - _lTriBounds.Width, _lTriBounds.Top, _lTriBounds.Width, _lTriBounds.Height);
+            _lTriBounds = new RectangleF(Bounds.Left + 4, Bounds.Top + 8, Bounds.Height - 16, Bounds.Height - 16);
+            _rTriBounds = new RectangleF(Bounds.Right - 4 - _lTriBounds.Width, _lTriBounds.Top, _lTriBounds.Width,
+                                        _lTriBounds.Height);
 
         }
 
         public void Render(Graphics g, GH_CanvasChannel channel)
         {
+            Brush lArrowBrush = SrPalette.SmallButton(_lTriBounds.Top, _lTriBounds.Bottom);
+            Brush rArrowBrush = lArrowBrush;
+
             if (Palette == GH_Palette.Normal)
             {
-                Palette = GH_Palette.Black;
+                Palette = GH_Palette.White;
+                Outline = new Pen(Color.Black);
+            }
+            if (Palette == GH_Palette.Warning || Palette == GH_Palette.Error)
+            {
+                lArrowBrush = new SolidBrush(Color.Empty);
+                rArrowBrush = new SolidBrush(Color.Empty);
             }
 
-            GH_Palette buttonPalette = !Clicked ? Palette : GH_Palette.Pink;
+            if (Palette != GH_Palette.Warning && Palette != GH_Palette.Error)
+            {
+                if (_lClick) lArrowBrush = new SolidBrush(Color.GreenYellow);
+                if (_rClick) rArrowBrush = new SolidBrush(Color.GreenYellow);
+            }
 
-            GH_Capsule button = GH_Capsule.CreateTextCapsule(Bounds, Bounds, buttonPalette, _text);
+            GH_Capsule button = GH_Capsule.CreateTextCapsule(Bounds, Bounds, Palette, _text);
             button.Render(g, false, Owner.Locked, false);
 
             // rendering the left and right triangle buttons
             var lPt0 = new PointF(_lTriBounds.Left, _lTriBounds.Top + _lTriBounds.Height / 2); // the left point
-            var lPt1 = new PointF(_rTriBounds.Right, _lTriBounds.Top); // upper right
-            var lPt2 = new PointF(_rTriBounds.Right, _lTriBounds.Bottom); // lower right
+            var lPt1 = new PointF(_lTriBounds.Right, _lTriBounds.Top); // upper right
+            var lPt2 = new PointF(_lTriBounds.Right, _lTriBounds.Bottom); // lower right
 
+            g.FillPolygon(lArrowBrush, new PointF[]{lPt0, lPt1, lPt2});
+            g.DrawPolygon(Outline, new PointF[] { lPt0, lPt1, lPt2 });
 
-            g.FillPolygon(new SolidBrush(Color.Black), new PointF[]{lPt0, lPt1, lPt2});
+            var rPt0 = new PointF(_rTriBounds.Right, _rTriBounds.Top + _rTriBounds.Height / 2); // the right point
+            var rPt1 = new PointF(_rTriBounds.Left, _rTriBounds.Top); // upper left
+            var rPt2 = new PointF(_rTriBounds.Left, _rTriBounds.Bottom); // lower left
+
+            g.FillPolygon(rArrowBrush, new PointF[] { rPt0, rPt1, rPt2 });
+            g.DrawPolygon(Outline, new PointF[] { rPt0, rPt1, rPt2 });
         }
 
         // MOUSE EVENTS ===============================================================================================
         public GH_ObjectResponse MouseDown(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)
         {
-            if (e.Button == MouseButtons.Left && Bounds.Contains(e.CanvasLocation))
+            if (e.Button == MouseButtons.Left && (_lTriBounds.Contains(e.CanvasLocation) || _rTriBounds.Contains(e.CanvasLocation)));
             {
-                Clicked = true;
+                if(_lTriBounds.Contains(e.CanvasLocation))  _lClick = true;
+                if(_rTriBounds.Contains(e.CanvasLocation))  _rClick = true;
 
                 // expire layout, but not solution
                 uiBase.ExpireLayout();
@@ -103,9 +127,10 @@ namespace SiteReader.UI.UiElements
         }
         public GH_ObjectResponse MouseUp(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)        
         {
-            if (e.Button == MouseButtons.Left && Clicked)
+            if (e.Button == MouseButtons.Left && (_lClick || _rClick))
             {
-                Clicked = false;
+                _lClick = false;
+                _rClick = false;
 
                 // expire layout, but not solution
                 uiBase.ExpireLayout();

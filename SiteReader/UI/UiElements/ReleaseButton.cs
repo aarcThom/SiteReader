@@ -62,7 +62,7 @@ namespace SiteReader.UI.UiElements
                 Palette = GH_Palette.Black;
             }
 
-            GH_Palette buttonPalette = !Clicked ? Palette : GH_Palette.Pink;
+            GH_Palette buttonPalette = !Clicked ? Palette : GH_Palette.Grey;
 
             GH_Capsule button = GH_Capsule.CreateTextCapsule(Bounds, Bounds, buttonPalette, _text);
             button.Render(g, false, Owner.Locked, false);

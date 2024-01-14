@@ -34,7 +34,7 @@ namespace SiteReader.UI
             
             _dropdown = new ReleaseButton("field", 30);
 
-            _filterButton = new CycleButton("test", 30);
+            _filterButton = new CycleButton(30);
 
             ComponentList = new List<IUi>()
             {

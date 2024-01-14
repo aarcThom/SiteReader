@@ -60,7 +60,7 @@ namespace SiteReader.UI.UiElements
 
             // drawing the graph background
             var gradRect = new RectangleF[1] { Bounds }; //use an array so I can use FillRectangles
-            g.FillRectangles(UiElements.Palette.GraphBackground, gradRect);
+            g.FillRectangles(UiElements.SrPalette.GraphBackground, gradRect);
             g.DrawRectangles(Outline, gradRect);
 
         }
