@@ -32,22 +32,22 @@ namespace SiteReader.UI
         //LAYOUT ======================================================================================================
         protected override void Layout()
         {
-            base.Layout(); //handles the basic layout, computes the bounds, etc.
-            OwnerRectangle = GH_Convert.ToRectangle(Bounds); //getting component base bounds
 
-            if (CompWidth > 0) // if width is overridden in the child component
-            {
-                OwnerRectangle.Width = CompWidth;
-                Bounds = OwnerRectangle;
-            }
+            base.Layout(); //handles the basic layout, computes the bounds, etc.
+
+            OwnerRectangle = GH_Convert.ToRectangle(Bounds); //getting component base bounds
 
             float yPos = OwnerRectangle.Bottom + VertSpace;
             int extraHeight = VertSpace;
+
             if ( ComponentList != null && ComponentList.Count > 0)
             {
                 foreach (var uiComp in ComponentList)
                 {
                     uiComp.Owner = _parent;
+
+                    if (CompWidth > 0) uiComp.Width = CompWidth;
+                    
                     uiComp.SideSpace = SideSpace;
 
                     extraHeight += (int)uiComp.Height + VertSpace;
@@ -56,11 +56,24 @@ namespace SiteReader.UI
                 }
             }
 
+
             OwnerRectangle.Height += extraHeight;
 
-            Bounds = OwnerRectangle;
+            if (CompWidth > 0)
+            {
+                OwnerRectangle.Width = CompWidth;
 
+                var extraWidth = CompWidth - Bounds.Width;
+
+                var paramRect = new RectangleF(m_innerBounds.X, m_innerBounds.Y, 
+                                               m_innerBounds.Width + extraWidth, m_innerBounds.Height);
+
+                m_innerBounds.Width = m_innerBounds.Width + extraWidth; // change the inner bounds for icon
+                LayoutOutputParams(Owner, paramRect); // layout out the output
+            }
+            Bounds = OwnerRectangle;
         }
+
 
         //RENDER ======================================================================================================
         protected override void Render(GH_Canvas canvas, Graphics graphics, GH_CanvasChannel channel)
@@ -106,6 +119,7 @@ namespace SiteReader.UI
                 }
             }
         }
+
 
         // MOUSE EVENT HANDLING ==========================================================================
 

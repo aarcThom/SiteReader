@@ -35,7 +35,8 @@ namespace SiteReader.UI.UiElements
 
         public bool Clicked { get; set; }
 
-        public Action ClickAction { get; set; }
+        public Action LeftClickAction { get; set; }
+        public Action RightClickAction { get; set; }
 
 
         //CONSTRUCTORS ================================================================================================
@@ -47,7 +48,7 @@ namespace SiteReader.UI.UiElements
         // LAYOUT AND RENDER ===========================================================================================
         public void Layout(RectangleF ownerRectangleF, float yPos)
         {
-            float buttonWidth = Width == 0 ? ownerRectangleF.Width - SideSpace * 2 : Width;
+            float buttonWidth = Width == 0 ? ownerRectangleF.Width - SideSpace * 2 : Width - SideSpace * 2;
 
             if (yPos == 0)
             {
@@ -111,7 +112,8 @@ namespace SiteReader.UI.UiElements
         // MOUSE EVENTS ===============================================================================================
         public GH_ObjectResponse MouseDown(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)
         {
-            if (e.Button == MouseButtons.Left && (_lTriBounds.Contains(e.CanvasLocation) || _rTriBounds.Contains(e.CanvasLocation)));
+            if (e.Button == MouseButtons.Left && 
+                (_lTriBounds.Contains(e.CanvasLocation) || _rTriBounds.Contains(e.CanvasLocation)))
             {
                 if(_lTriBounds.Contains(e.CanvasLocation))  _lClick = true;
                 if(_rTriBounds.Contains(e.CanvasLocation))  _rClick = true;
@@ -127,21 +129,33 @@ namespace SiteReader.UI.UiElements
         }
         public GH_ObjectResponse MouseUp(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)        
         {
-            if (e.Button == MouseButtons.Left && (_lClick || _rClick))
+            if (e.Button == MouseButtons.Left && _lClick)
             {
                 _lClick = false;
-                _rClick = false;
-
                 // expire layout, but not solution
                 uiBase.ExpireLayout();
                 sender.Refresh();
 
-                ClickAction?.Invoke();
+                LeftClickAction?.Invoke();
 
                 return GH_ObjectResponse.Release;
             }
+
+            if (e.Button == MouseButtons.Left && _rClick)
+            {
+                _rClick = false;
+                // expire layout, but not solution
+                uiBase.ExpireLayout();
+                sender.Refresh();
+
+                RightClickAction?.Invoke();
+
+                return GH_ObjectResponse.Release;
+            }
+
             return GH_ObjectResponse.Ignore;
         }
+
         public GH_ObjectResponse MouseDoubleClick(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)
         {
             return GH_ObjectResponse.Ignore;

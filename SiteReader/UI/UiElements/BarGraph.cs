@@ -34,7 +34,7 @@ namespace SiteReader.UI.UiElements
 
         public void Layout(RectangleF ownerRectangleF, float yPos)
         {
-            float graphWidth = Width == 0 ? ownerRectangleF.Width - SideSpace * 2 : Width;
+            float graphWidth = Width == 0 ? ownerRectangleF.Width - SideSpace * 2 : Width - SideSpace * 2;
 
 
             if (yPos == 0)

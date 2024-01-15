@@ -41,7 +41,7 @@ namespace SiteReader.UI.UiElements
         // LAYOUT AND RENDER ===========================================================================================
         public void Layout(RectangleF ownerRectangleF, float yPos)
         {
-            float buttonWidth = Width == 0 ? ownerRectangleF.Width - SideSpace * 2 : Width;
+            float buttonWidth = Width == 0 ? ownerRectangleF.Width - SideSpace * 2 : Width - SideSpace * 2;
 
             if (yPos == 0)
             {

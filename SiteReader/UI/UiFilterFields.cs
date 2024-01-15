@@ -26,7 +26,7 @@ namespace SiteReader.UI
         //PROPERTIES ==================================================================================================
 
         //CONSTRUCTORS ================================================================================================
-        public UiFilterFields(GH_Component owner) : base(owner)
+        public UiFilterFields(GH_Component owner, Action leftArrow, Action rightArrow) : base(owner)
         {
             CompWidth = 200;
             
@@ -35,6 +35,8 @@ namespace SiteReader.UI
             _dropdown = new ReleaseButton("field", 30);
 
             _filterButton = new CycleButton(30);
+            _filterButton.LeftClickAction = leftArrow;
+            _filterButton.RightClickAction = rightArrow;
 
             ComponentList = new List<IUi>()
             {
