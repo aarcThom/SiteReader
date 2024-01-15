@@ -12,7 +12,8 @@ namespace SiteReader.Components.Clouds
     public class FilterFields : CloudBase
     {
         //FIELDS ======================================================================================================
-        private List<string> _properties;
+        private List<string> _fieldNames;
+        private int _chosenField;
 
         //PROPERTIES ==================================================================================================
 
@@ -39,8 +40,11 @@ namespace SiteReader.Components.Clouds
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             base.SolveInstance(DA);
-            _properties = CloudUtility.ConsolidateProps(Clouds);
-            DA.SetDataList(0, _properties);
+            _fieldNames = CloudUtility.ConsolidateProps(Clouds);
+
+            if (_fieldNames == null) _chosenField = 0; // reset if unplugged
+
+            DA.SetDataList(0, _fieldNames);
         }
 
         //PREVIEW AND UI ==============================================================================================
@@ -49,14 +53,18 @@ namespace SiteReader.Components.Clouds
             m_attributes = new UiFilterFields(this, LeftArrow, RightArrow);
         }
 
-        public void LeftArrow()
+        public string LeftArrow()
         {
-
+            if (_fieldNames == null) return null;
+            _chosenField = Utility.WrapIndex(_chosenField - 1, _fieldNames.Count);
+            return _fieldNames[_chosenField];
         }
 
-        public void RightArrow()
+        public string RightArrow()
         {
-
+            if (_fieldNames == null) return null;
+            _chosenField = Utility.WrapIndex(_chosenField + 1, _fieldNames.Count);
+            return _fieldNames[_chosenField];
         }
 
         //UTILITY METHODS =============================================================================================

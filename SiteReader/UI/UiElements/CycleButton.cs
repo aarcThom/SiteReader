@@ -15,7 +15,7 @@ namespace SiteReader.UI.UiElements
     public class CycleButton : IUi
     {
         //FIELDS ======================================================================================================
-        private readonly string _text;
+        private string _text;
 
         private RectangleF _lTriBounds;
         private RectangleF _rTriBounds;
@@ -35,8 +35,8 @@ namespace SiteReader.UI.UiElements
 
         public bool Clicked { get; set; }
 
-        public Action LeftClickAction { get; set; }
-        public Action RightClickAction { get; set; }
+        public Func<string> LeftClickAction { get; set; }
+        public Func<string> RightClickAction { get; set; }
 
 
         //CONSTRUCTORS ================================================================================================
@@ -132,11 +132,10 @@ namespace SiteReader.UI.UiElements
             if (e.Button == MouseButtons.Left && _lClick)
             {
                 _lClick = false;
+                _text = LeftClickAction?.Invoke();
                 // expire layout, but not solution
                 uiBase.ExpireLayout();
                 sender.Refresh();
-
-                LeftClickAction?.Invoke();
 
                 return GH_ObjectResponse.Release;
             }
@@ -144,11 +143,10 @@ namespace SiteReader.UI.UiElements
             if (e.Button == MouseButtons.Left && _rClick)
             {
                 _rClick = false;
+                _text = RightClickAction?.Invoke();
                 // expire layout, but not solution
                 uiBase.ExpireLayout();
                 sender.Refresh();
-
-                RightClickAction?.Invoke();
 
                 return GH_ObjectResponse.Release;
             }

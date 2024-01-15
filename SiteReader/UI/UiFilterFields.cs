@@ -26,7 +26,7 @@ namespace SiteReader.UI
         //PROPERTIES ==================================================================================================
 
         //CONSTRUCTORS ================================================================================================
-        public UiFilterFields(GH_Component owner, Action leftArrow, Action rightArrow) : base(owner)
+        public UiFilterFields(GH_Component owner, Func<string> leftArrow, Func<string> rightArrow) : base(owner)
         {
             CompWidth = 200;
             

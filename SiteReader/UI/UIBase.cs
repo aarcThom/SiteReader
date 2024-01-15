@@ -35,11 +35,12 @@ namespace SiteReader.UI
 
             base.Layout(); //handles the basic layout, computes the bounds, etc.
 
-            OwnerRectangle = GH_Convert.ToRectangle(Bounds); //getting component base bounds
+            OwnerRectangle = GH_Convert.ToRectangle(Bounds);
 
             float yPos = OwnerRectangle.Bottom + VertSpace;
             int extraHeight = VertSpace;
 
+            // adding the extra height for UI elements
             if ( ComponentList != null && ComponentList.Count > 0)
             {
                 foreach (var uiComp in ComponentList)
@@ -55,10 +56,10 @@ namespace SiteReader.UI
                     yPos += uiComp.Height + VertSpace;
                 }
             }
-
-
             OwnerRectangle.Height += extraHeight;
 
+
+            // adding the extra width
             if (CompWidth > 0)
             {
                 OwnerRectangle.Width = CompWidth;
@@ -83,7 +84,8 @@ namespace SiteReader.UI
             //the main component rendering channel
             if (channel == GH_CanvasChannel.Objects)
             {
-                //declare the pens / brushes / pallets we will need to draw the custom objects - defaults for blank / message levels
+                //declare the pens / brushes / pallets we will need to draw the custom objects
+                //- defaults for blank / message levels
                 Pen outLine = SrPalette.BlankOutline;
                 GH_Palette palette = GH_Palette.Normal;
 

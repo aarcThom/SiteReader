@@ -127,5 +127,18 @@ namespace SiteReader.Functions
             var firstVal = listIn.First();
             return listIn.All(x => EqualityComparer<T>.Default.Equals(x, firstVal));
         }
+
+        /// <summary>
+        /// Returns the non-wrapped index for a wrapped input index
+        /// </summary>
+        /// <param name="index"> index - can be less than zero, or greater than list len</param>
+        /// <param name="listLen"> the length of the list</param>
+        /// <returns></returns>
+        public static int WrapIndex(int index, int listLen)
+        {
+            if (index < 0) return listLen - (-1 * index) % listLen;
+            if (index > listLen - 1) return index % listLen;
+            return index;
+        }
     }
 }
