@@ -46,15 +46,17 @@ namespace SiteReader.Components.Clouds
             base.SolveInstance(DA);
             _fieldNames = CloudUtility.ConsolidateProps(Clouds);
 
+            // setting the field name text on the cycle button
             if (_fieldNames == null) _fieldIndex = 0;
             else _ui.FilterButton.CapsuleText = _fieldNames[_fieldIndex];
 
-            DA.SetDataList(0, _fieldNames);
-
+            // setting the values in the bar graph
             if (Clouds != null && Clouds.Count > 0 && _fieldNames != null)
             {
-                DA.SetDataList(1, CloudUtility.FieldsToDouble(_fieldNames[_fieldIndex], Clouds[0]));
+                _ui.FilterBarGraph.FieldValues = CloudUtility.FieldsToDouble(_fieldNames[_fieldIndex], Clouds[0]);
             }
+
+            DA.SetDataList(0, _fieldNames);
         }
 
         //PREVIEW AND UI ==============================================================================================
@@ -69,6 +71,11 @@ namespace SiteReader.Components.Clouds
             _fieldIndex = Utility.WrapIndex(shift, _fieldIndex, _fieldNames.Count);
             _ui.FilterButton.CapsuleText = _fieldNames[_fieldIndex];
             ExpireSolution(true);
+        }
+
+        public void FieldValues(List<int> values)
+        {
+
         }
 
 

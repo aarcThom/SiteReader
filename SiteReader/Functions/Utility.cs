@@ -140,5 +140,26 @@ namespace SiteReader.Functions
             if (shift + index >= listLen) return shift % listLen -1;
             return shift + index;
         }
+
+        /// <summary>
+        /// Remaps a count of values to a x-value range. Used for laying out bar graphs.
+        /// </summary>
+        /// <param name="bounds">containing rectangle for graph.</param>
+        /// <param name="count">number of values to graph.</param>
+        /// <param name="sideSpace">optional side spaces from edge of containing rectangle.</param>
+        /// <returns>x-coordinates of bars.</returns>
+        public static List<float> EvenSpacePts(RectangleF bounds, int count, float sideSpace = 0)
+        {
+            var from1 = 0f;
+            var from2 = (float)count;
+            var to1 = bounds.Left + sideSpace;
+            var to2 = bounds.Left + bounds.Width - sideSpace;
+
+            var xRange = Enumerable.Range(0, count);
+            var xRangeFloat = xRange.Select(x => (float)x);
+            var xRemapped = xRangeFloat.Select(x => x.Remap(from1, from2, to1, to2));
+
+            return xRemapped.ToList();
+        }
     }
 }

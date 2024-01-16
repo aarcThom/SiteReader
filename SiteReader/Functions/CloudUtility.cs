@@ -27,7 +27,12 @@ namespace SiteReader.Functions
             return props;
         }
 
-
+        /// <summary>
+        /// Returns selected field as a List of Int32s.
+        /// </summary>
+        /// <param name="field">String description of selected field.</param>
+        /// <param name="cloud"> LasCloud object whose field you want to convert.</param>
+        /// <returns>List of Int32s representing selected field or null if incorrect selection.</returns>
         public static List<int> FieldsToDouble(string field, LasCloud cloud)
         {
             switch (field)

@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
+using SiteReader.Functions;
 
 namespace SiteReader.UI.UiElements
 {
@@ -13,6 +16,8 @@ namespace SiteReader.UI.UiElements
     public class BarGraph : IUi
     {
         //FIELDS ======================================================================================================
+        private List<PointF> _barsBotPts;
+        private List<PointF> _barsTopPts;
 
         //PROPERTIES ==================================================================================================
         public RectangleF Bounds { get; set; }
@@ -24,7 +29,7 @@ namespace SiteReader.UI.UiElements
         public GH_Palette Palette { get; set; }
         public GH_Component Owner { get; set; }
 
-        public bool Clicked { get; set; }
+        public List<int> FieldValues { get; set; }
 
         //CONSTRUCTORS ================================================================================================
         public BarGraph()
@@ -33,6 +38,7 @@ namespace SiteReader.UI.UiElements
 
         public void Layout(RectangleF ownerRectangleF, float yPos)
         {
+            // drawing the graph background
             float graphWidth = Width == 0 ? ownerRectangleF.Width - SideSpace * 2 : Width - SideSpace * 2;
 
             if (yPos == 0)
@@ -47,6 +53,24 @@ namespace SiteReader.UI.UiElements
             Bottom = Bounds.Bottom;
 
             Bounds.Inflate(-SideSpace, 0);
+
+            //getting points for the field bars
+            if (FieldValues != null)
+            {
+                var barsX = Utility.EvenSpacePts(Bounds, FieldValues.Max() + 1, 4f);
+                _barsTopPts = new List<PointF>();
+                _barsBotPts = new List<PointF>();
+
+                for (int i = 0; i < barsX.Count; i++)
+                {
+                    if (FieldValues.Contains(i))
+                    {
+                        _barsBotPts.Add(new PointF(barsX[i], Bounds.Bottom));
+                        _barsTopPts.Add(new PointF(barsX[i], Bounds.Y));
+                    }
+                }
+            }
+            
         }
 
         public void Render(Graphics g, GH_CanvasChannel channel)
@@ -58,9 +82,17 @@ namespace SiteReader.UI.UiElements
 
             // drawing the graph background
             var gradRect = new RectangleF[1] { Bounds }; //use an array so I can use FillRectangles
-            g.FillRectangles(UiElements.SrPalette.GraphBackground, gradRect);
+            g.FillRectangles(SrPalette.GraphBackground, gradRect);
             g.DrawRectangles(Outline, gradRect);
 
+            //drawing the bars
+            if (FieldValues != null)
+            {
+                for (int i = 0; i < _barsTopPts.Count; i++)
+                {
+                    g.DrawLine(Outline, _barsBotPts[i], _barsTopPts[i]);
+                }
+            }
         }
 
         // MOUSE EVENTS ===============================================================================================

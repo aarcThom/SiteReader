@@ -17,11 +17,11 @@ namespace SiteReader.UI
     public class UiFilterFields : UiBase
     {
         //FIELDS ======================================================================================================
-        private readonly BarGraph _filterBarGraph;
-
         private readonly ReleaseButton _dropdown;
 
         //PROPERTIES ==================================================================================================
+        public BarGraph FilterBarGraph = new BarGraph();
+        
         public CycleButton FilterButton = new CycleButton(30);
 
         //CONSTRUCTORS ================================================================================================
@@ -29,15 +29,13 @@ namespace SiteReader.UI
         {
             CompWidth = 200;
             
-            _filterBarGraph = new BarGraph();
-            
             _dropdown = new ReleaseButton("field", 30);
 
             FilterButton.ShiftValue = shiftAct;
 
             ComponentList = new List<IUi>()
             {
-                _filterBarGraph,
+                FilterBarGraph,
                 _dropdown,
                 FilterButton
             };
