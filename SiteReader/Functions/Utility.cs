@@ -131,14 +131,14 @@ namespace SiteReader.Functions
         /// <summary>
         /// Returns the non-wrapped index for a wrapped input index
         /// </summary>
-        /// <param name="index"> index - can be less than zero, or greater than list len</param>
+        /// <param name="shift"> index - can be less than zero, or greater than list len</param>
         /// <param name="listLen"> the length of the list</param>
         /// <returns></returns>
-        public static int WrapIndex(int index, int listLen)
+        public static int WrapIndex(int shift, int index, int listLen)
         {
-            if (index < 0) return listLen - (-1 * index) % listLen;
-            if (index > listLen - 1) return index % listLen;
-            return index;
+            if (shift + index < 0) return listLen - (-1 * shift) % listLen;
+            if (shift + index >= listLen) return shift % listLen -1;
+            return shift + index;
         }
     }
 }

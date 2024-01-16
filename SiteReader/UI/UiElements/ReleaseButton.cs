@@ -45,6 +45,7 @@ namespace SiteReader.UI.UiElements
 
             if (yPos == 0)
             {
+
                 throw new Exception("yPos must be defined!");
             }
 
@@ -86,7 +87,7 @@ namespace SiteReader.UI.UiElements
         }
         public GH_ObjectResponse MouseUp(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)        
         {
-            if (e.Button == MouseButtons.Left && Clicked)
+            if (e.Button == MouseButtons.Left && Clicked && (Palette != GH_Palette.Error || Palette != GH_Palette.Warning))
             {
                 Clicked = false;
 

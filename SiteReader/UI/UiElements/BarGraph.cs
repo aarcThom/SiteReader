@@ -13,7 +13,6 @@ namespace SiteReader.UI.UiElements
     public class BarGraph : IUi
     {
         //FIELDS ======================================================================================================
-        private readonly string _text;
 
         //PROPERTIES ==================================================================================================
         public RectangleF Bounds { get; set; }
@@ -35,7 +34,6 @@ namespace SiteReader.UI.UiElements
         public void Layout(RectangleF ownerRectangleF, float yPos)
         {
             float graphWidth = Width == 0 ? ownerRectangleF.Width - SideSpace * 2 : Width - SideSpace * 2;
-
 
             if (yPos == 0)
             {

@@ -13,7 +13,10 @@ namespace SiteReader.Components.Clouds
     {
         //FIELDS ======================================================================================================
         private List<string> _fieldNames;
-        private int _chosenField;
+
+        private UiFilterFields _ui;
+
+        private int _fieldIndex;
 
         //PROPERTIES ==================================================================================================
 
@@ -34,6 +37,7 @@ namespace SiteReader.Components.Clouds
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("properties", "props", "pp", GH_ParamAccess.list);
+            pManager.AddNumberParameter("a", "a", "a", GH_ParamAccess.list);
         }
 
         //SOLVE =======================================================================================================
@@ -42,30 +46,31 @@ namespace SiteReader.Components.Clouds
             base.SolveInstance(DA);
             _fieldNames = CloudUtility.ConsolidateProps(Clouds);
 
-            if (_fieldNames == null) _chosenField = 0; // reset if unplugged
+            if (_fieldNames == null) _fieldIndex = 0;
+            else _ui.FilterButton.CapsuleText = _fieldNames[_fieldIndex];
 
             DA.SetDataList(0, _fieldNames);
+
+            if (Clouds != null && Clouds.Count > 0 && _fieldNames != null)
+            {
+                DA.SetDataList(1, CloudUtility.FieldsToDouble(_fieldNames[_fieldIndex], Clouds[0]));
+            }
         }
 
         //PREVIEW AND UI ==============================================================================================
         public override void CreateAttributes()
         {
-            m_attributes = new UiFilterFields(this, LeftArrow, RightArrow);
+            _ui = new UiFilterFields(this, ShiftValue);
+            m_attributes = _ui;
         }
 
-        public string LeftArrow()
+        public void ShiftValue(int shift)
         {
-            if (_fieldNames == null) return null;
-            _chosenField = Utility.WrapIndex(_chosenField - 1, _fieldNames.Count);
-            return _fieldNames[_chosenField];
+            _fieldIndex = Utility.WrapIndex(shift, _fieldIndex, _fieldNames.Count);
+            _ui.FilterButton.CapsuleText = _fieldNames[_fieldIndex];
+            ExpireSolution(true);
         }
 
-        public string RightArrow()
-        {
-            if (_fieldNames == null) return null;
-            _chosenField = Utility.WrapIndex(_chosenField + 1, _fieldNames.Count);
-            return _fieldNames[_chosenField];
-        }
 
         //UTILITY METHODS =============================================================================================
 

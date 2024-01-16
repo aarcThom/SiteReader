@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -6,6 +7,7 @@ using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
+using SiteReader.Functions;
 
 namespace SiteReader.UI.UiElements
 {
@@ -15,8 +17,6 @@ namespace SiteReader.UI.UiElements
     public class CycleButton : IUi
     {
         //FIELDS ======================================================================================================
-        private string _text;
-
         private RectangleF _lTriBounds;
         private RectangleF _rTriBounds;
 
@@ -32,11 +32,8 @@ namespace SiteReader.UI.UiElements
         public Pen Outline { get; set; }
         public GH_Palette Palette { get; set; }
         public GH_Component Owner { get; set; }
-
-        public bool Clicked { get; set; }
-
-        public Func<string> LeftClickAction { get; set; }
-        public Func<string> RightClickAction { get; set; }
+        public Action<int> ShiftValue { get; set; }
+        public string CapsuleText { get; set; }
 
 
         //CONSTRUCTORS ================================================================================================
@@ -90,7 +87,7 @@ namespace SiteReader.UI.UiElements
                 if (_rClick) rArrowBrush = new SolidBrush(Color.GreenYellow);
             }
 
-            GH_Capsule button = GH_Capsule.CreateTextCapsule(Bounds, Bounds, Palette, _text);
+            GH_Capsule button = GH_Capsule.CreateTextCapsule(Bounds, Bounds, Palette, CapsuleText);
             button.Render(g, false, Owner.Locked, false);
 
             // rendering the left and right triangle buttons
@@ -112,7 +109,7 @@ namespace SiteReader.UI.UiElements
         // MOUSE EVENTS ===============================================================================================
         public GH_ObjectResponse MouseDown(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)
         {
-            if (e.Button == MouseButtons.Left && 
+            if (e.Button == MouseButtons.Left && CapsuleText != null &&
                 (_lTriBounds.Contains(e.CanvasLocation) || _rTriBounds.Contains(e.CanvasLocation)))
             {
                 if(_lTriBounds.Contains(e.CanvasLocation))  _lClick = true;
@@ -129,10 +126,10 @@ namespace SiteReader.UI.UiElements
         }
         public GH_ObjectResponse MouseUp(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)        
         {
-            if (e.Button == MouseButtons.Left && _lClick)
+            if (e.Button == MouseButtons.Left && CapsuleText != null && _lClick)
             {
                 _lClick = false;
-                _text = LeftClickAction?.Invoke();
+                ShiftValue?.Invoke(-1);
                 // expire layout, but not solution
                 uiBase.ExpireLayout();
                 sender.Refresh();
@@ -140,10 +137,10 @@ namespace SiteReader.UI.UiElements
                 return GH_ObjectResponse.Release;
             }
 
-            if (e.Button == MouseButtons.Left && _rClick)
+            if (e.Button == MouseButtons.Left && CapsuleText != null && _rClick)
             {
                 _rClick = false;
-                _text = RightClickAction?.Invoke();
+                ShiftValue?.Invoke(1);
                 // expire layout, but not solution
                 uiBase.ExpireLayout();
                 sender.Refresh();
