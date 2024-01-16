@@ -161,5 +161,37 @@ namespace SiteReader.Functions
 
             return xRemapped.ToList();
         }
+
+        /// <summary>
+        /// Returns the count of a certain number in a list of integers.
+        /// </summary>
+        /// <param name="listIn">The integers to check.</param>
+        /// <param name="selected">The integer to check count.</param>
+        /// <returns>The count of the selected integer.</returns>
+        public static int GetNumCount(List<int> listIn, int selected)
+        {
+            var numGroups = listIn.GroupBy(i => i);
+            return numGroups.Single(x => x.Key == selected).Count();
+        }
+
+        /// <summary>
+        /// Returns the max count of any single repeated integer in a list
+        /// </summary>
+        /// <param name="listIn">The integers to check.</param>
+        /// <returns>The count of the most common integer.</returns>
+        public static int GetMaxCountItems(List<int> listIn)
+        {
+            var maxVal = 0;
+            var numGroups = listIn.GroupBy(i => i);
+
+            foreach (var group in numGroups)
+            {
+                if (group.Count() > maxVal)
+                {
+                    maxVal = group.Count();
+                }
+            }
+            return maxVal;
+        }
     }
 }

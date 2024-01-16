@@ -46,7 +46,7 @@ namespace SiteReader.UI.UiElements
                 throw new Exception("yPos must be defined!");
             }
 
-            Height = graphWidth;
+            Height = graphWidth / 2;
 
             Bounds = new RectangleF(ownerRectangleF.Left + SideSpace, yPos, graphWidth, Height);
 
@@ -57,7 +57,15 @@ namespace SiteReader.UI.UiElements
             //getting points for the field bars
             if (FieldValues != null)
             {
+                // getting the horizontal positions
                 var barsX = Utility.EvenSpacePts(Bounds, FieldValues.Max() + 1, 4f);
+
+                //getting the range for the vertical
+                var maxVert = Bounds.Y;
+                var minVert = Bounds.Bottom;
+
+                var maxCount = (float)Utility.GetMaxCountItems(FieldValues);
+
                 _barsTopPts = new List<PointF>();
                 _barsBotPts = new List<PointF>();
 
@@ -65,8 +73,11 @@ namespace SiteReader.UI.UiElements
                 {
                     if (FieldValues.Contains(i))
                     {
+                        var numI = (float)Utility.GetNumCount(FieldValues, i);
+                        var topY = numI.Remap(0f, maxCount, minVert, maxVert);
+
                         _barsBotPts.Add(new PointF(barsX[i], Bounds.Bottom));
-                        _barsTopPts.Add(new PointF(barsX[i], Bounds.Y));
+                        _barsTopPts.Add(new PointF(barsX[i], topY));
                     }
                 }
             }
