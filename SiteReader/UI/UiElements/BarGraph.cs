@@ -18,6 +18,7 @@ namespace SiteReader.UI.UiElements
         //FIELDS ======================================================================================================
         private List<PointF> _barsBotPts;
         private List<PointF> _barsTopPts;
+        private List<Color> _barColors;
 
         //PROPERTIES ==================================================================================================
         public RectangleF Bounds { get; set; }
@@ -69,6 +70,9 @@ namespace SiteReader.UI.UiElements
                 _barsTopPts = new List<PointF>();
                 _barsBotPts = new List<PointF>();
 
+                _barColors = new List<Color>();
+                var colors = ColorGradients.GetColorList(0, barsX.Count);
+
                 for (int i = 0; i < barsX.Count; i++)
                 {
                     if (FieldValues.Contains(i))
@@ -78,6 +82,9 @@ namespace SiteReader.UI.UiElements
 
                         _barsBotPts.Add(new PointF(barsX[i], Bounds.Bottom));
                         _barsTopPts.Add(new PointF(barsX[i], topY));
+
+                        _barColors.Add(colors[i]);
+
                     }
                 }
             }
@@ -101,7 +108,9 @@ namespace SiteReader.UI.UiElements
             {
                 for (int i = 0; i < _barsTopPts.Count; i++)
                 {
-                    g.DrawLine(Outline, _barsBotPts[i], _barsTopPts[i]);
+                    var barPen = new Pen(_barColors[i], 2);
+
+                    g.DrawLine(barPen, _barsBotPts[i], _barsTopPts[i]);
                 }
             }
         }
