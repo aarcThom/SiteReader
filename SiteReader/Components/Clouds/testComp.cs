@@ -40,25 +40,6 @@ namespace SiteReader.Components.Clouds
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             base.SolveInstance(DA);
-
-            List<double> intense = new List<double>();
-            List<double> classif = new List<double>();
-            List<double> numReturns = new List<double>();
-            List<Color> colors = new List<Color>();
-
-
-            foreach (var cld in Clouds)
-            {
-                intense.AddRange(cld.PtIntensities.Select( x => Convert.ToDouble(x)));
-                classif.AddRange(cld.PtClassifications.Select(x => Convert.ToDouble(x)));
-                numReturns.AddRange(cld.PtNumReturns.Select(x => Convert.ToDouble(x)));
-                colors.AddRange(cld.PtColors);
-            }
-
-            DA.SetDataList(0, intense);
-            DA.SetDataList(1, colors);
-            DA.SetDataList(2, classif);
-            DA.SetDataList(3, numReturns);
         }
 
         //PREVIEW AND UI ==============================================================================================

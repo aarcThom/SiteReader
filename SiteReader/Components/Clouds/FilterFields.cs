@@ -3,6 +3,8 @@ using SiteReader.Classes;
 using SiteReader.Params;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Drawing2D;
+using System.Linq;
 using Rhino.Geometry;
 using SiteReader.Functions;
 using SiteReader.UI;
@@ -17,6 +19,7 @@ namespace SiteReader.Components.Clouds
         private UiFilterFields _ui;
 
         private int _fieldIndex;
+        private string _currentField;
 
         //PROPERTIES ==================================================================================================
 
@@ -48,15 +51,22 @@ namespace SiteReader.Components.Clouds
 
             // setting the field name text on the cycle button
             if (_fieldNames == null) _fieldIndex = 0;
-            else _ui.FilterButton.CapsuleText = _fieldNames[_fieldIndex];
+            else
+            {
+                _currentField = _fieldNames[_fieldIndex];
+                _ui.FilterButton.CapsuleText = _currentField;
+            }
 
             // setting the values in the bar graph
             if (Clouds != null && Clouds.Count > 0 && _fieldNames != null)
             {
-                _ui.FilterBarGraph.FieldValues = CloudUtility.FieldsToDouble(_fieldNames[_fieldIndex], Clouds[0]);
+                _ui.FilterBarGraph.FieldValues = Clouds[0].CloudProperties[_currentField];
+
+                DA.SetDataList(1, Clouds[0].CloudProperties[_currentField]);
             }
 
             DA.SetDataList(0, _fieldNames);
+            
         }
 
         //PREVIEW AND UI ==============================================================================================
@@ -66,10 +76,17 @@ namespace SiteReader.Components.Clouds
             m_attributes = _ui;
         }
 
+        // overriding base to display field colors
+        public override void DrawViewportWires(IGH_PreviewArgs arg)
+        {
+            return;
+        }
+
         public void ShiftValue(int shift)
         {
             _fieldIndex = Utility.WrapIndex(shift, _fieldIndex, _fieldNames.Count);
-            _ui.FilterButton.CapsuleText = _fieldNames[_fieldIndex];
+            _currentField = _fieldNames[_fieldIndex];
+            _ui.FilterButton.CapsuleText = _currentField;
             ExpireSolution(true);
         }
 

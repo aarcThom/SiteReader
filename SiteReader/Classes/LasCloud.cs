@@ -9,63 +9,53 @@ using Rhino.DocObjects;
 using Rhino;
 using SiteReader.Functions;
 using System.Security.Claims;
+using System.Xml.Serialization;
 
 namespace SiteReader.Classes
 {
     public class LasCloud : GH_GeometricGoo<PointCloud>, IGH_PreviewData, IGH_BakeAwareObject
     {
         // FIELDS =====================================================================================================
+        private List<Color> _pointColors;
+
+        private readonly List<string> _cloudPropNames = new List<string>()
+        {
+            // make sure that these are matched in the method that actually populates the dictionary:
+            // Lasfile.AddPropertyValues()
+
+            "Intensity",
+            "R",
+            "G",
+            "B",
+            "Classification",
+            "Number of Returns"
+        };
+
+        private SortedDictionary<string, List<int>> _cloudProperties;
 
         // PROPERTIES =================================================================================================
-        public LasFile FileMethods { get; }
+        public LasFile FileMethods { get; }  
         public CloudFilters Filters { get; }
         public PointCloud PtCloud { get; set; }
-        public List<Color> PtColors { get; set; }
-
-        // ushort properties - make sure to cover these during import in LasFile.UshortProps
-        public List<ushort> PtIntensities { get; set; }
-        public List<ushort> PtR { get; set; }
-        public List<ushort> PtG { get; set; }
-        public List<ushort> PtB { get; set; }
-
-        // byte properties - make sure to cover these during import in LasFile.ByteProps
-        public List<byte> PtClassifications { get; set; }
-        public List<byte> PtNumReturns { get; set; }
-
-        // the list of field descriptors for filtering components
-        public List<string> CloudFields { get; }
-
+        public List<Color> PtColors => _pointColors;
+        public List<string> CloudPropNames => _cloudPropNames;
+        public SortedDictionary<string, List<int>> CloudProperties => _cloudProperties;
 
         // CONSTRUCTORS ===============================================================================================
         public LasCloud(string path, double density = 0.1)
         {
-            // the cloud properties
-            var pInt = new List<ushort>(); // intensity
-            var pR = new List<ushort>(); // R
-            var pG = new List<ushort>(); // G
-            var pB = new List<ushort>(); // B
-            var pCls = new List<byte>(); // classifications
-            var pNR = new List<byte>(); // number of returns
-            var pClrs = new List<Color>(); // pt RGB colors
-
-
             FileMethods = new LasFile(path);
+
             Filters= new CloudFilters(FileMethods.FilePointCount, density);
-            PtCloud = FileMethods.ImportPtCloud(Filters.GetDensityFilter(), ref pInt, ref pR, ref pG, ref pB, ref pCls, 
-                                                ref pNR, ref pClrs, initial:true);
+
+            PtCloud = FileMethods.ImportPtCloud(Filters.GetDensityFilter(), _cloudPropNames, 
+                                                out _cloudProperties, out _pointColors, initial:true);
+
             m_value = PtCloud;
 
-            // need to test if all values are the same before assigning
-            // if all values are the same, it means that the given property is not present in the LAS format
-            PtIntensities = Utility.AllSameValues(pInt) ? null : pInt;
-            PtR = Utility.AllSameValues(pR) ? null : pR;
-            PtG = Utility.AllSameValues(pG) ? null : pG;
-            PtB = Utility.AllSameValues(pB) ? null : pB;
-            PtClassifications = Utility.AllSameValues(pCls) ? null : pCls;
-            PtNumReturns = Utility.AllSameValues(pNR) ? null : pNR;
-            PtColors = Utility.AllSameValues(pClrs) ? null : pClrs;
+            //updating the property names to only properties present in the LAS file
+            _cloudPropNames = new List<string>(CloudProperties.Keys);
 
-            CloudFields = PresentFields();
         }
 
         // Needed for GH I/O 
@@ -80,16 +70,9 @@ namespace SiteReader.Classes
             Filters = cldIn.Filters;
             PtCloud = cldIn.PtCloud;
 
-            PtIntensities = cldIn.PtIntensities;
-            PtR = cldIn.PtR;
-            PtG = cldIn.PtG;
-            PtB = cldIn.PtB;
-            PtClassifications = cldIn.PtClassifications;
-            PtNumReturns = cldIn.PtNumReturns;
-            PtColors = cldIn.PtColors;
-
-            CloudFields = cldIn.CloudFields;
-
+            _cloudPropNames = cldIn.CloudPropNames;
+            _cloudProperties = cldIn.CloudProperties;
+            _pointColors = cldIn.PtColors;
 
             m_value = PtCloud;
         }
@@ -102,15 +85,9 @@ namespace SiteReader.Classes
             PtCloud = transformedCloud;
             m_value = PtCloud;
 
-            PtIntensities = cld.PtIntensities;
-            PtR = cld.PtR;
-            PtG = cld.PtG;
-            PtB = cld.PtB;
-            PtClassifications = cld.PtClassifications;
-            PtNumReturns = cld.PtNumReturns;
-            PtColors = cld.PtColors;
-
-            CloudFields = cld.CloudFields;
+            _cloudPropNames = cld.CloudPropNames;
+            _cloudProperties = cld.CloudProperties;
+            _pointColors = cld.PtColors;
         }
 
         // INTERFACE METHODS ==========================================================================================
@@ -203,29 +180,5 @@ namespace SiteReader.Classes
             PtCloud = ptCldOut;
             m_value = ptCldOut;
         }
-
-        /// <summary>
-        /// Get the string list of fields present in this cloud
-        /// </summary>
-        /// <returns></returns>
-        private List<string> PresentFields()
-        {
-            var fieldList = new List<string>();
-
-            if (PtIntensities != null) fieldList.Add("Intensity");
-
-            if (PtR != null) fieldList.Add("R");
-
-            if (PtG != null) fieldList.Add("G");
-
-            if (PtB != null) fieldList.Add("B");
-
-            if (PtClassifications != null) fieldList.Add("Classification");
-
-            if (PtNumReturns != null) fieldList.Add("Number of Returns");
-
-            return fieldList;
-        }
-
     }
 }

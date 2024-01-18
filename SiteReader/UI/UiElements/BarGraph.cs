@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
@@ -16,9 +17,11 @@ namespace SiteReader.UI.UiElements
     public class BarGraph : IUi
     {
         //FIELDS ======================================================================================================
+        private readonly int _colorSchemeIndex = 0; // set color scheme here. Maybe allow user to control later
         private List<PointF> _barsBotPts;
         private List<PointF> _barsTopPts;
         private List<Color> _barColors;
+        private ColorBlend _colorBlend;
 
         //PROPERTIES ==================================================================================================
         public RectangleF Bounds { get; set; }
@@ -35,6 +38,7 @@ namespace SiteReader.UI.UiElements
         //CONSTRUCTORS ================================================================================================
         public BarGraph()
         {
+
         }
 
         public void Layout(RectangleF ownerRectangleF, float yPos)
@@ -62,16 +66,20 @@ namespace SiteReader.UI.UiElements
                 var barsX = Utility.EvenSpacePts(Bounds, FieldValues.Max() + 1, 4f);
 
                 //getting the range for the vertical
-                var maxVert = Bounds.Y;
-                var minVert = Bounds.Bottom;
+                var maxVert = Bounds.Y + 4;
+                var minVert = Bounds.Bottom - 4;
 
                 var maxCount = (float)Utility.GetMaxCountItems(FieldValues);
 
                 _barsTopPts = new List<PointF>();
                 _barsBotPts = new List<PointF>();
 
+                // the colors for the bars
                 _barColors = new List<Color>();
-                var colors = ColorGradients.GetColorList(0, barsX.Count);
+                var colors = ColorGradients.GetColorList(_colorSchemeIndex, barsX.Count);
+
+                // the gradient for the polygon if we have too many bars to render quickly
+                _colorBlend = ColorGradients.GetClrBlend(_colorSchemeIndex);
 
                 for (int i = 0; i < barsX.Count; i++)
                 {
@@ -80,11 +88,10 @@ namespace SiteReader.UI.UiElements
                         var numI = (float)Utility.GetNumCount(FieldValues, i);
                         var topY = numI.Remap(0f, maxCount, minVert, maxVert);
 
-                        _barsBotPts.Add(new PointF(barsX[i], Bounds.Bottom));
+                        _barsBotPts.Add(new PointF(barsX[i], Bounds.Bottom ));
                         _barsTopPts.Add(new PointF(barsX[i], topY));
 
                         _barColors.Add(colors[i]);
-
                     }
                 }
             }
@@ -103,15 +110,31 @@ namespace SiteReader.UI.UiElements
             g.FillRectangles(SrPalette.GraphBackground, gradRect);
             g.DrawRectangles(Outline, gradRect);
 
-            //drawing the bars
-            if (FieldValues != null)
+            
+            if (FieldValues == null) return;
+
+            // drawing the bars if we have only a few field categories
+            if (_barsTopPts.Count <= 50) // change this value if it's too sparse or dense
             {
                 for (int i = 0; i < _barsTopPts.Count; i++)
                 {
-                    var barPen = new Pen(_barColors[i], 2);
+                    var barPen = new Pen(_barColors[i], 4);
 
                     g.DrawLine(barPen, _barsBotPts[i], _barsTopPts[i]);
                 }
+            }
+            else
+            {
+                var lastIx = _barsBotPts.Count - 1;
+                var polyPoints = _barsTopPts.Where((x, i) => i % 4 == 0).ToList();
+                polyPoints.Add(_barsBotPts[lastIx]); // bottom right corner
+                polyPoints.Add(_barsBotPts[0]); // bottom left corner
+
+                var gradBrush = new LinearGradientBrush(_barsBotPts[0], _barsBotPts[lastIx], 
+                    Color.Black, Color.Black);
+                gradBrush.InterpolationColors = _colorBlend;
+
+                g.FillPolygon(gradBrush, polyPoints.ToArray());
             }
         }
 

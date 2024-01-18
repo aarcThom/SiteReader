@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using LASzip.Net;
@@ -47,38 +48,36 @@ namespace SiteReader.Classes
             return rgbFormats.Contains(_filePtFormat);
         }
 
-        private ushort[] UshortProps(laszip_point pt)
+        private void AddPropertyValues(ref SortedDictionary<string, List<int>> propDict, laszip_point pt)
         {
-            // make sure to match this with the properties in the LasCloud Class
-            var props = new ushort[4];
-
-            props[0] = pt.intensity;
-            props[1] = pt.rgb[0];
-            props[2] = pt.rgb[1];
-            props[3] = pt.rgb[2];
-
-            return props;
+            propDict["Intensity"].Add(Convert.ToInt32(pt.intensity) / 256);
+            propDict["Classification"].Add(Convert.ToInt32(pt.classification));
+            propDict["Number of Returns"].Add(Convert.ToInt32(pt.number_of_returns));
         }
 
-        private byte[] ByteProps(laszip_point pt)
+        private void AddColorValues(ref SortedDictionary<string, List<int>> propDict, laszip_point pt)
         {
-            // make sure to match this with the properties in the LasCloud class
-            var props = new byte[2];
-
-            props[0] = pt.classification;
-            props[1] = pt.number_of_returns;
-
-            return props;
+            propDict["R"].Add(Convert.ToInt32(pt.rgb[0]) / 256);
+            propDict["G"].Add(Convert.ToInt32(pt.rgb[1]) / 256);
+            propDict["B"].Add(Convert.ToInt32(pt.rgb[2]) / 256);
         }
 
-        public PointCloud ImportPtCloud(int[] filteredCldIndices, ref List<ushort> ptIntensities, ref List<ushort> ptR,
-                                        ref List<ushort> ptG, ref List<ushort>ptB, ref List<byte> ptClassifications,
-                                        ref List<byte> ptNumReturns, ref List<Color> ptColors, bool initial = false)
+        public PointCloud ImportPtCloud(int[] filteredCldIndices, List<string> propertyNames, 
+                                        out SortedDictionary<string, List<int>> properties, out List<Color> ptColors, 
+                                        bool initial = false)
         {
+            ptColors = new List<Color>();
             PointCloud ptCloud = new PointCloud();
+            properties = new SortedDictionary<string, List<int>>();
+
+            foreach (var propName in propertyNames)
+            {
+                properties.Add(propName, new List<int>());
+            }
 
             _lasReader.open_reader(_filePath, out bool isCompressed);
 
+            // MAIN LOOP THROUGH ALL THE POINTS ------------------------------------------------------
             int filterIx = 0;
             for (int i = 0; i < _filePtCount; i++)
             {
@@ -92,17 +91,13 @@ namespace SiteReader.Classes
 
                     var rhinoPoint = new Point3d(pointCoords[0], pointCoords[1], pointCoords[2]);
 
-                    // adding the pt LAS Properties - MAKE SURE TO MATCH THESE WITH PROPERTIES IN LasCloud class
-                    var ushortProps = UshortProps(lasPt);
-                    var byteProps = ByteProps(lasPt);
+                    // adding the pt LAS Properties
+                    AddPropertyValues(ref properties, lasPt);
 
-                    ptIntensities.Add(ushortProps[0]);
 
                     if (ContainsRgb())
                     {
-                        ptR.Add(ushortProps[1]);
-                        ptG.Add(ushortProps[2]);
-                        ptB.Add(ushortProps[3]);
+                        AddColorValues(ref properties, lasPt);
 
                         Color rgbColor = Utility.ConvertRGB(lasPt.rgb);
                         ptColors.Add(rgbColor);
@@ -114,14 +109,22 @@ namespace SiteReader.Classes
                         ptCloud.Add(rhinoPoint);
                     }
 
-                    ptClassifications.Add(byteProps[0]);
-                    ptNumReturns.Add(byteProps[1]);
-
                     filterIx++;
                 }
             }
-
             _lasReader.close_reader();
+
+            // We can get rid of properties that have all the same value as this means they aren't actually assigned
+            for (int i = propertyNames.Count - 1; i >= 0; i--)
+            {
+                var pair = properties.ElementAt(i);
+
+                if (Utility.NotAllSameValues(pair.Value))
+                {
+                    properties.Remove(pair.Key);
+                }
+            }
+
             return ptCloud;
         }
     }

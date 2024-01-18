@@ -122,7 +122,7 @@ namespace SiteReader.Functions
         /// <typeparam name="T"></typeparam>
         /// <param name="listIn"></param>
         /// <returns>True if all values are the same. False if not.</returns>
-        public static bool AllSameValues<T>(List<T> listIn)
+        public static bool NotAllSameValues<T>(List<T> listIn)
         {
             var firstVal = listIn.First();
             return listIn.All(x => EqualityComparer<T>.Default.Equals(x, firstVal));
@@ -193,5 +193,6 @@ namespace SiteReader.Functions
             }
             return maxVal;
         }
+
     }
 }

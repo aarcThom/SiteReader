@@ -46,7 +46,7 @@ namespace SiteReader.UI.UiElements
 
 
         //returns the color blend for the chosen gradient
-        private static ColorBlend GetClrBlend(int ix)
+        public static ColorBlend GetClrBlend(int ix)
         {
             ColorBlend clrBlnd = new ColorBlend();
             clrBlnd.Colors = GradColors[ix];
