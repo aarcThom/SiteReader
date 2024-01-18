@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
@@ -16,10 +18,11 @@ namespace SiteReader.Classes
     public class LasCloud : GH_GeometricGoo<PointCloud>, IGH_PreviewData, IGH_BakeAwareObject
     {
         // FIELDS =====================================================================================================
-        private List<Color> _pointColors;
+        private List<Color> _pointColors; // colors of the points in the rhino pt cloud
 
-        private readonly List<string> _cloudPropNames = new List<string>()
+        private readonly List<string> _cloudPropNames = new List<string>() 
         {
+            // refer to the LAS file specs when adding new fields
             // make sure that these are matched in the method that actually populates the dictionary:
             // Lasfile.AddPropertyValues()
 
@@ -31,7 +34,7 @@ namespace SiteReader.Classes
             "Number of Returns"
         };
 
-        private SortedDictionary<string, List<int>> _cloudProperties;
+        private SortedDictionary<string, List<int>> _cloudProperties; // keys = names above / values = LAS file fields
 
         // PROPERTIES =================================================================================================
         public LasFile FileMethods { get; }  
@@ -66,28 +69,29 @@ namespace SiteReader.Classes
         // Copying the LasCloud object
         public LasCloud(LasCloud cldIn)
         {
-            FileMethods = cldIn.FileMethods;
-            Filters = cldIn.Filters;
-            PtCloud = cldIn.PtCloud;
+            FileMethods = new LasFile(cldIn.FileMethods);
+            Filters = new CloudFilters(cldIn.Filters);
+            PtCloud = new PointCloud(cldIn.PtCloud);
 
-            _cloudPropNames = cldIn.CloudPropNames;
-            _cloudProperties = cldIn.CloudProperties;
-            _pointColors = cldIn.PtColors;
+            _cloudPropNames = new List<string>(cldIn.CloudPropNames);
+            _cloudProperties = Utility.CopyPropDict(cldIn.CloudProperties);
+            _pointColors = new List<Color>(cldIn.PtColors);
 
             m_value = PtCloud;
         }
 
         // GH components transforming the LASCloud object
-        public LasCloud(PointCloud transformedCloud, LasCloud cld)
+        public LasCloud(PointCloud transformedCloud, LasCloud cldIn)
         {
-            FileMethods = cld.FileMethods;
-            Filters = cld.Filters;
+            FileMethods = new LasFile(cldIn.FileMethods);
+            Filters = new CloudFilters(cldIn.Filters);
             PtCloud = transformedCloud;
-            m_value = PtCloud;
 
-            _cloudPropNames = cld.CloudPropNames;
-            _cloudProperties = cld.CloudProperties;
-            _pointColors = cld.PtColors;
+            _cloudPropNames = new List<string>(cldIn.CloudPropNames);
+            _cloudProperties = Utility.CopyPropDict(cldIn.CloudProperties);
+            _pointColors = new List<Color>(cldIn.PtColors);
+
+            m_value = PtCloud;
         }
 
         // INTERFACE METHODS ==========================================================================================
@@ -167,18 +171,26 @@ namespace SiteReader.Classes
         {
             if (Filters.CropMesh == null) return;
 
-            PointCloud ptCldOut = new PointCloud();
+            var ptCldOut = new PointCloud(PtCloud);
+            var propertiesOut = Utility.CopyPropDict(_cloudProperties);
 
-            foreach (var pt in PtCloud)
+            for (int i = PtCloud.Count - 1; i >= 0; i--)
             {
-                if (Filters.CropMesh.IsPointInside(pt.Location, 0.01, false) == inside)
+                if (Filters.CropMesh.IsPointInside(ptCldOut[i].Location, 0.01, false) != inside)
                 {
-                    ptCldOut.Add(pt.Location, pt.Color);
+                    ptCldOut.RemoveAt(i);
+
+                    //removing all the corresponding property values
+                    foreach (var pair in propertiesOut)
+                    {
+                        pair.Value.RemoveAt(i);
+                    }
                 }
             }
 
             PtCloud = ptCldOut;
             m_value = ptCldOut;
+            _cloudProperties = propertiesOut;
         }
     }
 }

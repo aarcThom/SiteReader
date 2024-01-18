@@ -47,6 +47,8 @@ namespace SiteReader.Components.Clouds
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             base.SolveInstance(DA);
+
+            // get the field names common to all clouds in input
             _fieldNames = CloudUtility.ConsolidateProps(Clouds);
 
             // setting the field name text on the cycle button
@@ -70,6 +72,8 @@ namespace SiteReader.Components.Clouds
         }
 
         //PREVIEW AND UI ==============================================================================================
+        
+        // setting _ui as a field so I can update the graph values without an action
         public override void CreateAttributes()
         {
             _ui = new UiFilterFields(this, ShiftValue);
@@ -82,11 +86,10 @@ namespace SiteReader.Components.Clouds
             return;
         }
 
+        // shifts the field selection 'left'(-1) or 'right(1)
         public void ShiftValue(int shift)
         {
             _fieldIndex = Utility.WrapIndex(shift, _fieldIndex, _fieldNames.Count);
-            _currentField = _fieldNames[_fieldIndex];
-            _ui.FilterButton.CapsuleText = _currentField;
             ExpireSolution(true);
         }
 

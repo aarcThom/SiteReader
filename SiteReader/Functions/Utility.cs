@@ -194,5 +194,21 @@ namespace SiteReader.Functions
             return maxVal;
         }
 
+        /// <summary>
+        /// Does a deeper copy of a sorted dictionary
+        /// </summary>
+        /// <param name="dicIn">properties dictionary</param>
+        /// <returns>copied dictionary</returns>
+        public static SortedDictionary<string, List<int>> CopyPropDict(SortedDictionary<string, List<int>> dicIn)
+        {
+            var dicOut = new SortedDictionary<string, List<int>>();
+
+            foreach (var pair in dicIn)
+            {
+                dicOut.Add(pair.Key, new List<int>(pair.Value));
+            }
+            return dicOut;
+        }
+
     }
 }

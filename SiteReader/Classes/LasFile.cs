@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Net.Sockets;
 using LASzip.Net;
 using Rhino.Geometry;
 using SiteReader.Functions;
@@ -22,14 +23,21 @@ namespace SiteReader.Classes
         // PROPERTIES =================================================================================================
         public string FilePath => _filePath;
         public int FilePointCount => (int)_filePtCount;
+        public long FilePointCountLong => _filePtCount;
         public byte FilePtFormat => _filePtFormat;
-
 
         // CONSTRUCTORS ===============================================================================================
         public LasFile(string path)
         {
             _filePath = path;
             Construct();
+        }
+
+        public LasFile(LasFile fileIn)
+        {
+            _filePath = fileIn.FilePath;
+            _filePtCount = fileIn.FilePointCountLong;
+            _filePtFormat = fileIn.FilePtFormat;
         }
 
         // METHODS ====================================================================================================

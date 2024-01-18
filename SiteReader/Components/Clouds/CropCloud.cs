@@ -58,11 +58,19 @@ namespace SiteReader.Components.Clouds
             var inside = true;
             if (!DA.GetData(2, ref inside)) inside = true;
 
+            var cloudsOut = new List<LasCloud>();
+
             foreach (var cloud in Clouds)
             {
-                cloud.Filters.CropMesh = cropMesh;
-                cloud.ApplyCrop(inside);
+                var newCloud = new LasCloud(cloud);
+
+                newCloud.Filters.CropMesh = cropMesh;
+                newCloud.ApplyCrop(inside);
+
+                cloudsOut.Add(newCloud);
             }
+
+            Clouds = cloudsOut;
 
             DA.SetDataList(0, Clouds);
 

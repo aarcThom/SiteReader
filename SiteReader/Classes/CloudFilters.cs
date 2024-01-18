@@ -18,6 +18,8 @@ namespace SiteReader.Classes
             set => _density = Utility.Clamp(value, 0, 1);
         }
 
+        public int FilePtCount => _filePointCount;
+
         public Mesh CropMesh { get; set; }
 
         // CONSTRUCTORS ===============================================================================================
@@ -25,6 +27,13 @@ namespace SiteReader.Classes
         {
             _density = density;
             _filePointCount = pointCount;
+        }
+
+        public CloudFilters(CloudFilters filterIn)
+        {
+            _density = filterIn.Density;
+            _filePointCount = filterIn.FilePtCount;
+            _cropMesh = filterIn.CropMesh;
         }
 
         // METHODS ====================================================================================================
