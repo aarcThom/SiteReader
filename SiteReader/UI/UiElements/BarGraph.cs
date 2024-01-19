@@ -17,11 +17,9 @@ namespace SiteReader.UI.UiElements
     public class BarGraph : IUi
     {
         //FIELDS ======================================================================================================
-        private readonly int _colorSchemeIndex = 0; // set color scheme here. Maybe allow user to control later
         private List<PointF> _barsBotPts;
         private List<PointF> _barsTopPts;
-        private List<Color> _barColors;
-        private ColorBlend _colorBlend;
+        private List<Color> _barsColors;
 
         //PROPERTIES ==================================================================================================
         public RectangleF Bounds { get; set; }
@@ -33,6 +31,8 @@ namespace SiteReader.UI.UiElements
         public GH_Palette Palette { get; set; }
         public GH_Component Owner { get; set; }
 
+        public List<Color> FieldColors { get; set; }
+        public ColorBlend FieldGradient { get; set; }
         public List<int> FieldValues { get; set; }
 
         //CONSTRUCTORS ================================================================================================
@@ -74,12 +74,7 @@ namespace SiteReader.UI.UiElements
                 _barsTopPts = new List<PointF>();
                 _barsBotPts = new List<PointF>();
 
-                // the colors for the bars
-                _barColors = new List<Color>();
-                var colors = ColorGradients.GetColorList(_colorSchemeIndex, barsX.Count);
-
-                // the gradient for the polygon if we have too many bars to render quickly
-                _colorBlend = ColorGradients.GetClrBlend(_colorSchemeIndex);
+                _barsColors = new List<Color>();
 
                 for (int i = 0; i < barsX.Count; i++)
                 {
@@ -91,7 +86,7 @@ namespace SiteReader.UI.UiElements
                         _barsBotPts.Add(new PointF(barsX[i], Bounds.Bottom ));
                         _barsTopPts.Add(new PointF(barsX[i], topY));
 
-                        _barColors.Add(colors[i]);
+                        _barsColors.Add(FieldColors[i]);
                     }
                 }
             }
@@ -118,7 +113,7 @@ namespace SiteReader.UI.UiElements
             {
                 for (int i = 0; i < _barsTopPts.Count; i++)
                 {
-                    var barPen = new Pen(_barColors[i], 4);
+                    var barPen = new Pen(_barsColors[i], 4);
 
                     g.DrawLine(barPen, _barsBotPts[i], _barsTopPts[i]);
                 }
@@ -132,7 +127,7 @@ namespace SiteReader.UI.UiElements
 
                 var gradBrush = new LinearGradientBrush(_barsBotPts[0], _barsBotPts[lastIx], 
                     Color.Black, Color.Black);
-                gradBrush.InterpolationColors = _colorBlend;
+                gradBrush.InterpolationColors = FieldGradient;
 
                 g.FillPolygon(gradBrush, polyPoints.ToArray());
             }

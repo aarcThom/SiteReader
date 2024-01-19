@@ -3,23 +3,33 @@ using SiteReader.Classes;
 using SiteReader.Params;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using Rhino.Geometry;
 using SiteReader.Functions;
 using SiteReader.UI;
+using SiteReader.UI.UiElements;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 
 namespace SiteReader.Components.Clouds
 {
     public class FilterFields : CloudBase
     {
         //FIELDS ======================================================================================================
+        private readonly int _colorSchemeIndex = 0; // set color scheme here. Maybe allow user to control later
         private List<string> _fieldNames;
 
         private UiFilterFields _ui;
 
         private int _fieldIndex;
         private string _currentField;
+
+        private PointCloud _displayCloud;
+
+        // need this so we don't recalc display cloud everyloop
+        private int _prevFieldIndex;
+        private int _prevCloudCount = 0;
 
         //PROPERTIES ==================================================================================================
 
@@ -52,7 +62,12 @@ namespace SiteReader.Components.Clouds
             _fieldNames = CloudUtility.ConsolidateProps(Clouds);
 
             // setting the field name text on the cycle button
-            if (_fieldNames == null) _fieldIndex = 0;
+            if (_fieldNames == null)
+            {
+                // first run
+                _fieldIndex = 0;
+                _prevFieldIndex = -1;
+            }
             else
             {
                 _currentField = _fieldNames[_fieldIndex];
@@ -60,11 +75,33 @@ namespace SiteReader.Components.Clouds
             }
 
             // setting the values in the bar graph
-            if (Clouds != null && Clouds.Count > 0 && _fieldNames != null)
+            if (Clouds != null && Clouds.Count > 0 && _fieldNames != null && 
+                (_prevFieldIndex != _fieldIndex || Clouds[0].PtCloud.Count != _prevCloudCount))
             {
-                _ui.FilterBarGraph.FieldValues = Clouds[0].CloudProperties[_currentField];
+                List<int> fieldValues = Clouds[0].CloudProperties[_currentField];
 
-                DA.SetDataList(1, Clouds[0].CloudProperties[_currentField]);
+                // the colors for each possible value within a given field
+                // for instance, R can be max 255, so fieldColors would be a list of colors 256 long
+                var fieldColors = ColorGradients.GetColorList(_colorSchemeIndex, fieldValues.Max() + 1);
+
+                // pass values to the UI
+                _ui.FilterBarGraph.FieldValues = fieldValues;
+                _ui.FilterBarGraph.FieldColors = fieldColors;
+                _ui.FilterBarGraph.FieldGradient = ColorGradients.GetClrBlend(_colorSchemeIndex);
+
+                // getting the field color for each point
+                _displayCloud = new PointCloud();
+                int ix = 0;
+                foreach (var val in fieldValues)
+                {
+                    _displayCloud.Add(Clouds[0].PtCloud[ix].Location, fieldColors[val]);
+                    ix++;
+                }
+
+                _prevFieldIndex = _fieldIndex;
+                _prevCloudCount = Clouds[0].PtCloud.Count;
+
+                DA.SetDataList(1, fieldValues);
             }
 
             DA.SetDataList(0, _fieldNames);
@@ -81,9 +118,10 @@ namespace SiteReader.Components.Clouds
         }
 
         // overriding base to display field colors
-        public override void DrawViewportWires(IGH_PreviewArgs arg)
+        public override void DrawViewportWires(IGH_PreviewArgs args)
         {
-            return;
+            if (_displayCloud == null) return;
+            args.Display.DrawPointCloud(_displayCloud, 2);
         }
 
         // shifts the field selection 'left'(-1) or 'right(1)
