@@ -111,8 +111,8 @@ namespace SiteReader.UI.UiElements
 
                 // the sliders ----------------------------------------------------------------------------------------
                 float sliderY = GraphBounds.Bottom + _sliderDia;
-                _slideBarLeft = new PointF(barsX[0], sliderY);
-                _slideBarRight = new PointF(barsX[barsX.Count - 1], sliderY);
+                _slideBarLeft = new PointF(GraphBounds.Left + _sliderDia / 2, sliderY);
+                _slideBarRight = new PointF(GraphBounds.Right - _sliderDia / 2, sliderY);
 
                 _leftSlider.Layout(_slideBarLeft, _slideBarRight);
                 _rightSlider.Layout(_slideBarLeft, _slideBarRight);
@@ -164,6 +164,15 @@ namespace SiteReader.UI.UiElements
             g.DrawLine(Outline, _slideBarLeft, _slideBarRight);
             _leftSlider.Render(g, channel, Palette);
             _rightSlider.Render(g, channel, Palette);
+
+            // rendering the slide mid-pt lines
+            var leftLineX = _leftSlider.Bounds.Left + _sliderDia / 2;
+            var rightLineX = _rightSlider.Bounds.Right - _sliderDia / 2;
+            var linesBot = GraphBounds.Bottom - 4;
+            var linesTop = GraphBounds.Top + 4;
+
+            g.DrawLine(SrPalette.GraphLight, leftLineX, linesBot, leftLineX, linesTop);
+            g.DrawLine(SrPalette.GraphLight, rightLineX, linesBot, rightLineX, linesTop);
         }
 
         // MOUSE EVENTS ===============================================================================================

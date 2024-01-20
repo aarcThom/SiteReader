@@ -52,7 +52,7 @@ namespace SiteReader.UI.UiElements
 
         public void Render(Graphics g, GH_CanvasChannel channel, GH_Palette palette)
         {
-            Brush sliderBrush = SrPalette.SmallButton(Bounds.Top, Bounds.Bottom);
+            Brush sliderBrush = SrPalette.Slider(Bounds.Top, Bounds.Bottom);
             Pen outline = new Pen(Color.Black, 1f);
             Palette = palette;
 
