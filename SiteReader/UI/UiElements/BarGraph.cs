@@ -21,8 +21,15 @@ namespace SiteReader.UI.UiElements
         private List<PointF> _barsTopPts;
         private List<Color> _barsColors;
 
+        private float _sliderDia = 10;
+        private SliderHandle _leftSlider;
+        private SliderHandle _rightSlider;
+        private PointF _slideBarLeft;
+        private PointF _slideBarRight;
+
         //PROPERTIES ==================================================================================================
         public RectangleF Bounds { get; set; }
+        public RectangleF GraphBounds { get; set; }
         public float Width { get; set; }
         public float Height { get; set; }
         public float Bottom { get; set; }
@@ -38,12 +45,14 @@ namespace SiteReader.UI.UiElements
         //CONSTRUCTORS ================================================================================================
         public BarGraph()
         {
-
+            _leftSlider = new SliderHandle(_sliderDia, 0);
+            _rightSlider = new SliderHandle(_sliderDia, 1);
         }
 
         public void Layout(RectangleF ownerRectangleF, float yPos)
         {
-            // drawing the graph background
+            // laying out the overall rectangle for graph and sliders
+
             float graphWidth = Width == 0 ? ownerRectangleF.Width - SideSpace * 2 : Width - SideSpace * 2;
 
             if (yPos == 0)
@@ -51,23 +60,32 @@ namespace SiteReader.UI.UiElements
                 throw new Exception("yPos must be defined!");
             }
 
-            Height = graphWidth / 2;
+            float graphHeight = graphWidth / 2;
+            Height = graphHeight + _sliderDia * 2; // overall height for slider and graph
 
             Bounds = new RectangleF(ownerRectangleF.Left + SideSpace, yPos, graphWidth, Height);
+            Bounds.Inflate(-SideSpace, 0);
 
             Bottom = Bounds.Bottom;
 
-            Bounds.Inflate(-SideSpace, 0);
 
-            //getting points for the field bars
+            // drawing the graph background ----------------------------------------------------------------------------
+
+            GraphBounds = new RectangleF(ownerRectangleF.Left + SideSpace, yPos, graphWidth, graphHeight);
+
+            GraphBounds.Inflate(-SideSpace, 0);
+
+
+            // the graph bars -----------------------------------------------------------------------------------------
+
             if (FieldValues != null)
             {
                 // getting the horizontal positions
-                var barsX = Utility.EvenSpacePts(Bounds, FieldValues.Max() + 1, 4f);
+                var barsX = Utility.EvenSpacePts(GraphBounds, FieldValues.Max() + 1, _sliderDia / 2);
 
                 //getting the range for the vertical
-                var maxVert = Bounds.Y + 4;
-                var minVert = Bounds.Bottom - 4;
+                var maxVert = GraphBounds.Y + 1;
+                var minVert = GraphBounds.Bottom - 1;
 
                 var maxCount = (float)Utility.GetMaxCountItems(FieldValues);
 
@@ -83,12 +101,22 @@ namespace SiteReader.UI.UiElements
                         var numI = (float)Utility.GetNumCount(FieldValues, i);
                         var topY = numI.Remap(0f, maxCount, minVert, maxVert);
 
-                        _barsBotPts.Add(new PointF(barsX[i], Bounds.Bottom ));
+                        _barsBotPts.Add(new PointF(barsX[i], minVert));
                         _barsTopPts.Add(new PointF(barsX[i], topY));
 
                         _barsColors.Add(FieldColors[i]);
                     }
                 }
+
+
+                // the sliders ----------------------------------------------------------------------------------------
+                float sliderY = GraphBounds.Bottom + _sliderDia;
+                _slideBarLeft = new PointF(barsX[0], sliderY);
+                _slideBarRight = new PointF(barsX[barsX.Count - 1], sliderY);
+
+                _leftSlider.Layout(_slideBarLeft, _slideBarRight);
+                _rightSlider.Layout(_slideBarLeft, _slideBarRight);
+
             }
             
         }
@@ -101,7 +129,7 @@ namespace SiteReader.UI.UiElements
             }
 
             // drawing the graph background
-            var gradRect = new RectangleF[1] { Bounds }; //use an array so I can use FillRectangles
+            var gradRect = new RectangleF[1] { GraphBounds }; //use an array so I can use FillRectangles
             g.FillRectangles(SrPalette.GraphBackground, gradRect);
             g.DrawRectangles(Outline, gradRect);
 
@@ -131,15 +159,32 @@ namespace SiteReader.UI.UiElements
 
                 g.FillPolygon(gradBrush, polyPoints.ToArray());
             }
+
+            // rendering the sliders and slider bar
+            g.DrawLine(Outline, _slideBarLeft, _slideBarRight);
+            _leftSlider.Render(g, channel, Palette);
+            _rightSlider.Render(g, channel, Palette);
         }
 
         // MOUSE EVENTS ===============================================================================================
         public GH_ObjectResponse MouseDown(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)
         {
+            var leftResponse = _leftSlider.MouseDown(sender, e, uiBase);
+            var rightResponse = _rightSlider.MouseDown(sender, e, uiBase);
+
+            if (leftResponse != GH_ObjectResponse.Ignore) return leftResponse;
+            if (rightResponse != GH_ObjectResponse.Ignore) return rightResponse;
+
             return GH_ObjectResponse.Ignore;
         }
         public GH_ObjectResponse MouseUp(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)
         {
+            var leftResponse = _leftSlider.MouseUp(sender, e, uiBase);
+            var rightResponse = _rightSlider.MouseUp(sender, e, uiBase);
+
+            if (leftResponse != GH_ObjectResponse.Ignore) return leftResponse;
+            if (rightResponse != GH_ObjectResponse.Ignore) return rightResponse;
+
             return GH_ObjectResponse.Ignore;
         }
         public GH_ObjectResponse MouseDoubleClick(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)
@@ -148,6 +193,8 @@ namespace SiteReader.UI.UiElements
         }
         public GH_ObjectResponse MouseMove(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)
         {
+            _leftSlider.RespondToMouseMove(sender, e, uiBase, boundsRight: _rightSlider.Bounds.Left - _sliderDia / 2);
+            _rightSlider.RespondToMouseMove(sender, e, uiBase, boundsLeft: _leftSlider.Bounds.Right + _sliderDia / 2);
             return GH_ObjectResponse.Ignore;
         }
     }
