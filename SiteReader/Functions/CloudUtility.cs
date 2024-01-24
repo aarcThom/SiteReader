@@ -27,6 +27,30 @@ namespace SiteReader.Functions
             return props;
         }
 
+        /// <summary>
+        /// Given a list of clouds and a field selection, return all field values as one list
+        /// </summary>
+        /// <param name="clouds">List of LasCloud objects</param>
+        /// <param name="field">string descriptor of field</param>
+        /// <returns>Null if field not present, or a list of field values.</returns>
+        public static List<int> MergeFieldValues(List<LasCloud> clouds, string field)
+        {
+            List<int> fVals = new List<int>();
+            foreach (var cloud in clouds)
+            {
+                try
+                {
+                    fVals.AddRange(cloud.CloudProperties[field]);
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+            }
+            return fVals;
+        }
+
+        // maybe remove the the two below functions which convert lists of ushorts/bytes to int
         public static List<int> UshortToInt(List<ushort> listIn)
         {
             return listIn.Select(x => Convert.ToInt32(x) / 256).ToList();

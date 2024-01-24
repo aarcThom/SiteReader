@@ -78,7 +78,8 @@ namespace SiteReader.Components.Clouds
             if (Clouds != null && Clouds.Count > 0 && _fieldNames != null && 
                 (_prevFieldIndex != _fieldIndex || Clouds[0].PtCloud.Count != _prevCloudCount))
             {
-                List<int> fieldValues = Clouds[0].CloudProperties[_currentField];
+                // the merged list of field values present in all clouds
+                List<int> fieldValues = CloudUtility.MergeFieldValues(Clouds, _currentField);
 
                 // the colors for each possible value within a given field
                 // for instance, R can be max 255, so fieldColors would be a list of colors 256 long
@@ -91,11 +92,16 @@ namespace SiteReader.Components.Clouds
 
                 // getting the field color for each point
                 _displayCloud = new PointCloud();
-                int ix = 0;
-                foreach (var val in fieldValues)
+
+                List<Point3d> allPoints = new List<Point3d>();
+                foreach (var cld in Clouds)
                 {
-                    _displayCloud.Add(Clouds[0].PtCloud[ix].Location, fieldColors[val]);
-                    ix++;
+                    allPoints.AddRange(cld.PtCloud.GetPoints());
+                }
+
+                for (int i = 0; i < allPoints.Count; i++)
+                {
+                    _displayCloud.Add(allPoints[i], fieldColors[fieldValues[i]]);
                 }
 
                 _prevFieldIndex = _fieldIndex;
