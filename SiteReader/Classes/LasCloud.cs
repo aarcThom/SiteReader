@@ -59,6 +59,12 @@ namespace SiteReader.Classes
             //updating the property names to only properties present in the LAS file
             _cloudPropNames = new List<string>(CloudProperties.Keys);
 
+            //creating the field filters dictionary
+            foreach (var name in _cloudPropNames)
+            {
+                Filters.FieldFilters.Add(name, null);
+            }
+
         }
 
         // Needed for GH I/O 
@@ -74,7 +80,7 @@ namespace SiteReader.Classes
             PtCloud = new PointCloud(cldIn.PtCloud);
 
             _cloudPropNames = new List<string>(cldIn.CloudPropNames);
-            _cloudProperties = Utility.CopyPropDict(cldIn.CloudProperties);
+            _cloudProperties = CloudUtility.CopyPropDict(cldIn.CloudProperties);
             _pointColors = new List<Color>(cldIn.PtColors);
 
             m_value = PtCloud;
@@ -88,8 +94,26 @@ namespace SiteReader.Classes
             PtCloud = transformedCloud;
 
             _cloudPropNames = new List<string>(cldIn.CloudPropNames);
-            _cloudProperties = Utility.CopyPropDict(cldIn.CloudProperties);
+            _cloudProperties = CloudUtility.CopyPropDict(cldIn.CloudProperties);
             _pointColors = new List<Color>(cldIn.PtColors);
+
+            m_value = PtCloud;
+        }
+
+        // used for filtering the cloud
+        public LasCloud(LasCloud cldIn, List<bool> boolFilter, string fieldName, int[] fieldFilter)
+        {
+            FileMethods = new LasFile(cldIn.FileMethods);
+
+            Filters = new CloudFilters(cldIn.Filters);
+            Filters.FieldFilters[fieldName] = fieldFilter;
+
+            PtCloud = CloudUtility.FilterCloudByBool(cldIn.PtCloud, boolFilter);
+
+            _cloudPropNames = new List<string>(cldIn.CloudPropNames);
+            _cloudProperties = CloudUtility.FilterPropDicts(cldIn.CloudProperties, boolFilter);
+
+            _pointColors = Utility.GenericFilterByBool(cldIn.PtColors, boolFilter);
 
             m_value = PtCloud;
         }
@@ -172,7 +196,7 @@ namespace SiteReader.Classes
             if (Filters.CropMesh == null) return;
 
             var ptCldOut = new PointCloud(PtCloud);
-            var propertiesOut = Utility.CopyPropDict(_cloudProperties);
+            var propertiesOut = CloudUtility.CopyPropDict(_cloudProperties);
 
             for (int i = PtCloud.Count - 1; i >= 0; i--)
             {

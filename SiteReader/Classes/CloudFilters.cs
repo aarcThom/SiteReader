@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Rhino.Geometry;
 using SiteReader.Functions;
 
@@ -22,11 +23,14 @@ namespace SiteReader.Classes
 
         public Mesh CropMesh { get; set; }
 
+        public SortedDictionary<string, int[]> FieldFilters { get; set; }
+
         // CONSTRUCTORS ===============================================================================================
         public CloudFilters(int pointCount, double density = 0.1)
         {
             _density = density;
             _filePointCount = pointCount;
+            FieldFilters = new SortedDictionary<string, int[]>();
         }
 
         public CloudFilters(CloudFilters filterIn)
@@ -34,6 +38,7 @@ namespace SiteReader.Classes
             _density = filterIn.Density;
             _filePointCount = filterIn.FilePtCount;
             _cropMesh = filterIn.CropMesh;
+            FieldFilters = filterIn.FieldFilters;
         }
 
         // METHODS ====================================================================================================

@@ -16,20 +16,20 @@ namespace SiteReader.UI
 {
     public class UiFilterFields : UiBase
     {
-        //FIELDS ======================================================================================================
-        private readonly ReleaseButton _dropdown;
-
         //PROPERTIES ==================================================================================================
         public BarGraph FilterBarGraph = new BarGraph();
         
         public CycleButton FilterButton = new CycleButton(30);
 
         //CONSTRUCTORS ================================================================================================
-        public UiFilterFields(GH_Component owner, Action<int> shiftAct, Action redraw) : base(owner)
+        public UiFilterFields(GH_Component owner, Action<int> shiftAct, Action redraw, Action Export) : base(owner)
         {
             CompWidth = 200;
-            
-            _dropdown = new ReleaseButton("field", 30);
+
+            var exportButton = new ReleaseButton("Filter Output", 30)
+            {
+                ClickAction = Export
+            };
 
             FilterButton.ShiftValue = shiftAct;
 
@@ -38,7 +38,7 @@ namespace SiteReader.UI
             ComponentList = new List<IUi>()
             {
                 FilterBarGraph,
-                _dropdown,
+                exportButton,
                 FilterButton
             };
         }

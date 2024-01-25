@@ -31,15 +31,16 @@ namespace SiteReader.Components.Clouds
         private PointCloud _displayCloud;
         private List<LasCloud> _exportClouds;
 
-        // need this so we don't recalc display cloud everyloop
+        // need this so we don't recalculate display cloud every loop
         private int _prevFieldIndex;
         private int _prevCloudCount = 0;
 
         // the slider bounding values
-        private float _leftBounds = 0f;
-        private float _rightBounds = 1f;
+        private double _leftBounds = 0;
+        private double _rightBounds = 1;
 
         private List<Point3d> _allPoints; // all the points in the incoming clouds
+        private List<bool> _currentFilter; // whether a point in _allPoints is filtered or not
 
         //PROPERTIES ==================================================================================================
 
@@ -59,9 +60,9 @@ namespace SiteReader.Components.Clouds
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
+            pManager.AddParameter(new LasCloudParam(), "LAS Clouds", "LCld",
+                "A LAS point cloud and associated data.", GH_ParamAccess.list);
             pManager.AddTextParameter("properties", "props", "pp", GH_ParamAccess.list);
-            pManager.AddNumberParameter("a", "a", "a", GH_ParamAccess.list);
-            pManager.AddNumberParameter("v", "a", "x", GH_ParamAccess.item);
         }
 
         //SOLVE =======================================================================================================
@@ -115,15 +116,14 @@ namespace SiteReader.Components.Clouds
 
                 _prevFieldIndex = _fieldIndex;
                 _prevCloudCount = Clouds[0].PtCloud.Count;
-
-                DA.SetDataList(1, _fieldValues);
             }
 
-            // updating the min and max values even if the 
+            DA.SetDataList(1, _fieldNames);
 
-            
-
-            DA.SetDataList(0, _fieldNames);
+            if (_exportClouds != null)
+            {
+                DA.SetDataList(0, _exportClouds);
+            }
             
 
         }
@@ -133,7 +133,7 @@ namespace SiteReader.Components.Clouds
         // setting _ui as a field so I can update the graph values without an action
         public override void CreateAttributes()
         {
-            _ui = new UiFilterFields(this, ShiftValue, RedrawCloud);
+            _ui = new UiFilterFields(this, ShiftValue, RedrawCloud, ExportClouds);
             m_attributes = _ui;
         }
 
@@ -156,25 +156,49 @@ namespace SiteReader.Components.Clouds
             // nulling the export cloud so users don't accidentally grab wrong data
             _exportClouds = null;
 
+            //resetting the filter
+            _currentFilter = new List<bool>();
+
             SetBounds();
             // getting the field color for each point
             _displayCloud = new PointCloud();
+
 
             for (int i = 0; i < _allPoints.Count; i++)
             {
                 if (_fieldValues[i] >= _leftBounds && _fieldValues[i] <= _rightBounds)
                 {
                     _displayCloud.Add(_allPoints[i], _fieldColors[_fieldValues[i]]);
+                    _currentFilter.Add(true);
+                }
+                else
+                {
+                    _currentFilter.Add(false);
                 }
             }
 
             ExpireSolution(true);
         }
 
-        public void ExportCloud()
+        public void ExportClouds()
         {
             _exportClouds = new List<LasCloud>();
 
+            //chunking the cloud filter per cloud so we can filter all values upon export
+            var cloudSizes = Clouds.Select(x => x.PtCloud.Count).ToList();
+            var perCldFilter = Utility.ChunkList(cloudSizes, _currentFilter);
+
+            //getting the field bounds in filter format
+            var fieldFilter = new int[] {(int)_leftBounds, (int)_rightBounds};
+
+            int filterIx = 0;
+            foreach (var cld in Clouds)
+            {
+                _exportClouds.Add(new LasCloud(cld, perCldFilter[filterIx], _currentField, fieldFilter));
+                filterIx++;
+            }
+
+            ExpireSolution(true);
         }
 
 
@@ -183,8 +207,9 @@ namespace SiteReader.Components.Clouds
         {
             if (Clouds != null && Clouds.Count > 0 && _fieldNames != null)
             {
-                _leftBounds = _fieldValues.Max() * _ui.FilterBarGraph.LeftBounds;
-                _rightBounds = _fieldValues.Max() * _ui.FilterBarGraph.RightBounds;
+                // need to fix this!!!
+                _leftBounds =Math.Ceiling(_fieldValues.Max() * _ui.FilterBarGraph.LeftBounds);
+                _rightBounds =Math.Ceiling(_fieldValues.Max() * _ui.FilterBarGraph.RightBounds);
             }
         }
 

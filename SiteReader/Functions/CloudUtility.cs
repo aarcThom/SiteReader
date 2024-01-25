@@ -4,6 +4,9 @@ using SiteReader.Params;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using Rhino.Geometry;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 
 namespace SiteReader.Functions
 {
@@ -48,6 +51,73 @@ namespace SiteReader.Functions
                 }
             }
             return fVals;
+        }
+
+        /// <summary>
+        /// Does a deeper copy of the sorted properties dictionary
+        /// </summary>
+        /// <param name="dicIn">properties dictionary</param>
+        /// <returns>copied dictionary</returns>
+        public static SortedDictionary<string, List<int>> CopyPropDict(SortedDictionary<string, List<int>> dicIn)
+        {
+            var dicOut = new SortedDictionary<string, List<int>>();
+
+            foreach (var pair in dicIn)
+            {
+                dicOut.Add(pair.Key, new List<int>(pair.Value));
+            }
+            return dicOut;
+        }
+
+        /// <summary>
+        /// Filter a point cloud by a boolean filter
+        /// </summary>
+        /// <param name="cloud">Cloud to filter</param>
+        /// <param name="filter">list of booleans. can be repeating.</param>
+        /// <returns>a filtered point cloud</returns>
+        public static PointCloud FilterCloudByBool(PointCloud cloud, List<bool> filter)
+        {
+            var newCloud = new PointCloud();
+
+            int filterIx = 0;
+            foreach (var pt in cloud)
+            {
+                if (filter[filterIx]) newCloud.Add(pt.Location, pt.Color);
+                filterIx = filterIx == cloud.Count - 1 ? 0: filterIx + 1;
+            }
+            return newCloud;
+        }
+
+        /// <summary>
+        /// filters a LasCloud's property dictionary based on a boolean pattern
+        /// </summary>
+        /// <param name="dictIn">property dictionary to filter</param>
+        /// <param name="filter">ist of booleans. can be repeating.</param>
+        /// <returns>a filtered property dictionary</returns>
+        public static SortedDictionary<string, List<int>>
+            FilterPropDicts(SortedDictionary<string, List<int>> dictIn, List<bool> filter)
+        {
+            var dicOut = new SortedDictionary<string, List<int>>();
+
+            foreach (var pair in dictIn)
+            {
+                var newList = new List<int>();
+
+                int filterIx = 0;
+                foreach (var propVal in pair.Value)
+                {
+                    if (filter[filterIx])
+                    {
+                        newList.Add(propVal);
+                    }
+
+                    filterIx = filterIx == pair.Value.Count - 1 ? 0 : filterIx + 1;
+                }
+
+                dicOut.Add(pair.Key, newList);
+            }
+
+            return dicOut;
         }
 
         // maybe remove the the two below functions which convert lists of ushorts/bytes to int

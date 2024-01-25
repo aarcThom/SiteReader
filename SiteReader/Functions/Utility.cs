@@ -195,19 +195,55 @@ namespace SiteReader.Functions
         }
 
         /// <summary>
-        /// Does a deeper copy of a sorted dictionary
+        /// Chunks a list into a list of lists given a list of chunk sizes
         /// </summary>
-        /// <param name="dicIn">properties dictionary</param>
-        /// <returns>copied dictionary</returns>
-        public static SortedDictionary<string, List<int>> CopyPropDict(SortedDictionary<string, List<int>> dicIn)
+        /// <typeparam name="T"></typeparam>
+        /// <param name="chunkSizes">list of ints. Must sum to listIn's length, and be > 0.</param>
+        /// <param name="listIn">list to chunk.</param>
+        /// <returns>A list of chunked lists.</returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static List<List<T>> ChunkList<T>(List<int> chunkSizes, List<T> listIn)
         {
-            var dicOut = new SortedDictionary<string, List<int>>();
-
-            foreach (var pair in dicIn)
+            if (chunkSizes.Sum() != listIn.Count)
             {
-                dicOut.Add(pair.Key, new List<int>(pair.Value));
+                throw new ArgumentException("chunkSizes must equal overall length of listIn");
             }
-            return dicOut;
+
+            if (chunkSizes.Any(n => n <= 0))
+            {
+                throw new ArgumentException("chunk sizes must all be greater than zero!");
+            }
+
+            var listOut = new List<List<T>>();
+            int start = 0;
+
+            foreach (var size in chunkSizes)
+            {
+                List<T> chunk = listIn.Skip(start).Take(size).ToList();
+                listOut.Add(chunk);
+                start = size;
+            }
+
+            return listOut;
+        }
+
+        /// <summary>
+        /// Filter a generic list by a boolean pattern
+        /// </summary>
+        /// <param name="listIn">List to filter</param>
+        /// <param name="filter">list of booleans. can be repeating.</param>
+        /// <returns>a filtered list</returns>
+        public static List<T> GenericFilterByBool<T>(List<T> listIn, List<bool> filter)
+        {
+            var newList = new List<T>();
+
+            int filterIx = 0;
+            foreach (var val in listIn)
+            {
+                if (filter[filterIx]) newList.Add(val);
+                filterIx = filterIx == listIn.Count - 1 ? 0 : filterIx + 1;
+            }
+            return newList;
         }
 
     }
