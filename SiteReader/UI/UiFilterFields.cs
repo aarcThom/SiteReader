@@ -25,13 +25,15 @@ namespace SiteReader.UI
         public CycleButton FilterButton = new CycleButton(30);
 
         //CONSTRUCTORS ================================================================================================
-        public UiFilterFields(GH_Component owner, Action<int> shiftAct) : base(owner)
+        public UiFilterFields(GH_Component owner, Action<int> shiftAct, Action redraw) : base(owner)
         {
             CompWidth = 200;
             
             _dropdown = new ReleaseButton("field", 30);
 
             FilterButton.ShiftValue = shiftAct;
+
+            FilterBarGraph.Redraw = redraw;
 
             ComponentList = new List<IUi>()
             {

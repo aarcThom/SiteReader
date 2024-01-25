@@ -26,7 +26,6 @@ namespace SiteReader.UI.UiElements
         public float Position { get; set; }
         public float Diameter { get; set; }
         public bool Clicked { get; set; }
-        public Action ClickAction { get; set; }
         private GH_Palette Palette { get; set; }
 
         //CONSTRUCTORS ================================================================================================
@@ -121,8 +120,6 @@ namespace SiteReader.UI.UiElements
                 // expire layout, but not solution
                 uiBase.ExpireLayout();
                 sender.Refresh();
-
-                ClickAction?.Invoke();
 
                 return GH_ObjectResponse.Release;
             }

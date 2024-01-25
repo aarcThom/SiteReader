@@ -21,9 +21,9 @@ namespace SiteReader.UI.UiElements
         private List<PointF> _barsTopPts;
         private List<Color> _barsColors;
 
-        private float _sliderDia = 10;
-        private SliderHandle _leftSlider;
-        private SliderHandle _rightSlider;
+        private readonly float _sliderDia = 10;
+        private readonly SliderHandle _leftSlider;
+        private readonly SliderHandle _rightSlider;
         private PointF _slideBarLeft;
         private PointF _slideBarRight;
 
@@ -41,6 +41,13 @@ namespace SiteReader.UI.UiElements
         public List<Color> FieldColors { get; set; }
         public ColorBlend FieldGradient { get; set; }
         public List<int> FieldValues { get; set; }
+
+        // bounds values from the sliders
+        public float LeftBounds { get; set; } = 0f;
+        public float RightBounds { get; set; } = 1f;
+
+        //redraw based on sliders
+        public Action Redraw { get; set; }
 
         //CONSTRUCTORS ================================================================================================
         public BarGraph()
@@ -191,8 +198,23 @@ namespace SiteReader.UI.UiElements
             var leftResponse = _leftSlider.MouseUp(sender, e, uiBase);
             var rightResponse = _rightSlider.MouseUp(sender, e, uiBase);
 
-            if (leftResponse != GH_ObjectResponse.Ignore) return leftResponse;
-            if (rightResponse != GH_ObjectResponse.Ignore) return rightResponse;
+            // the normalized positions to return to the main component - expire solution if need be
+            LeftBounds = _leftSlider.Position;
+            RightBounds = _rightSlider.Position;
+
+            if (leftResponse != GH_ObjectResponse.Ignore)
+            {
+                Owner.ExpireSolution(true);
+                Redraw();
+                return leftResponse;
+            }
+
+            if (rightResponse != GH_ObjectResponse.Ignore)
+            {
+                Owner.ExpireSolution(true);
+                Redraw();
+                return rightResponse;
+            }
 
             return GH_ObjectResponse.Ignore;
         }
