@@ -47,7 +47,7 @@ namespace SiteReader.Components.Clouds
         //CONSTRUCTORS ================================================================================================
 
         public FilterFields()
-            : base(name: "Filter LAS Field", nickname: "filterLAS", description: "Filter a LAS point cloud by LAS fields")
+            : base(name: "Visual Filter", nickname: "vizFilter", description: "Filter a LAS point cloud by LAS fields")
         {
             // IconPath = "siteReader.Resources...";
         }
@@ -62,7 +62,7 @@ namespace SiteReader.Components.Clouds
         {
             pManager.AddParameter(new LasCloudParam(), "LAS Clouds", "LCld",
                 "A LAS point cloud and associated data.", GH_ParamAccess.list);
-            pManager.AddTextParameter("properties", "props", "pp", GH_ParamAccess.list);
+            pManager.AddTextParameter("Fields", "Flds", "LAS fields present in the cloud.", GH_ParamAccess.list);
         }
 
         //SOLVE =======================================================================================================

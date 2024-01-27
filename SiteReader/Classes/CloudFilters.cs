@@ -9,8 +9,6 @@ namespace SiteReader.Classes
     {
         // FIELDS =====================================================================================================
         private double _density;
-        private readonly int _filePointCount;
-        private Mesh _cropMesh;
 
         // PROPERTIES =================================================================================================
         public double Density
@@ -19,9 +17,10 @@ namespace SiteReader.Classes
             set => _density = Utility.Clamp(value, 0, 1);
         }
 
-        public int FilePtCount => _filePointCount;
+        public int FilePtCount { get; set; }
 
         public Mesh CropMesh { get; set; }
+        public bool? InsideCrop { get; set; }
 
         public SortedDictionary<string, int[]> FieldFilters { get; set; }
 
@@ -29,16 +28,18 @@ namespace SiteReader.Classes
         public CloudFilters(int pointCount, double density = 0.1)
         {
             _density = density;
-            _filePointCount = pointCount;
+            FilePtCount = pointCount;
             FieldFilters = new SortedDictionary<string, int[]>();
+            InsideCrop = null;
         }
 
         public CloudFilters(CloudFilters filterIn)
         {
             _density = filterIn.Density;
-            _filePointCount = filterIn.FilePtCount;
-            _cropMesh = filterIn.CropMesh;
+            FilePtCount = filterIn.FilePtCount;
+            CropMesh = filterIn.CropMesh;
             FieldFilters = filterIn.FieldFilters;
+            InsideCrop = filterIn.InsideCrop;
         }
 
         // METHODS ====================================================================================================
@@ -49,10 +50,10 @@ namespace SiteReader.Classes
         /// <returns>An array of int indices</returns>
         public int[] GetDensityFilter()
         {
-            var filteredPtCount = (int)(_filePointCount * _density);
+            var filteredPtCount = (int)(FilePtCount * _density);
             var filteredIndices = Enumerable.Range(0, filteredPtCount);
 
-            filteredIndices = filteredIndices.Select(i => Utility.Remap(i, _filePointCount, filteredPtCount));
+            filteredIndices = filteredIndices.Select(i => Utility.Remap(i, FilePtCount, filteredPtCount));
 
             return filteredIndices.ToArray();
         }

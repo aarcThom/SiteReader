@@ -70,9 +70,65 @@ namespace SiteReader.Classes
             propDict["B"].Add(Convert.ToInt32(pt.rgb[2]) / 256);
         }
 
+        private bool FilterProperties(SortedDictionary<string, int[]> filterDict, laszip_point pt)
+        {
+
+            if (filterDict.ContainsKey("Intensity") && filterDict["Intensity"] != null)
+            {
+                var iFilter = filterDict["Intensity"];
+                var intensity = Convert.ToInt32(pt.intensity) / 256;
+                if (intensity < iFilter[0] || intensity > iFilter[1]) return true;
+            }
+
+            if (filterDict.ContainsKey("Classification") && filterDict["Classification"] != null)
+            {
+                var cFilter = filterDict["Classification"];
+                var classification = Convert.ToInt32(pt.classification);
+                if (classification < cFilter[0] || classification > cFilter[1]) return true;
+            }
+
+            if (filterDict.ContainsKey("Number of Returns") && filterDict["Number of Returns"] != null)
+            {
+                var nrFilter = filterDict["Number of Returns"];
+                var numRet = Convert.ToInt32(pt.number_of_returns);
+                if (numRet < nrFilter[0] || numRet > nrFilter[1]) return true;
+            }
+
+            if (filterDict.ContainsKey("R") && filterDict["R"] != null)
+            {
+                var rFilter = filterDict["R"];
+                var r = Convert.ToInt32(pt.rgb[0]) / 256;
+                if (r < rFilter[0] || r > rFilter[1]) return true;
+            }
+
+            if (filterDict.ContainsKey("G") && filterDict["G"] != null)
+            {
+                var gFilter = filterDict["G"];
+                var g = Convert.ToInt32(pt.rgb[1]) / 256;
+                if (g < gFilter[0] || g > gFilter[1]) return true;
+            }
+
+            if (!filterDict.ContainsKey("B")) return false;
+            if (filterDict["B"] == null) return false;
+            
+            var bFilter = filterDict["B"];
+            var b = Convert.ToInt32(pt.rgb[2]) / 256;
+            return b < bFilter[0] || b > bFilter[1];
+        }
+
+        private bool CropFilter(Mesh cropMesh, bool? inside, laszip_point pt)
+        {
+            if (inside == null || cropMesh == null) return false;
+
+            Point3d point = new Point3d(pt.X, pt.Y, pt.Z);
+
+            return cropMesh.IsPointInside(point, 0.01, false) != inside;
+        }
+
         public PointCloud ImportPtCloud(int[] filteredCldIndices, List<string> propertyNames, 
                                         out SortedDictionary<string, List<int>> properties, out List<Color> ptColors, 
-                                        bool initial = false)
+                                        bool initial = true, SortedDictionary<string, int[]> fieldFilters = null,
+                                        Mesh cropMesh = null, bool? insideCrop = null)
         {
             ptColors = new List<Color>();
             PointCloud ptCloud = new PointCloud();
@@ -92,42 +148,44 @@ namespace SiteReader.Classes
                 _lasReader.read_point();
                 var lasPt = _lasReader.point;
 
-                if (i == filteredCldIndices[filterIx])
+                if (i != filteredCldIndices[filterIx]) continue; // point doesn't meet density filter
+                if (!initial && FilterProperties(fieldFilters, lasPt)) continue; // point doesn't meet field filter
+                if (!initial && CropFilter(cropMesh, insideCrop, lasPt)) continue; // point isn't inside crop
+
+
+                var pointCoords = new double[3];
+                _lasReader.get_coordinates(pointCoords);
+
+                var rhinoPoint = new Point3d(pointCoords[0], pointCoords[1], pointCoords[2]);
+
+                // adding the pt LAS Properties
+                AddPropertyValues(ref properties, lasPt);
+
+                if (ContainsRgb())
                 {
-                    double[] pointCoords = new double[3];
-                    _lasReader.get_coordinates(pointCoords);
+                    AddColorValues(ref properties, lasPt);
 
-                    var rhinoPoint = new Point3d(pointCoords[0], pointCoords[1], pointCoords[2]);
+                    Color rgbColor = Utility.ConvertRGB(lasPt.rgb);
+                    ptColors.Add(rgbColor);
 
-                    // adding the pt LAS Properties
-                    AddPropertyValues(ref properties, lasPt);
-
-
-                    if (ContainsRgb())
-                    {
-                        AddColorValues(ref properties, lasPt);
-
-                        Color rgbColor = Utility.ConvertRGB(lasPt.rgb);
-                        ptColors.Add(rgbColor);
-
-                        ptCloud.Add(rhinoPoint, rgbColor);
-                    }
-                    else
-                    {
-                        ptCloud.Add(rhinoPoint);
-                    }
-
-                    filterIx++;
+                    ptCloud.Add(rhinoPoint, rgbColor);
                 }
+                else
+                {
+                    ptCloud.Add(rhinoPoint);
+                }
+
+                filterIx++;
+                
             }
             _lasReader.close_reader();
 
             // We can get rid of properties that have all the same value as this means they aren't actually assigned
-            for (int i = propertyNames.Count - 1; i >= 0; i--)
+            for (var i = propertyNames.Count - 1; i >= 0; i--)
             {
                 var pair = properties.ElementAt(i);
 
-                if (Utility.NotAllSameValues(pair.Value))
+                if (pair.Value.Count == 0 || Utility.NotAllSameValues(pair.Value))
                 {
                     properties.Remove(pair.Key);
                 }

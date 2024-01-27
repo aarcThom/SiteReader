@@ -45,14 +45,14 @@ namespace SiteReader.Classes
         public SortedDictionary<string, List<int>> CloudProperties => _cloudProperties;
 
         // CONSTRUCTORS ===============================================================================================
-        public LasCloud(string path, double density = 0.1)
+        public LasCloud(string path, double density = 0.01)
         {
             FileMethods = new LasFile(path);
 
             Filters= new CloudFilters(FileMethods.FilePointCount, density);
 
             PtCloud = FileMethods.ImportPtCloud(Filters.GetDensityFilter(), _cloudPropNames, 
-                                                out _cloudProperties, out _pointColors, initial:true);
+                                                out _cloudProperties, out _pointColors);
 
             m_value = PtCloud;
 
@@ -116,6 +116,23 @@ namespace SiteReader.Classes
             _pointColors = Utility.GenericFilterByBool(cldIn.PtColors, boolFilter);
 
             m_value = PtCloud;
+        }
+
+        // used for upscaling
+        public LasCloud(LasCloud cldIn, double density)
+        {
+            FileMethods = cldIn.FileMethods;
+            Filters = cldIn.Filters;
+            Filters.Density = density;
+
+            PtCloud = FileMethods.ImportPtCloud(Filters.GetDensityFilter(), _cloudPropNames, out _cloudProperties,
+                out _pointColors, false, Filters.FieldFilters, Filters.CropMesh,
+                Filters.InsideCrop);
+
+            m_value = PtCloud;
+
+            //updating the property names to only properties present in the LAS file
+            _cloudPropNames = new List<string>(CloudProperties.Keys);
         }
 
         // INTERFACE METHODS ==========================================================================================

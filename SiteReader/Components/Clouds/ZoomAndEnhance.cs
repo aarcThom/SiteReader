@@ -3,21 +3,24 @@ using SiteReader.Classes;
 using SiteReader.Params;
 using System;
 using System.Collections.Generic;
-using Rhino.Geometry;
-using SiteReader.Functions;
+using SiteReader.UI;
 
 namespace SiteReader.Components.Clouds
 {
-    public class CropCloud : CloudBase
+    public class ZoomAndEnhance : CloudBase
     {
         //FIELDS ======================================================================================================
+        private List<LasCloud> _newClouds = null;
+        private double _newDensity;
 
         //PROPERTIES ==================================================================================================
 
         //CONSTRUCTORS ================================================================================================
 
-        public CropCloud()
-            : base(name: "Crop LAS Cloud", nickname: "cropLAS", description: "Crop a Cloud with closed Breps or Meshes")
+        public ZoomAndEnhance()
+            : base(name: "Zoom & Enhance!", nickname: "Z&E", 
+                description: "Reimport your point cloud(s), but with a higher specified point density. " + 
+                             "Crops, field filters, & re-projections will be kept. GH transformations will not (yet).")
         {
             // IconPath = "siteReader.Resources...";
         }
@@ -26,12 +29,7 @@ namespace SiteReader.Components.Clouds
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             base.RegisterInputParams(pManager);
-            pManager.AddGeometryParameter("Crop Shapes", "cropShps",
-                "Closed Brep(s) or Mesh(s) that will be used for either interior or exterior cropping",
-                GH_ParamAccess.list);
-            pManager.AddBooleanParameter("Keep Inside?", "inside",
-                "If left True, points inside shapes will be kept, otherwise points outside shapes will be kept",
-                GH_ParamAccess.item);
+            pManager.AddNumberParameter("Density", "dns", "Up-scaled density of points.", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -45,45 +43,35 @@ namespace SiteReader.Components.Clouds
         {
             base.SolveInstance(DA);
 
-            List<GeometryBase> geoIn = new List<GeometryBase>();
-            if (!DA.GetDataList(1, geoIn)) return;
+            if(!DA.GetData(1, ref _newDensity)) return;
 
-            var cropMesh = GeoUtility.ConvertToMesh(geoIn);
-            if (cropMesh == null)
+            if (_newClouds != null)
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "You must provide closed meshes and/or breps");
-                return;
+                DA.SetDataList(0, _newClouds);
             }
-
-            var inside = true;
-            if (!DA.GetData(2, ref inside)) inside = true;
-
-            var cloudsOut = new List<LasCloud>();
-
-            foreach (var cloud in Clouds)
-            {
-                var newCloud = new LasCloud(cloud);
-
-                newCloud.Filters.CropMesh = cropMesh;
-                newCloud.Filters.InsideCrop = inside;
-                newCloud.ApplyCrop(inside);
-
-                cloudsOut.Add(newCloud);
-            }
-
-            Clouds = cloudsOut;
-
-            DA.SetDataList(0, Clouds);
-
-
         }
 
         //PREVIEW AND UI ==============================================================================================
+        public override void CreateAttributes()
+        {
+            m_attributes = new UiZoomEnhance(this, Upscale);
+        }
+
+        public void Upscale()
+        {
+            _newClouds = new List<LasCloud>();
+
+            foreach (var cld in Clouds)
+            {
+                _newClouds.Add(new LasCloud(cld, _newDensity));
+            }
+            ExpireSolution(true);
+        }
 
         //UTILITY METHODS =============================================================================================
 
         //GUID ========================================================================================================
         // make sure to change this if using template
-        public override Guid ComponentGuid => new Guid("E969B8F6-92E2-409F-89C0-24539AD1029D");
+        public override Guid ComponentGuid => new Guid("C6E639E7-3963-4D31-810A-BA1A6BB1695E");
     }
 }
