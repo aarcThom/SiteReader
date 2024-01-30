@@ -62,9 +62,13 @@ namespace SiteReader.Functions
         /// <returns>A single mesh, or null if other geo present or meshes/breps aren't closed</returns>
         public static Mesh ConvertToMesh(List<GeometryBase> geometry)
         {
+            if (geometry == null || geometry.Count == 0) return null;
+
             Mesh mesh = new Mesh();
             foreach (var geo in geometry)
             {
+                if (geo == null) return null;
+
                 if (geo.ObjectType == ObjectType.Brep && geo.HasBrepForm && Brep.TryConvertBrep(geo).IsSolid)
                 {
                     mesh.Append(Mesh.CreateFromBrep(Brep.TryConvertBrep(geo), MeshingParameters.FastRenderMesh));
@@ -78,6 +82,7 @@ namespace SiteReader.Functions
                     return null;
                 }
             }
+
             return mesh;
         }
     }

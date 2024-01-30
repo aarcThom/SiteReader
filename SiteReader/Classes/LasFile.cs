@@ -118,11 +118,11 @@ namespace SiteReader.Classes
 
         private bool CropFilter(Mesh cropMesh, bool? inside, laszip_point pt)
         {
-            if (inside == null || cropMesh == null) return false;
+            if (!inside.HasValue) return true;
 
             Point3d point = new Point3d(pt.X, pt.Y, pt.Z);
 
-            return cropMesh.IsPointInside(point, 0.01, false) != inside;
+            return cropMesh.IsPointInside(point, 0.01, false) == inside.Value;
         }
 
         public PointCloud ImportPtCloud(int[] filteredCldIndices, List<string> propertyNames, 
@@ -149,8 +149,10 @@ namespace SiteReader.Classes
                 var lasPt = _lasReader.point;
 
                 if (i != filteredCldIndices[filterIx]) continue; // point doesn't meet density filter
-                if (!initial && FilterProperties(fieldFilters, lasPt)) continue; // point doesn't meet field filter
-                if (!initial && CropFilter(cropMesh, insideCrop, lasPt)) continue; // point isn't inside crop
+                // (!initial && FilterProperties(fieldFilters, lasPt)) continue; // point doesn't meet field filter
+
+                // point isn't inside crop
+                if (cropMesh != null && insideCrop!= null && CropFilter(cropMesh, insideCrop, lasPt)) continue; 
 
 
                 var pointCoords = new double[3];

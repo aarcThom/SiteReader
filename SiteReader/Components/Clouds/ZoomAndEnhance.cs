@@ -29,7 +29,8 @@ namespace SiteReader.Components.Clouds
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             base.RegisterInputParams(pManager);
-            pManager.AddNumberParameter("Density", "dns", "Up-scaled density of points.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Density", "dns", "Up-scaled density of points.",
+                GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -45,10 +46,7 @@ namespace SiteReader.Components.Clouds
 
             if(!DA.GetData(1, ref _newDensity)) return;
 
-            if (_newClouds != null)
-            {
-                DA.SetDataList(0, _newClouds);
-            }
+            DA.SetDataList(0, _newClouds);
         }
 
         //PREVIEW AND UI ==============================================================================================
@@ -66,6 +64,22 @@ namespace SiteReader.Components.Clouds
                 _newClouds.Add(new LasCloud(cld, _newDensity));
             }
             ExpireSolution(true);
+        }
+
+        // draw new clouds once upscaled
+        public override void DrawViewportWires(IGH_PreviewArgs args)
+        {
+            if (_newClouds == null)
+            {
+                base.DrawViewportWires(args);
+            }
+            else
+            {
+                foreach (LasCloud cld in _newClouds)
+                {
+                    args.Display.DrawPointCloud(cld.PtCloud, 2);
+                }
+            }
         }
 
         //UTILITY METHODS =============================================================================================

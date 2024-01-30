@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Runtime.InteropServices;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Rhino.DocObjects;
 using Rhino;
 using SiteReader.Functions;
-using System.Security.Claims;
-using System.Xml.Serialization;
 
 namespace SiteReader.Classes
 {
@@ -121,13 +116,13 @@ namespace SiteReader.Classes
         // used for upscaling
         public LasCloud(LasCloud cldIn, double density)
         {
-            FileMethods = cldIn.FileMethods;
-            Filters = cldIn.Filters;
+            FileMethods = new LasFile(cldIn.FileMethods);
+            Filters = new CloudFilters(cldIn.Filters);
             Filters.Density = density;
 
             PtCloud = FileMethods.ImportPtCloud(Filters.GetDensityFilter(), _cloudPropNames, 
-                out _cloudProperties, out _pointColors, false, Filters.FieldFilters, Filters.CropMesh,
-                Filters.InsideCrop);
+                out _cloudProperties, out _pointColors, false, cldIn.Filters.FieldFilters, cldIn.Filters.CropMesh,
+                cldIn.Filters.InsideCrop);
 
             m_value = PtCloud;
 
