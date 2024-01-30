@@ -46,7 +46,7 @@ namespace SiteReader.Classes
 
             Filters= new CloudFilters(FileMethods.FilePointCount, density);
 
-            PtCloud = FileMethods.ImportPtCloud(Filters.GetDensityFilter(), _cloudPropNames, 
+            PtCloud = FileMethods.InitialLasImport(Filters.GetDensityFilter(), _cloudPropNames, 
                                                 out _cloudProperties, out _pointColors);
 
             m_value = PtCloud;
@@ -120,10 +120,7 @@ namespace SiteReader.Classes
             Filters = new CloudFilters(cldIn.Filters);
             Filters.Density = density;
 
-            PtCloud = FileMethods.ImportPtCloud(Filters.GetDensityFilter(), _cloudPropNames, 
-                out _cloudProperties, out _pointColors, false, cldIn.Filters.FieldFilters, cldIn.Filters.CropMesh,
-                cldIn.Filters.InsideCrop);
-
+            PtCloud = cldIn.PtCloud;
             m_value = PtCloud;
 
             //updating the property names to only properties present in the LAS file

@@ -116,19 +116,8 @@ namespace SiteReader.Classes
             return b < bFilter[0] || b > bFilter[1];
         }
 
-        private bool CropFilter(Mesh cropMesh, bool? inside, laszip_point pt)
-        {
-            if (!inside.HasValue) return true;
-
-            Point3d point = new Point3d(pt.X, pt.Y, pt.Z);
-
-            return cropMesh.IsPointInside(point, 0.01, false) == inside.Value;
-        }
-
-        public PointCloud ImportPtCloud(int[] filteredCldIndices, List<string> propertyNames, 
-                                        out SortedDictionary<string, List<int>> properties, out List<Color> ptColors, 
-                                        bool initial = true, SortedDictionary<string, int[]> fieldFilters = null,
-                                        Mesh cropMesh = null, bool? insideCrop = null)
+        public PointCloud InitialLasImport(int[] filteredCldIndices, List<string> propertyNames, 
+                                        out SortedDictionary<string, List<int>> properties, out List<Color> ptColors)
         {
             ptColors = new List<Color>();
             PointCloud ptCloud = new PointCloud();
@@ -149,12 +138,7 @@ namespace SiteReader.Classes
                 var lasPt = _lasReader.point;
 
                 if (i != filteredCldIndices[filterIx]) continue; // point doesn't meet density filter
-                // (!initial && FilterProperties(fieldFilters, lasPt)) continue; // point doesn't meet field filter
-
-                // point isn't inside crop
-                if (cropMesh != null && insideCrop!= null && CropFilter(cropMesh, insideCrop, lasPt)) continue; 
-
-
+                
                 var pointCoords = new double[3];
                 _lasReader.get_coordinates(pointCoords);
 
