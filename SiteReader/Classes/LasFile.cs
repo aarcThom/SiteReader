@@ -139,16 +139,20 @@ namespace SiteReader.Classes
                 var lasPt = _lasReader.point;
 
                 if (i != filteredCldIndices[filterIx]) continue; // point doesn't meet density filter
-                
+
+                if (!initial && FilterProperties(fieldFilters, lasPt)) // point doesn't meet field filter
+                {
+                    if (filterIx != _filePtCount - 1) filterIx++;
+                    continue; 
+                }
+
                 var pointCoords = new double[3];
                 _lasReader.get_coordinates(pointCoords);
 
                 var rhinoPoint = new Point3d(pointCoords[0], pointCoords[1], pointCoords[2]);
 
-                // (!initial && FilterProperties(fieldFilters, lasPt)) continue; // point doesn't meet field filter
-
-                // point isn't inside crop
-                if (CropFilter(cropMesh, insideCrop, rhinoPoint))
+                
+                if (CropFilter(cropMesh, insideCrop, rhinoPoint)) // point isn't inside crop
                 {
                     if (filterIx != _filePtCount - 1) filterIx++;
                     continue;
