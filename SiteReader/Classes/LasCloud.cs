@@ -46,7 +46,7 @@ namespace SiteReader.Classes
 
             Filters= new CloudFilters(FileMethods.FilePointCount, density);
 
-            PtCloud = FileMethods.InitialLasImport(Filters.GetDensityFilter(), _cloudPropNames, 
+            PtCloud = FileMethods.ImportPtCloud(Filters.GetDensityFilter(), _cloudPropNames, 
                                                 out _cloudProperties, out _pointColors);
 
             m_value = PtCloud;
@@ -70,7 +70,7 @@ namespace SiteReader.Classes
         // Copying the LasCloud object
         public LasCloud(LasCloud cldIn)
         {
-            FileMethods = new LasFile(cldIn.FileMethods);
+            FileMethods = new LasFile(cldIn.FileMethods.FilePath);
             Filters = new CloudFilters(cldIn.Filters);
             PtCloud = new PointCloud(cldIn.PtCloud);
 
@@ -84,7 +84,7 @@ namespace SiteReader.Classes
         // GH components transforming the LASCloud object
         public LasCloud(PointCloud transformedCloud, LasCloud cldIn)
         {
-            FileMethods = new LasFile(cldIn.FileMethods);
+            FileMethods = new LasFile(cldIn.FileMethods.FilePath);
             Filters = new CloudFilters(cldIn.Filters);
             PtCloud = transformedCloud;
 
@@ -98,7 +98,7 @@ namespace SiteReader.Classes
         // used for filtering the cloud
         public LasCloud(LasCloud cldIn, List<bool> boolFilter, string fieldName, int[] fieldFilter)
         {
-            FileMethods = new LasFile(cldIn.FileMethods);
+            FileMethods = new LasFile(cldIn.FileMethods.FilePath);
 
             Filters = new CloudFilters(cldIn.Filters);
             Filters.FieldFilters[fieldName] = fieldFilter;
@@ -116,11 +116,13 @@ namespace SiteReader.Classes
         // used for upscaling
         public LasCloud(LasCloud cldIn, double density)
         {
-            FileMethods = new LasFile(cldIn.FileMethods);
-            Filters = new CloudFilters(cldIn.Filters);
-            Filters.Density = density;
+            FileMethods = new LasFile(cldIn.FileMethods.FilePath);
+            Filters = new CloudFilters(cldIn.Filters, density);
 
-            PtCloud = cldIn.PtCloud;
+            PtCloud = FileMethods.ImportPtCloud(Filters.GetDensityFilter(), _cloudPropNames, 
+                out _cloudProperties, out _pointColors, false, Filters.FieldFilters, Filters.CropMesh,
+                Filters.InsideCrop);
+
             m_value = PtCloud;
 
             //updating the property names to only properties present in the LAS file

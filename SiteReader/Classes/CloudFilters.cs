@@ -42,6 +42,16 @@ namespace SiteReader.Classes
             InsideCrop = filterIn.InsideCrop;
         }
 
+        // used for upscaling
+        public CloudFilters(CloudFilters filterIn, double density)
+        {
+            _density = density;
+            FilePtCount = filterIn.FilePtCount;
+            CropMesh = filterIn.CropMesh != null ? filterIn.CropMesh.DuplicateMesh() : null;
+            FieldFilters = CloudUtility.DeepCopyFilters(filterIn.FieldFilters);
+            InsideCrop = filterIn.InsideCrop;
+        }
+
         // METHODS ====================================================================================================
 
         /// <summary>

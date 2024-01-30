@@ -33,13 +33,6 @@ namespace SiteReader.Classes
             Construct();
         }
 
-        public LasFile(LasFile fileIn)
-        {
-            _filePath = fileIn.FilePath;
-            _filePtCount = fileIn.FilePointCountLong;
-            _filePtFormat = fileIn.FilePtFormat;
-        }
-
         // METHODS ====================================================================================================
         private void Construct()
         {
@@ -116,14 +109,22 @@ namespace SiteReader.Classes
             return b < bFilter[0] || b > bFilter[1];
         }
 
-        public PointCloud InitialLasImport(int[] filteredCldIndices, List<string> propertyNames, 
-                                        out SortedDictionary<string, List<int>> properties, out List<Color> ptColors)
+        private bool CropFilter(Mesh cropMesh, bool? inside, Point3d point)
+        {
+            if (cropMesh == null || inside.HasValue == false) return false;
+            return cropMesh.IsPointInside(point, 0.01, false) != inside.Value;
+        }
+
+        public PointCloud ImportPtCloud(int[] filteredCldIndices, List<string> propertyNames, 
+                                        out SortedDictionary<string, List<int>> properties, out List<Color> ptColors, 
+                                        bool initial = true, SortedDictionary<string, int[]> fieldFilters = null,
+                                        Mesh cropMesh = null, bool? insideCrop = null)
         {
             ptColors = new List<Color>();
-            PointCloud ptCloud = new PointCloud();
+            var ptCloud = new PointCloud();
             properties = new SortedDictionary<string, List<int>>();
 
-            foreach (var propName in propertyNames)
+            foreach (string propName in propertyNames)
             {
                 properties.Add(propName, new List<int>());
             }
@@ -143,6 +144,15 @@ namespace SiteReader.Classes
                 _lasReader.get_coordinates(pointCoords);
 
                 var rhinoPoint = new Point3d(pointCoords[0], pointCoords[1], pointCoords[2]);
+
+                // (!initial && FilterProperties(fieldFilters, lasPt)) continue; // point doesn't meet field filter
+
+                // point isn't inside crop
+                if (CropFilter(cropMesh, insideCrop, rhinoPoint))
+                {
+                    if (filterIx != _filePtCount - 1) filterIx++;
+                    continue;
+                }
 
                 // adding the pt LAS Properties
                 AddPropertyValues(ref properties, lasPt);
