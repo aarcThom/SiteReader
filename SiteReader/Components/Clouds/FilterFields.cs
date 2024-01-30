@@ -4,14 +4,11 @@ using SiteReader.Params;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
-using Aardvark.Base;
 using Rhino.Geometry;
 using SiteReader.Functions;
 using SiteReader.UI;
 using SiteReader.UI.UiElements;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 
 namespace SiteReader.Components.Clouds
 {
@@ -42,10 +39,9 @@ namespace SiteReader.Components.Clouds
         private List<Point3d> _allPoints; // all the points in the incoming clouds
         private List<bool> _currentFilter; // whether a point in _allPoints is filtered or not
 
-        //PROPERTIES ==================================================================================================
+
 
         //CONSTRUCTORS ================================================================================================
-
         public FilterFields()
             : base(name: "Visual Filter", nickname: "vizFilter", description: "Filter a LAS point cloud by LAS fields")
         {
@@ -53,16 +49,12 @@ namespace SiteReader.Components.Clouds
         }
 
         //IO ==========================================================================================================
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
-        {
-            base.RegisterInputParams(pManager);
-        }
-
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddParameter(new LasCloudParam(), "LAS Clouds", "LCld",
                 "A LAS point cloud and associated data.", GH_ParamAccess.list);
-            pManager.AddTextParameter("Fields", "Flds", "LAS fields present in the cloud.", GH_ParamAccess.list);
+            pManager.AddTextParameter("Fields", "Flds", "LAS fields present in the cloud.", 
+                GH_ParamAccess.list);
         }
 
         //SOLVE =======================================================================================================
@@ -77,7 +69,6 @@ namespace SiteReader.Components.Clouds
                 _allPoints.AddRange(cld.PtCloud.GetPoints());
             }
             //-------------------------------------------------------------------
-
 
             // get the field names common to all clouds in input
             _fieldNames = CloudUtility.ConsolidateProps(Clouds);
@@ -124,8 +115,6 @@ namespace SiteReader.Components.Clouds
             {
                 DA.SetDataList(0, _exportClouds);
             }
-            
-
         }
 
         //PREVIEW AND UI ==============================================================================================
@@ -216,7 +205,6 @@ namespace SiteReader.Components.Clouds
             ExpireSolution(true);
         }
 
-
         //UTILITY METHODS =============================================================================================
         private void SetBounds()
         {
@@ -229,7 +217,6 @@ namespace SiteReader.Components.Clouds
         }
 
         //GUID ========================================================================================================
-        // make sure to change this if using template
         public override Guid ComponentGuid => new Guid("C57E27B7-38CF-436A-BD90-9D18793344B4");
     }
 }

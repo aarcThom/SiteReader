@@ -37,8 +37,8 @@ namespace SiteReader.Classes
         {
             _density = filterIn.Density;
             FilePtCount = filterIn.FilePtCount;
-            CropMesh = filterIn.CropMesh;
-            FieldFilters = filterIn.FieldFilters;
+            CropMesh = filterIn.CropMesh != null? filterIn.CropMesh.DuplicateMesh() : null;
+            FieldFilters = CloudUtility.DeepCopyFilters(filterIn.FieldFilters);
             InsideCrop = filterIn.InsideCrop;
         }
 

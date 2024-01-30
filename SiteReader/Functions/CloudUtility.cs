@@ -58,13 +58,57 @@ namespace SiteReader.Functions
         /// </summary>
         /// <param name="dicIn">properties dictionary</param>
         /// <returns>copied dictionary</returns>
-        public static SortedDictionary<string, List<int>> CopyPropDict(SortedDictionary<string, List<int>> dicIn)
+        public static SortedDictionary<string, List<int>> CopyPropDictDeep(SortedDictionary<string, List<int>> dicIn)
         {
             var dicOut = new SortedDictionary<string, List<int>>();
 
             foreach (var pair in dicIn)
             {
                 dicOut.Add(pair.Key, new List<int>(pair.Value));
+            }
+            return dicOut;
+        }
+
+        /// <summary>
+        /// Copies the property dictionary, but with empty lists
+        /// </summary>
+        /// <param name="dicIn">property dictionary in</param>
+        /// <returns>dictionary with same keys but empty lists</returns>
+        public static SortedDictionary<string, List<int>> CopyPropDictKeys(SortedDictionary<string, List<int>> dicIn)
+        {
+            var dicOut = new SortedDictionary<string, List<int>>();
+
+            foreach (var pair in dicIn)
+            {
+                dicOut.Add(pair.Key, new List<int>());
+            }
+            return dicOut;
+        }
+
+        /// <summary>
+        /// Deep copies the filters dictionary
+        /// </summary>
+        /// <param name="dicIn">Filters dictionary to copy</param>
+        /// <returns>Deep copy of filters dictionary.</returns>
+        public static SortedDictionary<string, int[]> DeepCopyFilters(SortedDictionary<string, int[]> dicIn)
+        {
+            var dicOut = new SortedDictionary<string, int[]>();
+
+            foreach (var pair in dicIn)
+            {
+                var newArr = new int[2];
+
+                if (pair.Value == null)
+                {
+                    newArr = null;
+                }
+                else
+                {
+                    newArr[0] = pair.Value[0];
+                    newArr[1] = pair.Value[1];
+                }
+
+                dicOut.Add(pair.Key, newArr);
             }
             return dicOut;
         }

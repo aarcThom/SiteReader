@@ -80,7 +80,7 @@ namespace SiteReader.Classes
             PtCloud = new PointCloud(cldIn.PtCloud);
 
             _cloudPropNames = new List<string>(cldIn.CloudPropNames);
-            _cloudProperties = CloudUtility.CopyPropDict(cldIn.CloudProperties);
+            _cloudProperties = CloudUtility.CopyPropDictDeep(cldIn.CloudProperties);
             _pointColors = new List<Color>(cldIn.PtColors);
 
             m_value = PtCloud;
@@ -94,7 +94,7 @@ namespace SiteReader.Classes
             PtCloud = transformedCloud;
 
             _cloudPropNames = new List<string>(cldIn.CloudPropNames);
-            _cloudProperties = CloudUtility.CopyPropDict(cldIn.CloudProperties);
+            _cloudProperties = CloudUtility.CopyPropDictDeep(cldIn.CloudProperties);
             _pointColors = new List<Color>(cldIn.PtColors);
 
             m_value = PtCloud;
@@ -125,8 +125,8 @@ namespace SiteReader.Classes
             Filters = cldIn.Filters;
             Filters.Density = density;
 
-            PtCloud = FileMethods.ImportPtCloud(Filters.GetDensityFilter(), _cloudPropNames, out _cloudProperties,
-                out _pointColors, false, Filters.FieldFilters, Filters.CropMesh,
+            PtCloud = FileMethods.ImportPtCloud(Filters.GetDensityFilter(), _cloudPropNames, 
+                out _cloudProperties, out _pointColors, false, Filters.FieldFilters, Filters.CropMesh,
                 Filters.InsideCrop);
 
             m_value = PtCloud;
@@ -212,25 +212,33 @@ namespace SiteReader.Classes
         {
             if (Filters.CropMesh == null) return;
 
-            var ptCldOut = new PointCloud(PtCloud);
-            var propertiesOut = CloudUtility.CopyPropDict(_cloudProperties);
+            var propertiesOut = CloudUtility.CopyPropDictKeys(_cloudProperties);
+            var ptCldOut = new PointCloud();
+            var newColors = new List<Color>();
 
             for (int i = PtCloud.Count - 1; i >= 0; i--)
             {
-                if (Filters.CropMesh.IsPointInside(ptCldOut[i].Location, 0.01, false) != inside)
+                if (Filters.CropMesh.IsPointInside(PtCloud[i].Location, 0.01, false) == inside)
                 {
-                    ptCldOut.RemoveAt(i);
+                    var color = PtCloud[i].Color;
+                    var location = PtCloud[i].Location;
 
-                    //removing all the corresponding property values
-                    foreach (var pair in propertiesOut)
+                    ptCldOut.Add(location, color);
+                    newColors.Add(color);
+
+                    foreach (var pair in _cloudProperties)
                     {
-                        pair.Value.RemoveAt(i);
+                        var key = pair.Key;
+                        var value = pair.Value[i];
+
+                        propertiesOut[key].Add(value);
                     }
                 }
             }
 
             PtCloud = ptCldOut;
             m_value = ptCldOut;
+            _pointColors = newColors;
             _cloudProperties = propertiesOut;
         }
     }
