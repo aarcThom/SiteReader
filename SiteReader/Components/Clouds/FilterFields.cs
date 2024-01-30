@@ -141,13 +141,28 @@ namespace SiteReader.Components.Clouds
         public override void DrawViewportWires(IGH_PreviewArgs args)
         {
             if (_displayCloud == null) return;
-            args.Display.DrawPointCloud(_displayCloud, 2);
+
+            if (_exportClouds != null)
+            {
+                foreach (var cld in _exportClouds)
+                {
+                    args.Display.DrawPointCloud(cld.PtCloud, 2);
+                }
+            }
+            else
+            {
+                args.Display.DrawPointCloud(_displayCloud, 2);
+            }
         }
 
         // shifts the field selection 'left'(-1) or 'right(1)
         public void ShiftValue(int shift)
         {
+            // nulling the export cloud so users don't accidentally grab wrong data
+            _exportClouds = null;
+
             _fieldIndex = Utility.WrapIndex(shift, _fieldIndex, _fieldNames.Count);
+
             ExpireSolution(true);
         }
 
