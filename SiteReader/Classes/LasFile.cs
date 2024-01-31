@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
 using LASzip.Net;
 using Rhino.Geometry;
 using SiteReader.Functions;
@@ -19,6 +20,12 @@ namespace SiteReader.Classes
         private byte _filePtFormat;
 
         private readonly laszip _lasReader = new laszip();
+
+        // used to grab proper values from .LAS importer
+        private readonly Dictionary<string, int> _rgbDict = new Dictionary<string, int>()
+        {
+            { "r", 0 }, { "g", 1 }, { "b", 2 }
+        };
 
         // PROPERTIES =================================================================================================
         public string FilePath => _filePath;
@@ -42,6 +49,7 @@ namespace SiteReader.Classes
             _lasReader.close_reader();
         }
 
+        // does the file contain RGB as per .LAS standards?
         private bool ContainsRgb()
         {
             // the below integers are the LAS formats that contain RGB - ref LAS file standard
@@ -49,85 +57,94 @@ namespace SiteReader.Classes
             return rgbFormats.Contains(_filePtFormat);
         }
 
-        private void AddPropertyValues(ref SortedDictionary<string, List<int>> propDict, laszip_point pt)
+        // returns the las field value of a point in proper integer formatting
+        private int FieldValueAtPoint(string lasFieldName, laszip_point pt)
         {
-            propDict["Intensity"].Add(Convert.ToInt32(pt.intensity) / 256);
-            propDict["Classification"].Add(Convert.ToInt32(pt.classification));
-            propDict["Number of Returns"].Add(Convert.ToInt32(pt.number_of_returns));
+            // convert name to lower case and replace whitespaces with underscore
+            lasFieldName = Regex.Replace(lasFieldName.ToLower(), @"\s", "_");
+
+            // special case for RGB where the type is an array and the field is RGB
+            if (_rgbDict.ContainsKey(lasFieldName)) return Convert.ToInt32(pt.rgb[_rgbDict[lasFieldName]]) / 256;
+
+            try
+            {
+                Type lasFieldType;
+                int ptFieldVal;
+
+                // need to test if it's a property or a field as laszip exposes both
+                if (pt.GetType().GetField(lasFieldName) != null)
+                {
+                    lasFieldType = pt.GetType().GetField(lasFieldName).GetValue(pt).GetType();
+                    ptFieldVal = Convert.ToInt32(pt.GetType().GetField(lasFieldName).GetValue(pt));
+                }
+                else
+                {
+                    lasFieldType = pt.GetType().GetProperty(lasFieldName).GetValue(pt).GetType();
+                    ptFieldVal = Convert.ToInt32(pt.GetType().GetProperty(lasFieldName).GetValue(pt)) ;
+                }
+
+                // if the value is a ushort divide by 256
+                return lasFieldType == typeof(byte) ? ptFieldVal : ptFieldVal / 256;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
-        private void AddColorValues(ref SortedDictionary<string, List<int>> propDict, laszip_point pt)
+        // adds a pt's field value for given field name
+        private void AddLasFieldValue(ref SortedDictionary<string, List<int>> propDict, laszip_point pt)
         {
-            propDict["R"].Add(Convert.ToInt32(pt.rgb[0]) / 256);
-            propDict["G"].Add(Convert.ToInt32(pt.rgb[1]) / 256);
-            propDict["B"].Add(Convert.ToInt32(pt.rgb[2]) / 256);
+            foreach (var pair in propDict)
+            {
+                propDict[pair.Key].Add(FieldValueAtPoint(pair.Key, pt));
+            }
         }
 
-        private bool FilterProperties(SortedDictionary<string, int[]> filterDict, laszip_point pt)
+        // tests if pt meets field filter if filter is present
+        private bool FilterLasFields(SortedDictionary<string, int[]> filterDict, laszip_point pt)
         {
-
-            if (filterDict.ContainsKey("Intensity") && filterDict["Intensity"] != null)
+            foreach (var pair in filterDict)
             {
-                var iFilter = filterDict["Intensity"];
-                var intensity = Convert.ToInt32(pt.intensity) / 256;
-                if (intensity < iFilter[0] || intensity > iFilter[1]) return true;
+                int[] filter = pair.Value;
+                if (filter != null)
+                {
+                    int pointValue = FieldValueAtPoint(pair.Key, pt);
+                    if (pointValue < filter[0] || pointValue > filter[1]) return true;
+                }
             }
-
-            if (filterDict.ContainsKey("Classification") && filterDict["Classification"] != null)
-            {
-                var cFilter = filterDict["Classification"];
-                var classification = Convert.ToInt32(pt.classification);
-                if (classification < cFilter[0] || classification > cFilter[1]) return true;
-            }
-
-            if (filterDict.ContainsKey("Number of Returns") && filterDict["Number of Returns"] != null)
-            {
-                var nrFilter = filterDict["Number of Returns"];
-                var numRet = Convert.ToInt32(pt.number_of_returns);
-                if (numRet < nrFilter[0] || numRet > nrFilter[1]) return true;
-            }
-
-            if (filterDict.ContainsKey("R") && filterDict["R"] != null)
-            {
-                var rFilter = filterDict["R"];
-                var r = Convert.ToInt32(pt.rgb[0]) / 256;
-                if (r < rFilter[0] || r > rFilter[1]) return true;
-            }
-
-            if (filterDict.ContainsKey("G") && filterDict["G"] != null)
-            {
-                var gFilter = filterDict["G"];
-                var g = Convert.ToInt32(pt.rgb[1]) / 256;
-                if (g < gFilter[0] || g > gFilter[1]) return true;
-            }
-
-            if (!filterDict.ContainsKey("B")) return false;
-            if (filterDict["B"] == null) return false;
-            
-            var bFilter = filterDict["B"];
-            var b = Convert.ToInt32(pt.rgb[2]) / 256;
-            return b < bFilter[0] || b > bFilter[1];
+            return false;
         }
 
+        // tests if a point is in the crop mesh
         private bool CropFilter(Mesh cropMesh, bool? inside, Point3d point)
         {
             if (cropMesh == null || inside.HasValue == false) return false;
             return cropMesh.IsPointInside(point, 0.01, false) != inside.Value;
         }
 
-        public PointCloud ImportPtCloud(int[] filteredCldIndices, List<string> propertyNames, 
-                                        out SortedDictionary<string, List<int>> properties, out List<Color> ptColors, 
+        // converts the incoming LAS field names to the field dictionary - removes RGB if not present
+        private SortedDictionary<string, List<int>> GetFieldDictionary(List<string> fieldNames)
+        {
+            var fieldDict = new SortedDictionary<string, List<int>>();
+            foreach (var field in fieldNames)
+            {
+                if (!ContainsRgb() && "rgb".Contains(field)) continue; // does not contain RGB 
+                fieldDict.Add(field, new List<int>());
+            }
+            return fieldDict;
+        }
+
+        public PointCloud ImportPtCloud(int[] filteredCldIndices, List<string> lasFieldNames, 
+                                        out SortedDictionary<string, List<int>> lasFields, out List<Color> ptColors, 
                                         bool initial = true, SortedDictionary<string, int[]> fieldFilters = null,
                                         Mesh cropMesh = null, bool? insideCrop = null)
         {
+
             ptColors = new List<Color>();
             var ptCloud = new PointCloud();
-            properties = new SortedDictionary<string, List<int>>();
-
-            foreach (string propName in propertyNames)
-            {
-                properties.Add(propName, new List<int>());
-            }
+            lasFields = GetFieldDictionary(lasFieldNames);
 
             _lasReader.open_reader(_filePath, out bool isCompressed);
 
@@ -140,7 +157,7 @@ namespace SiteReader.Classes
 
                 if (i != filteredCldIndices[filterIx]) continue; // point doesn't meet density filter
 
-                if (!initial && FilterProperties(fieldFilters, lasPt)) // point doesn't meet field filter
+                if (!initial && FilterLasFields(fieldFilters, lasPt)) // point doesn't meet field filter
                 {
                     if (filterIx != _filePtCount - 1) filterIx++;
                     continue; 
@@ -151,7 +168,6 @@ namespace SiteReader.Classes
 
                 var rhinoPoint = new Point3d(pointCoords[0], pointCoords[1], pointCoords[2]);
 
-                
                 if (CropFilter(cropMesh, insideCrop, rhinoPoint)) // point isn't inside crop
                 {
                     if (filterIx != _filePtCount - 1) filterIx++;
@@ -159,15 +175,12 @@ namespace SiteReader.Classes
                 }
 
                 // adding the pt LAS Properties
-                AddPropertyValues(ref properties, lasPt);
-
+                AddLasFieldValue(ref lasFields, lasPt);
+                
                 if (ContainsRgb())
                 {
-                    AddColorValues(ref properties, lasPt);
-
                     Color rgbColor = Utility.ConvertRGB(lasPt.rgb);
                     ptColors.Add(rgbColor);
-
                     ptCloud.Add(rhinoPoint, rgbColor);
                 }
                 else
@@ -180,14 +193,14 @@ namespace SiteReader.Classes
             }
             _lasReader.close_reader();
 
-            // We can get rid of properties that have all the same value as this means they aren't actually assigned
-            for (var i = propertyNames.Count - 1; i >= 0; i--)
+            // We can get rid of lasFields that have all the same value as this means they aren't actually assigned
+            for (var i = lasFieldNames.Count - 1; i >= 0; i--)
             {
-                var pair = properties.ElementAt(i);
+                var pair = lasFields.ElementAt(i);
 
                 if (pair.Value.Count == 0 || Utility.NotAllSameValues(pair.Value))
                 {
-                    properties.Remove(pair.Key);
+                    lasFields.Remove(pair.Key);
                 }
             }
 

@@ -17,9 +17,11 @@ namespace SiteReader.Classes
 
         private readonly List<string> _cloudPropNames = new List<string>() 
         {
-            // refer to the LAS file specs when adding new fields
-            // make sure that these are matched in the method that actually populates the dictionary:
-            // Lasfile.AddPropertyValues()
+            // refer to the LAS file specs when adding new LAS fields
+            // make sure that these fields also conform to las importers field names with the following rules:
+            // CASE INSENSITIVE - e.g. a name of "Intensity" will return 'importer.intensity'
+            // WHITE SPACES --> _ : e.g. a name "Number of Returns" will return 'importer.number_of_returns'
+            // RGB IS A SPECIAL CASE - Just keep the field names as 'R','G', and 'B'
 
             "Intensity",
             "R",

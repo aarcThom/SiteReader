@@ -25,10 +25,11 @@ namespace SiteReader.Components.Clouds
         //IO ==========================================================================================================
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("File Path", "Path", "Path to LAS or LAZ file.", GH_ParamAccess.list);
+            pManager.AddTextParameter("File Path", "Path", "Path to LAS or LAZ file.", 
+                GH_ParamAccess.list);
             pManager.AddNumberParameter("Cloud Density", "CldDens",
-                "What factor of points do you want to import. TIP: Smart low - around 0.001. You can always upsample.",
-                GH_ParamAccess.item, 0.001);
+                "What factor of points do you want to import. TIP: Smart low - around 0.001."+
+                " You can always upsample.", GH_ParamAccess.item, 0.001);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
