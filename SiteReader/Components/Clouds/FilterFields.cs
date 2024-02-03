@@ -55,6 +55,7 @@ namespace SiteReader.Components.Clouds
                 "A LAS point cloud and associated data.", GH_ParamAccess.list);
             pManager.AddTextParameter("Fields", "Flds", "LAS fields present in the cloud.", 
                 GH_ParamAccess.list);
+            pManager.AddNumberParameter("test", "t", "t", GH_ParamAccess.list);
         }
 
         //SOLVE =======================================================================================================
@@ -93,6 +94,9 @@ namespace SiteReader.Components.Clouds
                 // the merged list of field values present in all clouds
                 _fieldValues = CloudUtility.MergeFieldValues(Clouds, _currentField);
 
+                // need to add 1 to the max value of the field values in order to have a slider to the right of it
+                _fieldValues.Add(_fieldValues.Max() + 1);
+
                 // the colors for each possible value within a given field
                 // for instance, R can be max 255, so fieldColors would be a list of colors 256 long
                 _fieldColors = ColorGradients.GetColorList(_colorSchemeIndex, _fieldValues.Max() + 1);
@@ -115,6 +119,9 @@ namespace SiteReader.Components.Clouds
             {
                 DA.SetDataList(0, _exportClouds);
             }
+
+            var outList = new List<double>() { _leftBounds, _rightBounds };
+            DA.SetDataList(2, outList);
         }
 
         //PREVIEW AND UI ==============================================================================================
@@ -210,9 +217,8 @@ namespace SiteReader.Components.Clouds
         {
             if (Clouds != null && Clouds.Count > 0 && _fieldNames != null)
             {
-                // need to fix this!!!
-                _leftBounds =Math.Ceiling(_fieldValues.Max() * _ui.FilterBarGraph.LeftBounds);
-                _rightBounds =Math.Ceiling(_fieldValues.Max() * _ui.FilterBarGraph.RightBounds);
+                _leftBounds = (_fieldValues.Max() + 1) * _ui.FilterBarGraph.LeftBounds;
+                _rightBounds = (_fieldValues.Max() + 1) * _ui.FilterBarGraph.RightBounds;
             }
         }
 
