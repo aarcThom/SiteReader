@@ -42,6 +42,11 @@ namespace SiteReader.Classes
         public SortedDictionary<string, List<int>> CloudProperties => _cloudProperties;
 
         // CONSTRUCTORS ===============================================================================================
+        /// <summary>
+        /// The initial constructor for the LasCloud object
+        /// </summary>
+        /// <param name="path">File path to the .LAS or .LAZ file.</param>
+        /// <param name="density"> The factor of points in relation to the file's number of points to import.</param>
         public LasCloud(string path, double density = 0.01)
         {
             FileMethods = new LasFile(path);
@@ -61,15 +66,19 @@ namespace SiteReader.Classes
             {
                 Filters.FieldFilters.Add(name, null);
             }
-
         }
 
-        // Needed for GH I/O 
+        /// <summary>
+        /// Constructor for GH I/O
+        /// </summary>
         public LasCloud()
         {
         }
 
-        // Copying the LasCloud object
+        /// <summary>
+        /// Constructor for copying the LasCloud object.
+        /// </summary>
+        /// <param name="cldIn">LasCloud to copy.</param>
         public LasCloud(LasCloud cldIn)
         {
             FileMethods = new LasFile(cldIn.FileMethods.FilePath);
@@ -97,8 +106,14 @@ namespace SiteReader.Classes
             m_value = PtCloud;
         }
 
-        // used for filtering the cloud
-        public LasCloud(LasCloud cldIn, List<bool> boolFilter, string fieldName, int[] fieldFilter)
+        /// <summary>
+        /// The constructor to return a LasCloud object filtered by a particular LAS field.
+        /// </summary>
+        /// <param name="cldIn">The LasCloud object to filter.</param>
+        /// <param name="boolFilter">A list representing whether or not a point falls within the filter bounds.</param>
+        /// <param name="fieldName">The LAS field name that is being filtered.</param>
+        /// <param name="fieldFilter">The bounds of the LAS field filter.</param>
+        public LasCloud(LasCloud cldIn, List<bool> boolFilter, string fieldName, double[] fieldFilter)
         {
             FileMethods = new LasFile(cldIn.FileMethods.FilePath);
 

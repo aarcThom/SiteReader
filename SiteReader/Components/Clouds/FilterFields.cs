@@ -55,7 +55,8 @@ namespace SiteReader.Components.Clouds
                 "A LAS point cloud and associated data.", GH_ParamAccess.list);
             pManager.AddTextParameter("Fields", "Flds", "LAS fields present in the cloud.", 
                 GH_ParamAccess.list);
-            pManager.AddNumberParameter("test", "t", "t", GH_ParamAccess.list);
+            pManager.AddIntervalParameter("Field Bounds", "Bnds",
+                "The domain representing kept field values.", GH_ParamAccess.item);
         }
 
         //SOLVE =======================================================================================================
@@ -120,8 +121,8 @@ namespace SiteReader.Components.Clouds
                 DA.SetDataList(0, _exportClouds);
             }
 
-            var outList = new List<double>() { _leftBounds, _rightBounds };
-            DA.SetDataList(2, outList);
+            var outDom = new Interval(_leftBounds, _rightBounds);
+            DA.SetData(2, outDom);
         }
 
         //PREVIEW AND UI ==============================================================================================
@@ -200,7 +201,7 @@ namespace SiteReader.Components.Clouds
             var perCldFilter = Utility.ChunkList(cloudSizes, _currentFilter);
 
             //getting the field bounds in filter format
-            var fieldFilter = new int[] {(int)_leftBounds, (int)_rightBounds};
+            var fieldFilter = new double[] {_leftBounds, _rightBounds};
 
             int filterIx = 0;
             foreach (var cld in Clouds)

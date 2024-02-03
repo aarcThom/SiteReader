@@ -103,11 +103,11 @@ namespace SiteReader.Classes
         }
 
         // tests if pt meets field filter if filter is present
-        private bool FilterLasFields(SortedDictionary<string, int[]> filterDict, laszip_point pt)
+        private bool FilterLasFields(SortedDictionary<string, double[]> filterDict, laszip_point pt)
         {
             foreach (var pair in filterDict)
             {
-                int[] filter = pair.Value;
+                double[] filter = pair.Value;
                 if (filter != null)
                 {
                     int pointValue = FieldValueAtPoint(pair.Key, pt);
@@ -138,7 +138,7 @@ namespace SiteReader.Classes
 
         public PointCloud ImportPtCloud(int[] filteredCldIndices, List<string> lasFieldNames, 
                                         out SortedDictionary<string, List<int>> lasFields, out List<Color> ptColors, 
-                                        bool initial = true, SortedDictionary<string, int[]> fieldFilters = null,
+                                        bool initial = true, SortedDictionary<string, double[]> fieldFilters = null,
                                         Mesh cropMesh = null, bool? insideCrop = null)
         {
 

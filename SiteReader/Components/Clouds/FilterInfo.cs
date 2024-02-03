@@ -11,10 +11,6 @@ namespace SiteReader.Components.Clouds
 {
     public class FilterInfo : CloudBase
     {
-        //FIELDS ======================================================================================================
-
-        //PROPERTIES ==================================================================================================
-
         //CONSTRUCTORS ================================================================================================
 
         public FilterInfo()
@@ -22,12 +18,6 @@ namespace SiteReader.Components.Clouds
                 description: "Get current cloud filter info and crop mesh(s). Mostly useful for debugging.")
         {
             // IconPath = "siteReader.Resources...";
-        }
-
-        //IO ==========================================================================================================
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
-        {
-            base.RegisterInputParams(pManager);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -80,10 +70,6 @@ namespace SiteReader.Components.Clouds
             DA.SetDataList(2, filters);
             DA.SetDataList(3, density);
         }
-
-        //PREVIEW AND UI ==============================================================================================
-
-        //UTILITY METHODS =============================================================================================
 
         //GUID ========================================================================================================
         // make sure to change this if using template

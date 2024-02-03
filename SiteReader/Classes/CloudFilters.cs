@@ -18,21 +18,28 @@ namespace SiteReader.Classes
         }
 
         public int FilePtCount { get; set; }
-
         public Mesh CropMesh { get; set; }
         public bool? InsideCrop { get; set; }
-
-        public SortedDictionary<string, int[]> FieldFilters { get; set; }
+        public SortedDictionary<string, double[]> FieldFilters { get; set; }
 
         // CONSTRUCTORS ===============================================================================================
+        /// <summary>
+        /// Initial constructor for CloudFilters object
+        /// </summary>
+        /// <param name="pointCount"> Number of points in the .LAS file</param>
+        /// <param name="density">The factor of points versus the .LAS file count for the GH LAS cloud</param>
         public CloudFilters(int pointCount, double density = 0.1)
         {
             _density = density;
             FilePtCount = pointCount;
-            FieldFilters = new SortedDictionary<string, int[]>();
+            FieldFilters = new SortedDictionary<string, double[]>();
             InsideCrop = null;
         }
 
+        /// <summary>
+        /// Copying constructor for the CloudFilters object
+        /// </summary>
+        /// <param name="filterIn">CloudFilters object to copy</param>
         public CloudFilters(CloudFilters filterIn)
         {
             _density = filterIn.Density;
@@ -42,7 +49,11 @@ namespace SiteReader.Classes
             InsideCrop = filterIn.InsideCrop;
         }
 
-        // used for upscaling
+        /// <summary>
+        /// Up-scaling constructor for the CloudFilters object
+        /// </summary>
+        /// <param name="filterIn">The CloudFilter object to copy and up-scale</param>
+        /// <param name="density">The new density for the up-scaled GH LAS cloud</param>
         public CloudFilters(CloudFilters filterIn, double density)
         {
             _density = density;
@@ -60,8 +71,8 @@ namespace SiteReader.Classes
         /// <returns>An array of int indices</returns>
         public int[] GetDensityFilter()
         {
-            var filteredPtCount = (int)(FilePtCount * _density);
-            var filteredIndices = Enumerable.Range(0, filteredPtCount);
+            int filteredPtCount = (int)(FilePtCount * _density);
+            IEnumerable<int> filteredIndices = Enumerable.Range(0, filteredPtCount);
 
             filteredIndices = filteredIndices.Select(i => Utility.Remap(i, FilePtCount, filteredPtCount));
 

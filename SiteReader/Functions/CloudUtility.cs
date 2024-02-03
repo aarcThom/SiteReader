@@ -90,13 +90,13 @@ namespace SiteReader.Functions
         /// </summary>
         /// <param name="dicIn">Filters dictionary to copy</param>
         /// <returns>Deep copy of filters dictionary.</returns>
-        public static SortedDictionary<string, int[]> DeepCopyFilters(SortedDictionary<string, int[]> dicIn)
+        public static SortedDictionary<string, double[]> DeepCopyFilters(SortedDictionary<string, double[]> dicIn)
         {
-            var dicOut = new SortedDictionary<string, int[]>();
+            var dicOut = new SortedDictionary<string, double[]>();
 
             foreach (var pair in dicIn)
             {
-                var newArr = new int[2];
+                var newArr = new double[2];
 
                 if (pair.Value == null)
                 {
