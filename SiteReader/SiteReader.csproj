@@ -37,6 +37,7 @@
   
   <ItemGroup>
     <PackageReference Include="Aardvark.Data.Points.LasZip" Version="5.2.28" />
+    <PackageReference Include="geometry3Sharp" Version="1.0.324" />
     <PackageReference Include="Grasshopper" Version="8.0.23164.14305-wip" IncludeAssets="compile;build" />
   </ItemGroup>
 
