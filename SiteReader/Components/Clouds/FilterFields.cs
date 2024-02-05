@@ -126,15 +126,20 @@ namespace SiteReader.Components.Clouds
         }
 
         //PREVIEW AND UI ==============================================================================================
-        
-        // setting _ui as a field so I can update the graph values without an action
+
+        /// <summary>
+        /// Setting _ui as a field so I can update the graph values without an action
+        /// </summary>
         public override void CreateAttributes()
         {
             _ui = new UiFilterFields(this, ShiftValue, RedrawCloud, ExportClouds);
             m_attributes = _ui;
         }
 
-        // overriding base to display field colors
+        /// <summary>
+        /// Display field colors while setting filter values. Display export cloud if present.
+        /// </summary>
+        /// <param name="args"></param>
         public override void DrawViewportWires(IGH_PreviewArgs args)
         {
             if (_displayCloud == null) return;
@@ -152,7 +157,10 @@ namespace SiteReader.Components.Clouds
             }
         }
 
-        // shifts the field selection 'left'(-1) or 'right(1)
+        /// <summary>
+        /// Shifts the field selection 'left'(-1) or 'right(1)
+        /// </summary>
+        /// <param name="shift">-1 or 1 to shift left or right</param>
         public void ShiftValue(int shift)
         {
             // nulling the export cloud so users don't accidentally grab wrong data
@@ -163,6 +171,9 @@ namespace SiteReader.Components.Clouds
             ExpireSolution(true);
         }
 
+        /// <summary>
+        /// Redraws the filtered cloud
+        /// </summary>
         public void RedrawCloud()
         {
             // nulling the export cloud so users don't accidentally grab wrong data
@@ -192,6 +203,9 @@ namespace SiteReader.Components.Clouds
             ExpireSolution(true);
         }
 
+        /// <summary>
+        /// Creates cloud to be set as output
+        /// </summary>
         public void ExportClouds()
         {
             _exportClouds = new List<LasCloud>();
@@ -214,6 +228,9 @@ namespace SiteReader.Components.Clouds
         }
 
         //UTILITY METHODS =============================================================================================
+        /// <summary>
+        /// Converts the UI slider to field values
+        /// </summary>
         private void SetBounds()
         {
             if (Clouds != null && Clouds.Count > 0 && _fieldNames != null)

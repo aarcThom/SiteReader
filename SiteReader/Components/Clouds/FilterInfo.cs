@@ -1,18 +1,13 @@
 ﻿using Grasshopper.Kernel;
 using Rhino.Geometry;
-using SiteReader.Classes;
-using SiteReader.Params;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 
 namespace SiteReader.Components.Clouds
 {
     public class FilterInfo : CloudBase
     {
         //CONSTRUCTORS ================================================================================================
-
         public FilterInfo()
             : base(name: "Get Filter Info", nickname: "FltrInfo", 
                 description: "Get current cloud filter info and crop mesh(s). Mostly useful for debugging.")
@@ -72,7 +67,6 @@ namespace SiteReader.Components.Clouds
         }
 
         //GUID ========================================================================================================
-        // make sure to change this if using template
         public override Guid ComponentGuid => new Guid("91B1E8CA-1C5B-4898-BDFC-1995ABECBB4F");
     }
 }

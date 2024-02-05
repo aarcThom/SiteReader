@@ -29,15 +29,12 @@ namespace SiteReader.Params
 
         public void BakeGeometry(RhinoDoc doc, List<Guid> obj_ids)
         {
-            
             var defaultAttributes = doc.CreateDefaultAttributes();
             BakeGeometry(doc, defaultAttributes, obj_ids);
-            
         }
 
         public void BakeGeometry(RhinoDoc doc, ObjectAttributes att, List<Guid> obj_ids)
         {
-            
             foreach (IGH_BakeAwareObject obj in m_data)
             {
                 if (obj != null)
@@ -47,7 +44,6 @@ namespace SiteReader.Params
                     obj_ids.AddRange(idsOut);
                 }
             }
-            
         }
 
         public void DrawViewportMeshes(IGH_PreviewArgs args)
@@ -57,7 +53,6 @@ namespace SiteReader.Params
 
         public void DrawViewportWires(IGH_PreviewArgs args)
         {
-            
             if (m_data == null || m_data.DataCount == 0) return;
 
             foreach (LasCloud cloud in m_data)
@@ -67,7 +62,6 @@ namespace SiteReader.Params
                     args.Display.DrawPointCloud(cloud.PtCloud, 2);
                 }
             }
-            
         }
 
         protected override GH_GetterResult Prompt_Plural(ref List<LasCloud> values)

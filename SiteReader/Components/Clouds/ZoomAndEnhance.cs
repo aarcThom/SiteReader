@@ -13,10 +13,7 @@ namespace SiteReader.Components.Clouds
         private List<LasCloud> _newClouds = null;
         private double _newDensity;
 
-        //PROPERTIES ==================================================================================================
-
-        //CONSTRUCTORS ================================================================================================
-
+         //CONSTRUCTORS ================================================================================================
         public ZoomAndEnhance()
             : base(name: "Zoom & Enhance!", nickname: "Z&E", 
                 description: "Reimport your point cloud(s), but with a higher specified point density. " + 
@@ -82,10 +79,7 @@ namespace SiteReader.Components.Clouds
             }
         }
 
-        //UTILITY METHODS =============================================================================================
-
         //GUID ========================================================================================================
-        // make sure to change this if using template
         public override Guid ComponentGuid => new Guid("C6E639E7-3963-4D31-810A-BA1A6BB1695E");
     }
 }

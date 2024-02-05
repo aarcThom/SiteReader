@@ -1,16 +1,7 @@
-﻿using Grasshopper.GUI.Canvas;
-using Grasshopper.Kernel;
-using Grasshopper.Kernel.Attributes;
+﻿using Grasshopper.Kernel;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
-using System.Runtime.CompilerServices;
-using System.Windows.Forms;
 using SiteReader.UI.UiElements;
-using Grasshopper.GUI;
 
 namespace SiteReader.UI
 {

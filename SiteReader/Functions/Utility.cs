@@ -74,6 +74,11 @@ namespace SiteReader.Functions
             return true;
         }
 
+        /// <summary>
+        /// Returns an invalid file format message
+        /// </summary>
+        /// <param name="exts">Allowed file extensions</param>
+        /// <returns>An invalid file format message</returns>
         private static string FormatExtMsg(List<string> exts)
         {
             string msg = "You must provide a valid ";

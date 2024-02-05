@@ -110,7 +110,7 @@ namespace SiteReader.Classes
         /// The constructor to return a LasCloud object filtered by a particular LAS field.
         /// </summary>
         /// <param name="cldIn">The LasCloud object to filter.</param>
-        /// <param name="boolFilter">A list representing whether or not a point falls within the filter bounds.</param>
+        /// <param name="boolFilter">List representing whether a point falls within the LAS field filter bounds.</param>
         /// <param name="fieldName">The LAS field name that is being filtered.</param>
         /// <param name="fieldFilter">The bounds of the LAS field filter.</param>
         public LasCloud(LasCloud cldIn, List<bool> boolFilter, string fieldName, double[] fieldFilter)
@@ -130,7 +130,11 @@ namespace SiteReader.Classes
             m_value = PtCloud;
         }
 
-        // used for upscaling
+        /// <summary>
+        /// The constructor to return an up-scaled LasCloud object.
+        /// </summary>
+        /// <param name="cldIn">The LasCloud to copy and up-scale.</param>
+        /// <param name="density">The new density - a factor of the number of points in .LAS file to import. </param>
         public LasCloud(LasCloud cldIn, double density)
         {
             FileMethods = new LasFile(cldIn.FileMethods.FilePath);
@@ -175,7 +179,6 @@ namespace SiteReader.Classes
 
 
         // GH_GOO METHODS
-
         public override string ToString()
         {
             return $"LAS Point Cloud with {m_value.Count} points.";
@@ -201,7 +204,6 @@ namespace SiteReader.Classes
         {
             var duplicate = m_value.Duplicate();
             return new LasCloud((PointCloud)duplicate, this);
-
         }
 
         public override string TypeName => "LAS Cloud";

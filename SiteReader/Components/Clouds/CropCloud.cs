@@ -10,12 +10,7 @@ namespace SiteReader.Components.Clouds
 {
     public class CropCloud : CloudBase
     {
-        //FIELDS ======================================================================================================
-
-        //PROPERTIES ==================================================================================================
-
         //CONSTRUCTORS ================================================================================================
-
         public CropCloud()
             : base(name: "Crop LAS Cloud", nickname: "cropLAS", description: "Crop a Cloud with closed Breps or Meshes")
         {
@@ -74,16 +69,9 @@ namespace SiteReader.Components.Clouds
             Clouds = cloudsOut;
 
             DA.SetDataList(0, Clouds);
-
-
         }
 
-        //PREVIEW AND UI ==============================================================================================
-
-        //UTILITY METHODS =============================================================================================
-
         //GUID ========================================================================================================
-        // make sure to change this if using template
         public override Guid ComponentGuid => new Guid("E969B8F6-92E2-409F-89C0-24539AD1029D");
     }
 }

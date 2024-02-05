@@ -40,7 +40,6 @@ namespace SiteReader.Components.Clouds
             {
                 Clouds[i] = new LasCloud(Clouds[i]);
             }
-
         }
 
         //PREVIEW AND UI ==============================================================================================

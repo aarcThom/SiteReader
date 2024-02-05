@@ -1,12 +1,8 @@
-﻿using Grasshopper.Kernel;
-using SiteReader.Classes;
-using SiteReader.Params;
+﻿using SiteReader.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Rhino.Geometry;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 
 namespace SiteReader.Functions
 {
@@ -162,17 +158,6 @@ namespace SiteReader.Functions
             }
 
             return dicOut;
-        }
-
-        // maybe remove the the two below functions which convert lists of ushorts/bytes to int
-        public static List<int> UshortToInt(List<ushort> listIn)
-        {
-            return listIn.Select(x => Convert.ToInt32(x) / 256).ToList();
-        }
-
-        public static List<int> ByteToInt(List<byte> listIn)
-        {
-            return listIn.Select(x => Convert.ToInt32(x)).ToList();
         }
     }
 }

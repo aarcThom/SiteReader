@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using LASzip.Net;
 using Rhino.Geometry;
@@ -49,7 +48,10 @@ namespace SiteReader.Classes
             _lasReader.close_reader();
         }
 
-        // does the file contain RGB as per .LAS standards?
+        /// <summary>
+        /// Does the file contain RGB as per .LAS standards?
+        /// </summary>
+        /// <returns>True if the .LAS file contains RGB.</returns>
         private bool ContainsRgb()
         {
             // the below integers are the LAS formats that contain RGB - ref LAS file standard
@@ -57,7 +59,12 @@ namespace SiteReader.Classes
             return rgbFormats.Contains(_filePtFormat);
         }
 
-        // returns the las field value of a point in proper integer formatting
+        /// <summary>
+        /// Returns the las field value of a point in proper integer formatting
+        /// </summary>
+        /// <param name="lasFieldName">.LAS field to convert to integer</param>
+        /// <param name="pt">Point to extract .LAS field value from</param>
+        /// <returns>.LAS field value of a point in proper integer formatting</returns>
         private int FieldValueAtPoint(string lasFieldName, laszip_point pt)
         {
             // convert name to lower case and replace whitespaces with underscore
@@ -93,16 +100,25 @@ namespace SiteReader.Classes
             }
         }
 
-        // adds a pt's field value for given field name
-        private void AddLasFieldValue(ref SortedDictionary<string, List<int>> propDict, laszip_point pt)
+        /// <summary>
+        /// Adds a field value for a given point to the LAS field dictionary
+        /// </summary>
+        /// <param name="lasFieldDict">LAS field dictionary to add to.</param>
+        /// <param name="pt">Point whose fields are to be added to the dictionary.</param>
+        private void AddLasFieldValue(ref SortedDictionary<string, List<int>> lasFieldDict, laszip_point pt)
         {
-            foreach (var pair in propDict)
+            foreach (var pair in lasFieldDict)
             {
-                propDict[pair.Key].Add(FieldValueAtPoint(pair.Key, pt));
+                lasFieldDict[pair.Key].Add(FieldValueAtPoint(pair.Key, pt));
             }
         }
 
-        // tests if pt meets field filter if filter is present
+        /// <summary>
+        /// Tests if point meets field filter conditions if filter is present
+        /// </summary>
+        /// <param name="filterDict">Dictionary containing upper and lower limits for each LAS field</param>
+        /// <param name="pt">The laszip point to test for filter inclusion</param>
+        /// <returns></returns>
         private bool FilterLasFields(SortedDictionary<string, double[]> filterDict, laszip_point pt)
         {
             foreach (var pair in filterDict)
@@ -117,15 +133,25 @@ namespace SiteReader.Classes
             return false;
         }
 
-        // tests if a point is in the crop mesh
+        /// <summary>
+        /// Tests if a point is in the crop mesh
+        /// </summary>
+        /// <param name="cropMesh">Mesh to test for point inclusion (or exclusion)</param>
+        /// <param name="inside">True if testing for inclusion, false for exclusion.</param>
+        /// <param name="point">Rhino point to test for inclusion</param>
+        /// <returns>True if point is meets inclusion / exclusion rule</returns>
         private bool CropFilter(Mesh cropMesh, bool? inside, Point3d point)
         {
             if (cropMesh == null || inside.HasValue == false) return false;
             return cropMesh.IsPointInside(point, 0.01, false) != inside.Value;
         }
 
-        // converts the incoming LAS field names to the field dictionary - removes RGB if not present
-        private SortedDictionary<string, List<int>> GetFieldDictionary(List<string> fieldNames)
+        /// <summary>
+        /// Converts the incoming LAS field names to the field dictionary - removes RGB if not present
+        /// </summary>
+        /// <param name="fieldNames">List of .LAS field to include in the dictionary</param>
+        /// <returns>Formatted .LAS field dictionary</returns>
+        private SortedDictionary<string, List<int>> GetLasFieldDictionary(List<string> fieldNames)
         {
             var fieldDict = new SortedDictionary<string, List<int>>();
             foreach (var field in fieldNames)
@@ -136,6 +162,18 @@ namespace SiteReader.Classes
             return fieldDict;
         }
 
+        /// <summary>
+        /// Import a .LAS point cloud and related field data
+        /// </summary>
+        /// <param name="filteredCldIndices">A list of indices of points to include. Based on density value</param>
+        /// <param name="lasFieldNames">.LAS field names to search for in point cloud import</param>
+        /// <param name="lasFields">Each key is a .LAS field name, and list of integers are corresponding values</param>
+        /// <param name="ptColors">A list of colors of corresponding to each point</param>
+        /// <param name="initial">Is this the initial import of a cloud, or a re-import upon up-scaling</param>
+        /// <param name="fieldFilters">Keys = .LAS field names. Values = ranges for allowed field values per point</param>
+        /// <param name="cropMesh">Optional mesh to test points against for inclusion or exclusion</param>
+        /// <param name="insideCrop">True if testing for point / mesh inclusion. False if testing for exclusion.</param>
+        /// <returns></returns>
         public PointCloud ImportPtCloud(int[] filteredCldIndices, List<string> lasFieldNames, 
                                         out SortedDictionary<string, List<int>> lasFields, out List<Color> ptColors, 
                                         bool initial = true, SortedDictionary<string, double[]> fieldFilters = null,
@@ -144,7 +182,7 @@ namespace SiteReader.Classes
 
             ptColors = new List<Color>();
             var ptCloud = new PointCloud();
-            lasFields = GetFieldDictionary(lasFieldNames);
+            lasFields = GetLasFieldDictionary(lasFieldNames);
 
             _lasReader.open_reader(_filePath, out bool isCompressed);
 

@@ -32,7 +32,6 @@ namespace SiteReader.UI
         //LAYOUT ======================================================================================================
         protected override void Layout()
         {
-
             base.Layout(); //handles the basic layout, computes the bounds, etc.
 
             OwnerRectangle = GH_Convert.ToRectangle(Bounds);
@@ -124,7 +123,6 @@ namespace SiteReader.UI
 
 
         // MOUSE EVENT HANDLING ==========================================================================
-
         public override GH_ObjectResponse RespondToMouseDown(GH_Canvas sender, GH_CanvasMouseEvent e)
         {
             foreach (var uiComp in ComponentList)
