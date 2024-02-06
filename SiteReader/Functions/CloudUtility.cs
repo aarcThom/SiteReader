@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Rhino.Geometry;
+using System.Drawing;
 
 namespace SiteReader.Functions
 {
@@ -158,6 +159,25 @@ namespace SiteReader.Functions
             }
 
             return dicOut;
+        }
+
+        /// <summary>
+        /// Merges the point clouds of two LasCloud objects
+        /// </summary>
+        /// <param name="clds">List of LasClouds to merge</param>
+        /// <returns>A Rhino PointCloud</returns>
+        public static PointCloud MergeRhinoClouds(List<LasCloud> clds)
+        {
+            PointCloud outCLoud = new PointCloud();
+
+            foreach (var cld in clds)
+            {
+                Point3d[] pts = cld.PtCloud.GetPoints();
+                Color[] clrs = cld.PtCloud.GetColors();
+                outCLoud.AddRange(pts, clrs);
+            }
+
+            return outCLoud;
         }
     }
 }

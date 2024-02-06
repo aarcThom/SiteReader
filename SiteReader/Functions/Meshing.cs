@@ -12,6 +12,11 @@ namespace siteReader.Methods
         //The methods contained within this class relate to meshing both in Rhino and using g3
         //=============================================================================================================
 
+        /// <summary>
+        /// Triangulates any quad faces within a mesh
+        /// </summary>
+        /// <param name="inMesh">Mesh with quad faces</param>
+        /// <returns>Mesh composed of only triangular faces</returns>
         public static Mesh TriangulateMesh(Mesh inMesh)
         {
             foreach (var face in inMesh.Faces)
@@ -57,7 +62,6 @@ namespace siteReader.Methods
                 var tri = new g3.Index3i(face.A, face.B, face.C);
                 triList.Add(tri);
             }
-
             return triList;
         }
 
@@ -70,7 +74,6 @@ namespace siteReader.Methods
                 var coords = new g3.Vector3f(vert.X, vert.Y, vert.Z);
                 vertices.Add(coords);
             }
-
             return vertices;
         }
 
@@ -108,9 +111,11 @@ namespace siteReader.Methods
             return dMesh;
         }
 
-        public static Mesh TesselatePoints(LasCloud cld, double maxLength = 10000000000000000000)
+        public static Mesh TesselatePoints(PointCloud ptCld, double maxLength = 10000000000000000000)
         {
-            var rPts = cld.PtCloud.GetPoints();
+
+            Point3d[] rPts = ptCld.GetPoints();
+
             var mesh = Mesh.CreateFromTessellation(rPts, null, Plane.WorldXY, false);
 
             if (maxLength < 10000000000000000000)
