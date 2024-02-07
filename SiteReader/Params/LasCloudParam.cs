@@ -5,11 +5,20 @@ using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
 using SiteReader.Classes;
+using System.Drawing;
+using System.Reflection;
 
 namespace SiteReader.Params
 {
     public class LasCloudParam : GH_PersistentGeometryParam<LasCloud>, IGH_PreviewObject, IGH_BakeAwareObject
     {
+        // FIELDS ======================================================================================================
+        //grabbing embedded resources
+        private readonly Assembly _ghAssembly = Assembly.GetExecutingAssembly();
+
+        private string _iconPath;
+
+        // CONSTRUCTOR =================================================================================================
         public LasCloudParam() : base(new GH_InstanceDescription("LAS Cloud", "LCld",
             "A LAS point cloud and associated data.", "SiteReader", "LAS Clouds"))
         {
@@ -46,6 +55,20 @@ namespace SiteReader.Params
             }
         }
 
+        protected override Bitmap Icon
+        {
+            get
+            {
+                if (_iconPath == null)
+                {
+                    _iconPath = "SiteReader.Resources.generic.png";
+                }
+
+                var stream = _ghAssembly.GetManifestResourceStream(_iconPath);
+                return new Bitmap(stream);
+            }
+        }
+
         public void DrawViewportMeshes(IGH_PreviewArgs args)
         {
             // None to display
@@ -66,120 +89,23 @@ namespace SiteReader.Params
 
         protected override GH_GetterResult Prompt_Plural(ref List<LasCloud> values)
         {
-            // reinstate if you want to be able to reference Rhino pt clouds down the road
-
-            /*
-
-            List<PointCloud> ptClouds;
-            var result = LoadPlural(out ptClouds);
-
-            if (result == GH_GetterResult.success)
-            {
-                values = ptClouds.Select(pc => new LasCloud(pc)).ToList();
-            }
-            return result;
-            */
             values = null;
             return GH_GetterResult.cancel;
-
         }
 
         public GH_GetterResult LoadPlural(out List<PointCloud> ptClouds)
         {
-            // reinstate if you want to be able to reference Rhino pt clouds down the road
-
-            /*
-            var go = new GetObject();
-            go.GeometryFilter = ObjectType.PointSet;
-
-            if (go.GetMultiple(1, 0) == Rhino.Input.GetResult.Cancel)
-            {
-                ptClouds = null;
-                return GH_GetterResult.cancel;
-            }
-
-            ptClouds = new List<PointCloud>();
-
-            for (int i = 0; i < go.ObjectCount; i++)
-            {
-                var obj = go.Object(i);
-                var rhinoObj = obj.Object();
-
-                if (rhinoObj.ObjectType == ObjectType.PointSet)
-                {
-                    ptClouds.Add(obj.PointCloud());
-                }
-            }
-
-            return GH_GetterResult.success;
-            */
-
             ptClouds = null;
             return GH_GetterResult.cancel;
-
-
         }
 
         protected override GH_GetterResult Prompt_Singular(ref LasCloud value)
         {
-            // reinstate if you want to be able to reference Rhino pt clouds down the road
-
-            /*
-            PointCloud PtCloud;
-            var result = LoadSingular(out PtCloud);
-
-            if(result == GH_GetterResult.success)
-            {
-                value = new LasCloud(PtCloud);
-            }
-            return result;
-            */
-
             return GH_GetterResult.cancel;
         }
 
         public GH_GetterResult LoadSingular(out PointCloud ptCloud)
         {
-            // reinstate if you want to be able to reference Rhino pt clouds down the road
-
-            /*
-            var go = new GetObject();
-            go.GeometryFilter = ObjectType.PointSet;
-
-            if (go.GetMultiple(1, 0) == Rhino.Input.GetResult.Cancel)
-            {
-                PtCloud = null;
-                return GH_GetterResult.cancel;
-            }
-
-            PtCloud = new PointCloud();
-
-            for (int i = 0; i < go.ObjectCount; i++)
-            {
-                var obj = go.Object(i);
-                var rhinoObj = obj.Object();
-
-                //loading points instead of a cloud if user insists
-                if (rhinoObj.ObjectType == ObjectType.Point)
-                {
-                    var point = obj.Point().Location;
-                    var color = rhinoObj.Attributes.ObjectColor;
-                    PtCloud.Add(point, color);
-                }
-                else if (rhinoObj.ObjectType == ObjectType.PointSet)
-                {
-                    using (PointCloud cloud = obj.PointCloud())
-                    {
-                        foreach (var pt in cloud.AsEnumerable())
-                        {
-                            PtCloud.Add(pt.Location, pt.Normal, pt.Color);
-                        }
-                    }
-                }
-            }
-            return GH_GetterResult.success;
-            */
-
             ptCloud = null;
             return GH_GetterResult.cancel;
         }
