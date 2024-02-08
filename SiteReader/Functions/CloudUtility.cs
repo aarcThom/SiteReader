@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Rhino.Geometry;
 using System.Drawing;
+using System.Text;
 
 namespace SiteReader.Functions
 {
@@ -178,6 +179,58 @@ namespace SiteReader.Functions
             }
 
             return outCLoud;
+        }
+
+        /// <summary>
+        /// decodes and formats the .las VLRs and returns a dictionary of values if any
+        /// </summary>
+        /// <param name="vlr">the list of vlrs read by Laszip</param>
+        /// <returns>Vlr key/value pairs</returns>
+        public static Dictionary<string, string> VlrDict(LasCloud cld)
+        {
+            var lz = cld.FileMethods.LasReader;
+            var path = cld.FileMethods.FilePath;
+
+            Dictionary<string, string> vlrDict = new Dictionary<string, string>();
+
+            lz.open_reader(path, out bool isCompressed);
+
+            if (lz.header.vlrs.Count > 0)
+            {
+                var vlr = lz.header.vlrs;
+
+                foreach (var v in vlr)
+                {
+                    var line = Encoding.ASCII.GetString(v.data);
+                    var frags = line.Split(',').ToList();
+
+                    if (frags.Count > 1)
+                    {
+                        for (int i = frags.Count - 1; i >= 0; i--)
+                        {
+                            frags[i] = frags[i].Replace("]", string.Empty);
+                            frags[i] = frags[i].Replace("\"", string.Empty);
+
+                            if (!frags[i].Contains("[") && i != 0)
+                            {
+                                frags[i - 1] += "," + frags[i];
+                                frags.RemoveAt(i);
+                            }
+                        }
+                        frags.Sort();
+
+                        foreach (var f in frags)
+                        {
+                            f.Replace(',', ' ');
+                            var keyVal = f.Split('[');
+                            vlrDict.AddDup(keyVal[0], keyVal[1]);
+                        }
+                    }
+                }
+            }
+            lz.close_reader();
+            return vlrDict;
+
         }
     }
 }

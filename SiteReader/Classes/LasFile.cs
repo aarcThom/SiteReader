@@ -31,6 +31,7 @@ namespace SiteReader.Classes
         public int FilePointCount => (int)_filePtCount;
         public long FilePointCountLong => _filePtCount;
         public byte FilePtFormat => _filePtFormat;
+        public laszip LasReader => _lasReader;
 
         // CONSTRUCTORS ===============================================================================================
         public LasFile(string path)
