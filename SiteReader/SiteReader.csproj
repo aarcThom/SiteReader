@@ -10,6 +10,8 @@
   </PropertyGroup>
 	
   <ItemGroup>
+    <None Remove="Resources\cropcloud.png" />
+    <None Remove="Resources\filter.png" />
     <None Remove="Resources\filterField.png" />
     <None Remove="Resources\generic.png" />
     <None Remove="Resources\menus\greyscale_no.png" />
@@ -23,6 +25,8 @@
   </ItemGroup>
 	
   <ItemGroup>
+    <EmbeddedResource Include="Resources\cropcloud.png" />
+    <EmbeddedResource Include="Resources\filter.png" />
     <EmbeddedResource Include="Resources\filterField.png" />
     <EmbeddedResource Include="Resources\generic.png" />
     <EmbeddedResource Include="Resources\menus\greyscale_no.png" />

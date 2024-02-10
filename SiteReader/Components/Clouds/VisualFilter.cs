@@ -12,7 +12,7 @@ using SiteReader.UI.UiElements;
 
 namespace SiteReader.Components.Clouds
 {
-    public class FilterFields : CloudBase
+    public class VisualFilter : CloudBase
     {
         //FIELDS ======================================================================================================
         private readonly int _colorSchemeIndex = 0; // set color scheme here. Maybe allow user to control later
@@ -42,10 +42,10 @@ namespace SiteReader.Components.Clouds
 
 
         //CONSTRUCTORS ================================================================================================
-        public FilterFields()
+        public VisualFilter()
             : base(name: "Visual Filter", nickname: "vizFilter", description: "Filter a LAS point cloud by LAS fields")
         {
-            // IconPath = "siteReader.Resources...";
+            IconPath = "SiteReader.Resources.filter.png";
         }
 
         //IO ==========================================================================================================

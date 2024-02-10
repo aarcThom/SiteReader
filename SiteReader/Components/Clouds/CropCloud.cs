@@ -14,7 +14,7 @@ namespace SiteReader.Components.Clouds
         public CropCloud()
             : base(name: "Crop LAS Cloud", nickname: "cropLAS", description: "Crop a Cloud with closed Breps or Meshes")
         {
-            // IconPath = "siteReader.Resources...";
+            IconPath = "SiteReader.Resources.cropcloud.png";
         }
 
         //IO ==========================================================================================================
