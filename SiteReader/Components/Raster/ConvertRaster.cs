@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using Rhino.Geometry;
 using SiteReader.Functions;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Globalization;
 
 namespace SiteReader.Components.Raster
 {
@@ -44,8 +46,17 @@ namespace SiteReader.Components.Raster
 
             string output = StandAlone.LaunchCommandLineApp("raster2jpeg", commands);
 
-            
-            DA.SetData(0, output);
+            string[] outList = output.Split(' ');
+            string upperLeft = $"{outList[0].Trim()},{outList[1].Trim()},0";
+            string lowerRight = $"{outList[2].Trim()},{outList[3].Trim()},0";
+
+            // getting the jpeg version of the output file
+            string outputJpeg = $"{dir_out}{Path.GetFileNameWithoutExtension(@file_in)}.jpg";
+            string rhinoCommand = $"_-Picture {outputJpeg} {upperLeft} {lowerRight}";
+
+            Rhino.RhinoApp.RunScript(rhinoCommand, false);
+
+            DA.SetData(0, rhinoCommand);
 
         }
 
