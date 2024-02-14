@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Allow releases
+/Release/**
+/SiteReader/Release/SiteReader_001.zip
