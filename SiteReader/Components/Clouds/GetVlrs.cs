@@ -1,7 +1,6 @@
 ﻿using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
-using Rhino.Geometry;
 using SiteReader.Functions;
 using System;
 using System.Collections.Generic;
