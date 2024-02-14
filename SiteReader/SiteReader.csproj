@@ -22,6 +22,7 @@
     <None Remove="Resources\menus\rainbow_yes.png" />
     <None Remove="Resources\menus\red-white-blue_no.png" />
     <None Remove="Resources\menus\red-white-blue_yes.png" />
+    <None Remove="Resources\zoomEnhance.png" />
   </ItemGroup>
 	
   <ItemGroup>
@@ -37,6 +38,7 @@
     <EmbeddedResource Include="Resources\menus\rainbow_yes.png" />
     <EmbeddedResource Include="Resources\menus\red-white-blue_no.png" />
     <EmbeddedResource Include="Resources\menus\red-white-blue_yes.png" />
+    <EmbeddedResource Include="Resources\zoomEnhance.png" />
   </ItemGroup>
   
   <ItemGroup>

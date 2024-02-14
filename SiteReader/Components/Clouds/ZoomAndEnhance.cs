@@ -19,7 +19,7 @@ namespace SiteReader.Components.Clouds
                 description: "Reimport your point cloud(s), but with a higher specified point density. " + 
                              "Crops, field filters, & re-projections will be kept. GH transformations will not (yet).")
         {
-            // IconPath = "siteReader.Resources...";
+            IconPath = "SiteReader.Resources.zoomEnhance.png";
         }
 
         //IO ==========================================================================================================
