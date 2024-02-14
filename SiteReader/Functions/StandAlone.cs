@@ -28,6 +28,7 @@ namespace SiteReader.Functions
             ProcessStartInfo psi = new ProcessStartInfo();
             psi.FileName = "CMD.EXE";
             psi.Arguments = fullCommand;
+            psi.UseShellExecute = false;
             psi.RedirectStandardOutput = true;
             p.StartInfo = psi;
             p.Start();
