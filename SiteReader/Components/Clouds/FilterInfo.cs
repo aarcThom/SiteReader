@@ -12,7 +12,7 @@ namespace SiteReader.Components.Clouds
             : base(name: "Get Filter Info", nickname: "FltrInfo", 
                 description: "Get current cloud filter info and crop mesh(s). Mostly useful for debugging.")
         {
-            // IconPath = "siteReader.Resources...";
+            IconPath = "SiteReader.Resources.filter_info.png";
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)

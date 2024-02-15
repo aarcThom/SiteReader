@@ -19,7 +19,7 @@ namespace SiteReader.Components.Raster
             : base(name: "Convert ECW / SID", nickname: "sidEcw", 
                 description: "Convert a .ecw or .sid file to .jpeg and import into Rhino file.")
         {
-            // IconPath = "...";
+            IconPath = "SiteReader.Resources.convert_raster.png";
         }
 
         //IO ==========================================================================================================

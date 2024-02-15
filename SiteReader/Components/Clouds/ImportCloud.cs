@@ -18,7 +18,7 @@ namespace SiteReader.Components.Clouds
             : base(name: "Import LAS Cloud", nickname: "impLas", 
                 description: "Import a point cloud from a .las or .laz file.")
         {
-            // IconPath = "siteReader.Resources...";
+            IconPath = "SiteReader.Resources.import_cloud.png";
         }
 
         //IO ==========================================================================================================

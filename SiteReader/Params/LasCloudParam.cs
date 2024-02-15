@@ -23,6 +23,7 @@ namespace SiteReader.Params
             "A LAS point cloud and associated data.", "SiteReader", "LAS Clouds"))
         {
             Hidden = false;
+            _iconPath = "SiteReader.Resources.cloud.png";
         }
 
         public override Guid ComponentGuid => new Guid("{E902C5B7-6B05-4F44-931D-C7ABAFD4F37A}");

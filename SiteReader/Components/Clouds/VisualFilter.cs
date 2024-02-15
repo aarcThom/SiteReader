@@ -45,7 +45,7 @@ namespace SiteReader.Components.Clouds
         public VisualFilter()
             : base(name: "Visual Filter", nickname: "vizFilter", description: "Filter a LAS point cloud by LAS fields")
         {
-            IconPath = "SiteReader.Resources.filter.png";
+            IconPath = "SiteReader.Resources.viz_filter.png";
         }
 
         //IO ==========================================================================================================

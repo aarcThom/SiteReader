@@ -14,7 +14,7 @@ namespace SiteReader.Components.Clouds
             : base(name: "Get VLRs", nickname: "VLR", 
                 description: "Get Variable length records - if present in file. Will sometime contain projection info.")
         {
-            // IconPath = "siteReader.Resources...";
+            IconPath = "SiteReader.Resources.vlr.png";
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)

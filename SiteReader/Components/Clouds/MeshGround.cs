@@ -15,8 +15,8 @@ namespace SiteReader.Components.Clouds
         public MeshGround()
         : base(name: "Mesh Ground", nickname: "mshGrd", 
              description: "Tessellate a point cloud using the XY plane to get a mesh. Works best for ground surfaces.")
-    {
-            // IconPath = "siteReader.Resources...";
+        {
+        IconPath = "SiteReader.Resources.mesh_ground.png";
         }
 
         //IO ==========================================================================================================

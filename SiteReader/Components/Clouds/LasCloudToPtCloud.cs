@@ -14,7 +14,7 @@ namespace SiteReader.Components.Clouds
             : base(name: "Extract Point Cloud", nickname: "Las2Pt", 
                 description: "Extract the Grasshopper point cloud from the LasCLoud")
         {
-            // IconPath = "siteReader.Resources...";
+            IconPath = "SiteReader.Resources.export_pt_cloud.png";
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)

@@ -10,10 +10,15 @@
   </PropertyGroup>
 	
   <ItemGroup>
+    <None Remove="Resources\cloud.png" />
+    <None Remove="Resources\convert_raster.png" />
     <None Remove="Resources\cropcloud.png" />
+    <None Remove="Resources\export_pt_cloud.png" />
     <None Remove="Resources\filter.png" />
     <None Remove="Resources\filterField.png" />
+    <None Remove="Resources\filter_info.png" />
     <None Remove="Resources\generic.png" />
+    <None Remove="Resources\import_cloud.png" />
     <None Remove="Resources\menus\greyscale_no.png" />
     <None Remove="Resources\menus\greyscale_yes.png" />
     <None Remove="Resources\menus\heatmap_no.png" />
@@ -22,14 +27,20 @@
     <None Remove="Resources\menus\rainbow_yes.png" />
     <None Remove="Resources\menus\red-white-blue_no.png" />
     <None Remove="Resources\menus\red-white-blue_yes.png" />
+    <None Remove="Resources\mesh_ground.png" />
+    <None Remove="Resources\viz_filter.png" />
+    <None Remove="Resources\vlr.png" />
     <None Remove="Resources\zoomEnhance.png" />
   </ItemGroup>
 	
   <ItemGroup>
+    <EmbeddedResource Include="Resources\cloud.png" />
+    <EmbeddedResource Include="Resources\convert_raster.png" />
     <EmbeddedResource Include="Resources\cropcloud.png" />
-    <EmbeddedResource Include="Resources\filter.png" />
-    <EmbeddedResource Include="Resources\filterField.png" />
+    <EmbeddedResource Include="Resources\export_pt_cloud.png" />
+    <EmbeddedResource Include="Resources\filter_info.png" />
     <EmbeddedResource Include="Resources\generic.png" />
+    <EmbeddedResource Include="Resources\import_cloud.png" />
     <EmbeddedResource Include="Resources\menus\greyscale_no.png" />
     <EmbeddedResource Include="Resources\menus\greyscale_yes.png" />
     <EmbeddedResource Include="Resources\menus\heatmap_no.png" />
@@ -38,6 +49,9 @@
     <EmbeddedResource Include="Resources\menus\rainbow_yes.png" />
     <EmbeddedResource Include="Resources\menus\red-white-blue_no.png" />
     <EmbeddedResource Include="Resources\menus\red-white-blue_yes.png" />
+    <EmbeddedResource Include="Resources\mesh_ground.png" />
+    <EmbeddedResource Include="Resources\viz_filter.png" />
+    <EmbeddedResource Include="Resources\vlr.png" />
     <EmbeddedResource Include="Resources\zoomEnhance.png" />
   </ItemGroup>
   
