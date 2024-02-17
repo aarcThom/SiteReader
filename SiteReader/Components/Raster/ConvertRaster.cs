@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Globalization;
+using System.Threading;
 
 namespace SiteReader.Components.Raster
 {
@@ -49,7 +50,9 @@ namespace SiteReader.Components.Raster
                 StandAlone.FormatWinDir(dir_out) 
             };
 
-            string output = StandAlone.LaunchCommandLineApp("raster2jpeg", commands);
+            StandAlone app = new StandAlone("raster2jpeg", commands);
+
+            string output = app.LaunchCommandLineApp();
 
             // raster2jpeg outputs 4 coordinates as a single string - top left x, top left y, bot right x, bot right y
             //properly format them for the Rhino 'picture' command
@@ -66,6 +69,7 @@ namespace SiteReader.Components.Raster
                 outputJpeg = $"\"{outputJpeg}\"";
             }
 
+            
             string rhinoCommand = $"_-Picture {outputJpeg} {upperLeft} {lowerRight}";
 
             Rhino.RhinoApp.RunScript(rhinoCommand, true);

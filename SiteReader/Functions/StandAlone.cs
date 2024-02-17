@@ -11,34 +11,33 @@ using System.Threading.Tasks;
 
 namespace SiteReader.Functions
 {
-    public static class StandAlone
+    public class StandAlone
     {
-        /// <summary>
-        /// If the path has spaces, enclose it in quotations. Replace \ with /.
-        /// </summary>
-        /// <param name="path">Path in</param>
-        /// <returns>Path Out</returns>
-        public static string FormatWinDir(string path)
+        // FIELDS =====================================================================================================
+        private string _subParser;
+        private List<string> _commands;
+
+        // CONSTRUCTORS ===============================================================================================
+
+        public StandAlone(string subParser, List<string> commands)
         {
-            string[] pathArr = path.Trim().Split('\\');
-            path = String.Join("/", pathArr);
-            if (path.Contains(" ")) path = $"\"{path}\"";
-            return path;
+            _subParser = subParser;
+            _commands = commands;
         }
 
+        // UTILITY METHODS ============================================================================================
         /// <summary>
         /// Launch the standalone app and return a string
         /// </summary>
         /// <param name="subParser">subParser to select - ref. site_reader_py</param>
         /// <param name="commands">commands / arguments for the selected sub-parser</param>
         /// <returns>A string. Dependent on the sub-parser chosen</returns>
-        public static string LaunchCommandLineApp(string subParser, List<string> commands)
+        public string LaunchCommandLineApp()
         {
-
             string curPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string srPath = "/C " + curPath + "\\SiteReader.exe";
             srPath = srPath.Replace(@"\\", @"\");
-            string fullCommand = $"{srPath} {subParser} {String.Join(" ", commands)}";
+            string fullCommand = $"{srPath} {_subParser} {String.Join(" ", _commands)}";
 
             Process p = new Process();
             ProcessStartInfo psi = new ProcessStartInfo();
@@ -52,6 +51,20 @@ namespace SiteReader.Functions
             p.WaitForExit();
 
             return p.StandardOutput.ReadToEnd();
+        }
+
+        // STATIC UTILITY METHODS =====================================================================================
+        /// <summary>
+        /// If the path has spaces, enclose it in quotations. Replace \ with /.
+        /// </summary>
+        /// <param name="path">Path in</param>
+        /// <returns>Path Out</returns>
+        public static string FormatWinDir(string path)
+        {
+            string[] pathArr = path.Trim().Split('\\');
+            path = String.Join("/", pathArr);
+            if (path.Contains(" ")) path = $"\"{path}\"";
+            return path;
         }
     }
 }
