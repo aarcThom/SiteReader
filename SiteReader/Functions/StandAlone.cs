@@ -14,7 +14,7 @@ namespace SiteReader.Functions
     public static class StandAlone
     {
         /// <summary>
-        /// If the path has spaces, enclose it in quotations
+        /// If the path has spaces, enclose it in quotations. Replace \ with /.
         /// </summary>
         /// <param name="path">Path in</param>
         /// <returns>Path Out</returns>
@@ -44,6 +44,7 @@ namespace SiteReader.Functions
             ProcessStartInfo psi = new ProcessStartInfo();
             psi.FileName = "CMD.EXE";
             psi.Arguments = fullCommand;
+            psi.CreateNoWindow = true;
             psi.UseShellExecute = false;
             psi.RedirectStandardOutput = true;
             p.StartInfo = psi;

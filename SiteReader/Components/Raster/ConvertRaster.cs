@@ -42,6 +42,7 @@ namespace SiteReader.Components.Raster
 
             if (!DA.GetData(0, ref file_in)) return;
             if (!DA.GetData(1, ref dir_out)) return;
+
             List<string> commands = new List<string>()
             {
                 StandAlone.FormatWinDir(file_in), 
@@ -58,9 +59,16 @@ namespace SiteReader.Components.Raster
 
             // getting the jpeg version of the output file and running 'picture' in Rhino
             string outputJpeg = $"{dir_out}{Path.GetFileNameWithoutExtension(@file_in)}.jpg";
+
+            //formatting for picture command if file in contains spaces
+            if (file_in.Trim().Contains(" "))
+            {
+                outputJpeg = $"\"{outputJpeg}\"";
+            }
+
             string rhinoCommand = $"_-Picture {outputJpeg} {upperLeft} {lowerRight}";
 
-            Rhino.RhinoApp.RunScript(rhinoCommand, false);
+            Rhino.RhinoApp.RunScript(rhinoCommand, true);
 
             DA.SetData(0, rhinoCommand);
 
