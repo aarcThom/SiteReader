@@ -42,15 +42,21 @@ namespace SiteReader.Components.Raster
 
             if (!DA.GetData(0, ref file_in)) return;
             if (!DA.GetData(1, ref dir_out)) return;
-            List<string> commands = new List<string>() { file_in, dir_out };
+            List<string> commands = new List<string>()
+            {
+                StandAlone.FormatWinDir(file_in), 
+                StandAlone.FormatWinDir(dir_out) 
+            };
 
             string output = StandAlone.LaunchCommandLineApp("raster2jpeg", commands);
 
+            // raster2jpeg outputs 4 coordinates as a single string - top left x, top left y, bot right x, bot right y
+            //properly format them for the Rhino 'picture' command
             string[] outList = output.Split(' ');
             string upperLeft = $"{outList[0].Trim()},{outList[1].Trim()},0";
             string lowerRight = $"{outList[2].Trim()},{outList[3].Trim()},0";
 
-            // getting the jpeg version of the output file
+            // getting the jpeg version of the output file and running 'picture' in Rhino
             string outputJpeg = $"{dir_out}{Path.GetFileNameWithoutExtension(@file_in)}.jpg";
             string rhinoCommand = $"_-Picture {outputJpeg} {upperLeft} {lowerRight}";
 

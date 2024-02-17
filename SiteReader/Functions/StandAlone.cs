@@ -14,15 +14,31 @@ namespace SiteReader.Functions
     public static class StandAlone
     {
         /// <summary>
-        /// Launch the application with some options set.
+        /// If the path has spaces, enclose it in quotations
         /// </summary>
+        /// <param name="path">Path in</param>
+        /// <returns>Path Out</returns>
+        public static string FormatWinDir(string path)
+        {
+            string[] pathArr = path.Trim().Split('\\');
+            path = String.Join("/", pathArr);
+            if (path.Contains(" ")) path = $"\"{path}\"";
+            return path;
+        }
+
+        /// <summary>
+        /// Launch the standalone app and return a string
+        /// </summary>
+        /// <param name="subParser">subParser to select - ref. site_reader_py</param>
+        /// <param name="commands">commands / arguments for the selected sub-parser</param>
+        /// <returns>A string. Dependent on the sub-parser chosen</returns>
         public static string LaunchCommandLineApp(string subParser, List<string> commands)
         {
 
             string curPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string srPath = "/C" + curPath + "\\SiteReader.exe";
+            string srPath = "/C " + curPath + "\\SiteReader.exe";
+            srPath = srPath.Replace(@"\\", @"\");
             string fullCommand = $"{srPath} {subParser} {String.Join(" ", commands)}";
-            string result = "error";
 
             Process p = new Process();
             ProcessStartInfo psi = new ProcessStartInfo();
@@ -33,9 +49,8 @@ namespace SiteReader.Functions
             p.StartInfo = psi;
             p.Start();
             p.WaitForExit();
-            result = p.StandardOutput.ReadToEnd();
 
-            return result;
+            return p.StandardOutput.ReadToEnd();
         }
     }
 }
