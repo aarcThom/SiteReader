@@ -24,7 +24,7 @@ namespace SiteReader.Classes
 
         // CONSTRUCTORS ===============================================================================================
         /// <summary>
-        /// Initial constructor for CloudFilters object
+        /// Initial constructor for CloudFilters object. Testing for connectivity.
         /// </summary>
         /// <param name="pointCount"> Number of points in the .LAS file</param>
         /// <param name="density">The factor of points versus the .LAS file count for the GH LAS cloud</param>
