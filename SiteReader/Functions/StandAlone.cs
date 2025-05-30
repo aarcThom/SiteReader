@@ -50,6 +50,7 @@ namespace SiteReader.Functions
             p.WaitForExit();
 
             // grabbing the output from the temp file
+            // need to make handle exceptions!
             var tempFile = Path.Combine(Path.GetTempPath(), "site_reader_temp.txt");
             var lines =  File.ReadLines(tempFile);
             return lines.FirstOrDefault();
