@@ -43,7 +43,7 @@ namespace SiteReader.Components.Clouds
             List<GeometryBase> geoIn = new List<GeometryBase>();
             if (!DA.GetDataList(1, geoIn)) return;
 
-            var cropMesh = GeoUtility.ConvertToMesh(geoIn);
+            var cropMesh = GeoUtility.ConvertToMesh(geoIn, MeshingParameters.FastRenderMesh);
             if (cropMesh == null)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "You must provide closed meshes and/or breps");

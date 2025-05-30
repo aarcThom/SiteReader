@@ -166,7 +166,7 @@ namespace SiteReader.Components.Clouds
             // nulling the export cloud so users don't accidentally grab wrong data
             _exportClouds = null;
 
-            _fieldIndex = Utility.WrapIndex(shift, _fieldIndex, _fieldNames.Count);
+            _fieldIndex = Functions.Utility.WrapIndex(shift, _fieldIndex, _fieldNames.Count);
 
             ExpireSolution(true);
         }
