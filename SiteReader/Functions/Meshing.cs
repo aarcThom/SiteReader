@@ -1,6 +1,7 @@
 ﻿using g3;
 using Rhino.Geometry;
 using SiteReader.Classes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -141,6 +142,64 @@ namespace siteReader.Methods
             return mesh;
         }
 
+
+        /// <summary>
+        /// Returns area of triangular mesh face
+        /// </summary>
+        /// <param name="fMesh">Mesh that contains the face</param>
+        /// <param name="mFace">The triangular face</param>
+        /// <returns>area in square units</returns>
+        public static double AreaOfTriFace(Mesh fMesh, MeshFace mFace) 
+        {
+            
+            var triPts = GetFacePoints(fMesh, mFace);
+
+            double a = triPts[0].DistanceTo(triPts[1]);
+            double b = triPts[1].DistanceTo(triPts[2]);
+            double c = triPts[2].DistanceTo(triPts[0]);
+            double s = (a + b + c) / 2;
+
+            return Math.Sqrt(s * (s - a) * (s - b) * (s - c));
+        }
+
+
+        /// <summary>
+        /// Returns the vertices of a mesh face as Points
+        /// </summary>
+        /// <param name="fMesh">Mesh that contains the face</param>
+        /// <param name="mFace">The face</param>
+        /// <returns>A list of Point 3ds - 3 pts for triangles, 4 pts for quads.</returns>
+        public static List<Point3d> GetFacePoints(Mesh fMesh, MeshFace mFace)
+        {
+            Point3d ptA = fMesh.Vertices[mFace.A];
+            Point3d ptB = fMesh.Vertices[mFace.B];
+            Point3d ptC = fMesh.Vertices[mFace.C];
+
+            var ptList = new List<Point3d>() { ptA, ptB, ptC };
+
+            if (mFace.IsQuad)
+            {
+                ptList.Add(fMesh.Vertices[mFace.D]);
+            }
+
+            return ptList;
+        }
+
+        /// <summary>
+        /// Gets 3 randomized barycentric weights
+        /// </summary>
+        /// <param name="rand">Random object to generate values</param>
+        /// <returns>3 weights for mapping a point on a triangular face</returns>
+        public static (double u, double v, double w) GetBaryWeights(Random rand)
+        {
+            var u = rand.NextDouble();
+            var v = rand.NextDouble() * (1 - u);
+            var w = 1 - u - v;
+
+            return (u, v, w);
+        }
+
+
         private static double GetFaceLongestEdge(MeshFace face, Point3d[] verts)
         {
             List<double> distances = new List<double>();
@@ -167,5 +226,6 @@ namespace siteReader.Methods
 
             return ptA.DistanceTo(ptB);
         }
+
     }
 }

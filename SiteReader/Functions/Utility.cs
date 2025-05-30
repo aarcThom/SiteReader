@@ -17,10 +17,12 @@ namespace SiteReader.Functions
         /// <param name="toCount"></param>
         /// <param name="fromCount"></param>
         /// <returns>Remapped integer</returns>
+        
         public static int Remap(int val, int toCount, int fromCount)
         {
             return (int)((double)val * (toCount - 1) / (fromCount - 1));
         }
+
 
         /// <summary>
         /// Clamps a double to between a minimum and maximum.
@@ -33,6 +35,7 @@ namespace SiteReader.Functions
         {
             return Math.Max(min, Math.Min(val, max));
         }
+
 
         /// <summary>
         /// converts LAS ushort array to RGB
@@ -47,6 +50,7 @@ namespace SiteReader.Functions
 
             return Color.FromArgb(r, b, g);
         }
+
 
         /// <summary>
         /// Test if the file is of the proper type, and return a message if not.
@@ -73,6 +77,7 @@ namespace SiteReader.Functions
 
             return true;
         }
+
 
         /// <summary>
         /// Returns an invalid file format message
@@ -102,6 +107,7 @@ namespace SiteReader.Functions
             return msg;
         }
 
+
         /// <summary>
         /// tests if file Path is of the specified format.
         /// </summary>
@@ -121,6 +127,7 @@ namespace SiteReader.Functions
             return false;
         }
 
+
         /// <summary>
         /// Tests if all values in a given list are the same
         /// </summary>
@@ -132,6 +139,7 @@ namespace SiteReader.Functions
             var firstVal = listIn.First();
             return listIn.All(x => EqualityComparer<T>.Default.Equals(x, firstVal));
         }
+
 
         /// <summary>
         /// Returns the non-wrapped index for a wrapped input index
@@ -145,6 +153,7 @@ namespace SiteReader.Functions
             if (shift + index >= listLen) return shift % listLen -1;
             return shift + index;
         }
+
 
         /// <summary>
         /// Remaps a count of values to a x-value range. Used for laying out bar graphs.
@@ -167,6 +176,7 @@ namespace SiteReader.Functions
             return xRemapped.ToList();
         }
 
+
         /// <summary>
         /// Returns the count of a certain number in a list of integers.
         /// </summary>
@@ -178,6 +188,7 @@ namespace SiteReader.Functions
             var numGroups = listIn.GroupBy(i => i);
             return numGroups.Single(x => x.Key == selected).Count();
         }
+
 
         /// <summary>
         /// Returns the max count of any single repeated integer in a list
@@ -198,6 +209,7 @@ namespace SiteReader.Functions
             }
             return maxVal;
         }
+
 
         /// <summary>
         /// Chunks a list into a list of lists given a list of chunk sizes
@@ -232,6 +244,7 @@ namespace SiteReader.Functions
             return listOut;
         }
 
+
         /// <summary>
         /// Filter a generic list by a boolean pattern
         /// </summary>
@@ -250,6 +263,7 @@ namespace SiteReader.Functions
             }
             return newList;
         }
+
 
         /// <summary>
         /// Creates a uniquely named .txt file in the temp path

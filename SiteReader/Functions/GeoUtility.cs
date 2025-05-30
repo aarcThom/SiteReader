@@ -2,6 +2,8 @@
 using Rhino;
 using System.Collections.Generic;
 using Rhino.DocObjects;
+using System.Numerics;
+using System.Linq;
 
 namespace SiteReader.Functions
 {
@@ -59,7 +61,7 @@ namespace SiteReader.Functions
         /// </summary>
         /// <param name="geometry">A list of meshes and/or breps</param>
         /// <returns>A single mesh, or null if other geo present or meshes/breps aren't closed</returns>
-        public static Mesh ConvertToMesh(List<GeometryBase> geometry)
+        public static Mesh ConvertToMesh(List<GeometryBase> geometry, MeshingParameters meshQuality)
         {
             if (geometry == null || geometry.Count == 0) return null;
 
@@ -70,7 +72,7 @@ namespace SiteReader.Functions
 
                 if (geo.ObjectType == ObjectType.Brep && geo.HasBrepForm && Brep.TryConvertBrep(geo).IsSolid)
                 {
-                    mesh.Append(Mesh.CreateFromBrep(Brep.TryConvertBrep(geo), MeshingParameters.FastRenderMesh));
+                    mesh.Append(Mesh.CreateFromBrep(Brep.TryConvertBrep(geo), meshQuality));
                 }
                 else if (geo.ObjectType == ObjectType.Mesh && ((Mesh)geo).IsClosed)
                 {
@@ -83,6 +85,24 @@ namespace SiteReader.Functions
             }
 
             return mesh;
+        }
+
+        /// <summary>
+        /// Given a desired of points, reduce a list of points to that number based on distance
+        /// </summary>
+        /// <param name="points">points to reduce</param>
+        /// <param name="ptCnt">count to reduce to</param>
+        /// <returns>reduced points</returns>
+        public static IEnumerable<Point3d> CullDupsToNum(IEnumerable<Point3d> points, int ptCnt)
+        {
+            double tolerance = 0;
+            while (points.Count() > ptCnt)
+            {
+                points = Point3d.CullDuplicates(points, tolerance);
+                tolerance += 0.01;
+            }
+
+            return points;
         }
     }
 }
