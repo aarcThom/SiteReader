@@ -35,22 +35,24 @@ namespace SiteReader.Functions
         public string LaunchCommandLineApp()
         {
             string curPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string srPath = "/C " + curPath + "\\SiteReader.exe";
-            srPath = srPath.Replace(@"\\", @"\");
-            string fullCommand = $"{srPath} {_subParser} {String.Join(" ", _commands)}";
+            string siteReaderExePath = $"\"{curPath}\\SiteReader.exe\"";
+            string siteReaderArgs = $"{_subParser} {String.Join(" ", _commands)}";
+            string fullCommand = $"/C {siteReaderExePath} {siteReaderArgs}";
 
             Process p = new Process();
             ProcessStartInfo psi = new ProcessStartInfo();
-            psi.FileName = "CMD.EXE";
+            psi.FileName = "powershell.exe";
             psi.Arguments = fullCommand;
-            psi.CreateNoWindow = true;
-            psi.UseShellExecute = false;
-            psi.RedirectStandardOutput = true;
+            psi.CreateNoWindow = false;
+            psi.UseShellExecute = true;
             p.StartInfo = psi;
             p.Start();
             p.WaitForExit();
 
-            return p.StandardOutput.ReadToEnd();
+            // grabbing the output from the temp file
+            var tempFile = Path.Combine(Path.GetTempPath(), "site_reader_temp.txt");
+            var lines =  File.ReadLines(tempFile);
+            return lines.FirstOrDefault();
         }
 
         // STATIC UTILITY METHODS =====================================================================================

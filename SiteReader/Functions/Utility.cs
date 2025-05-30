@@ -251,5 +251,17 @@ namespace SiteReader.Functions
             return newList;
         }
 
+        /// <summary>
+        /// Creates a uniquely named .txt file in the temp path
+        /// </summary>
+        /// <returns>Path of temp file</returns>
+        public static string CreateTempTxt()
+        {
+            // create a uniquely named .txt file
+            string tempFileName = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".txt";
+            File.Create(tempFileName).Dispose();
+            return tempFileName;
+        }
+
     }
 }
