@@ -21,27 +21,32 @@ namespace SiteReader.Components.Clouds
         //IO ==========================================================================================================
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            /*
-            pManager.AddGeometryParameter("Crop Shapes", "cropShps",
-                "Closed Brep(s) or Mesh(s) that will be used for either interior or exterior cropping",
-                GH_ParamAccess.list);
-            pManager.AddBooleanParameter("Keep Inside?", "inside",
-                "If left True, points inside shapes will be kept, otherwise points outside shapes will be kept",
-                GH_ParamAccess.item);
-            */
+            pManager.AddPointParameter("Points", "pts", "A field of attractor points to generate the vine through", GH_ParamAccess.list);
+            pManager.AddPointParameter("Base Pt", "bpt", "The base point of your vine.", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            /*
-            pManager.AddParameter(new LasCloudParam(), "LAS Cloud", "LCld",
-                "A LAS point cloud and associated data.", GH_ParamAccess.list);
-            */
+            pManager.AddLineParameter("testout", "t", "test", GH_ParamAccess.list);
+
         }
 
         //SOLVE =======================================================================================================
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+
+            List<Point> attPts = new List<Point>();
+            if(!DA.GetDataList(0, attPts)) return;
+
+            Point3d basePt = new Point3d();
+            if (!DA.GetData(1, ref basePt)) return;
+
+
+            List<Line> branches = new List<Line>();
+
+
+
+
             /*
             List<GeometryBase> geoIn = new List<GeometryBase>();
             if (!DA.GetDataList(1, geoIn)) return;
@@ -76,6 +81,6 @@ namespace SiteReader.Components.Clouds
         }
 
         //GUID ========================================================================================================
-        public override Guid ComponentGuid => new Guid("508B48A7-60D9-4BA1-8B82-F93B445B0652");
+        public override Guid ComponentGuid => new Guid("188A9C8F-716B-44FE-B290-E3E650FF7549");
     }
 }
