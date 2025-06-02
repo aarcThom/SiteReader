@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Rhino.Geometry;
 using SiteReader.Functions;
 using SiteReader.Components.Plants;
+using SiteReader.Classes.Plants;
 
 namespace SiteReader.Components.Clouds
 {
@@ -23,61 +24,49 @@ namespace SiteReader.Components.Clouds
         {
             pManager.AddPointParameter("Points", "pts", "A field of attractor points to generate the vine through", GH_ParamAccess.list);
             pManager.AddPointParameter("Base Pt", "bpt", "The base point of your vine.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Segment Length", "sLen", "The avaerage length of vine segments", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Prune Ratio", "pRat", "Value to prune away leaves, must be between 0.01 and 0.99", GH_ParamAccess.item, 0.75);
+            pManager.AddVectorParameter("Growth Direction", "gDir", "The initial growth direction.", GH_ParamAccess.item, new Vector3d(0,0,0));
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddLineParameter("testout", "t", "test", GH_ParamAccess.list);
-
+            pManager.AddPointParameter("vPts", "vPt", "test", GH_ParamAccess.list);
+            pManager.AddPointParameter("lPts", "lpt", "test", GH_ParamAccess.list);
         }
 
         //SOLVE =======================================================================================================
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-
-            List<Point> attPts = new List<Point>();
+            // INPUT =====================================================
+            List<Point3d> attPts = new List<Point3d>();
             if(!DA.GetDataList(0, attPts)) return;
 
             Point3d basePt = new Point3d();
             if (!DA.GetData(1, ref basePt)) return;
 
+            Double sLen = 0;
+            if (!DA.GetData(2, ref sLen)) return;
 
-            List<Line> branches = new List<Line>();
+            Double pRat = 0.75;
+            if (!DA.GetData(3, ref pRat)) return;
+
+            Vector3d gDir = new Vector3d();
+            if (!DA.GetData(4, ref gDir)) return;
 
 
+            // WORK ========================================================
+
+            Vine vine = new Vine(basePt, attPts, sLen, pRat, gDir);
+
+            vine.Grow();
 
 
-            /*
-            List<GeometryBase> geoIn = new List<GeometryBase>();
-            if (!DA.GetDataList(1, geoIn)) return;
+            // OUTPUT ====================================================
 
-            var cropMesh = GeoUtility.ConvertToMesh(geoIn);
-            if (cropMesh == null)
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "You must provide closed meshes and/or breps");
-                return;
-            }
+            DA.SetDataList(0, vine.VinePts);
+            DA.SetDataList(1, vine.LeafPts);
 
-            var inside = true;
-            if (!DA.GetData(2, ref inside)) inside = true;
-
-            var cloudsOut = new List<LasCloud>();
-
-            foreach (var cloud in Clouds)
-            {
-                var newCloud = new LasCloud(cloud);
-
-                newCloud.Filters.CropMesh = cropMesh;
-                newCloud.Filters.InsideCrop = inside;
-                newCloud.ApplyCrop(inside);
-
-                cloudsOut.Add(newCloud);
-            }
-
-            Clouds = cloudsOut;
-
-            DA.SetDataList(0, Clouds);
-            */
         }
 
         //GUID ========================================================================================================

@@ -104,5 +104,28 @@ namespace SiteReader.Functions
 
             return points;
         }
+
+        /// <summary>
+        /// Sums and (optionally unitizes a collection of vectors)
+        /// </summary>
+        /// <param name="vecIn">Vectors to sum</param>
+        /// <param name="unitize">Unitize?</param>
+        /// <returns>A single summed (and maybe unitized) vector</returns>
+        public static Vector3d SumVectors(IEnumerable<Vector3d> vecIn, bool unitize = false)
+        {
+            Vector3d blankVec = new Vector3d(0, 0, 0);
+
+            foreach(Vector3d vec in vecIn)
+            {
+                blankVec += vec;
+            }
+
+            if (blankVec.Length != 0 && unitize)
+            {
+                blankVec.Unitize();
+            }
+
+            return blankVec;
+        }
     }
 }
