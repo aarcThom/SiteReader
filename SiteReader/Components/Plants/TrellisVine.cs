@@ -26,13 +26,13 @@ namespace SiteReader.Components.Clouds
             pManager.AddPointParameter("Base Pt", "bpt", "The base point of your vine.", GH_ParamAccess.item);
             pManager.AddNumberParameter("Segment Length", "sLen", "The avaerage length of vine segments", GH_ParamAccess.item);
             pManager.AddNumberParameter("Prune Ratio", "pRat", "Value to prune away leaves, must be between 0.01 and 0.99", GH_ParamAccess.item, 0.75);
+            pManager.AddIntegerParameter("GrowSteps", "gStp", "Number of iterations of growth.", GH_ParamAccess.item);
             pManager.AddVectorParameter("Growth Direction", "gDir", "The initial growth direction.", GH_ParamAccess.item, new Vector3d(0,0,0));
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddPointParameter("vPts", "vPt", "test", GH_ParamAccess.list);
-            pManager.AddPointParameter("lPts", "lpt", "test", GH_ParamAccess.list);
+            pManager.AddCurveParameter("vineCrvs", "vCrv", "Vine Curves", GH_ParamAccess.list);
         }
 
         //SOLVE =======================================================================================================
@@ -51,22 +51,24 @@ namespace SiteReader.Components.Clouds
             Double pRat = 0.75;
             if (!DA.GetData(3, ref pRat)) return;
 
+            int gsteps = 0;
+            if (!DA.GetData(4, ref gsteps)) return;
+
             Vector3d gDir = new Vector3d();
-            if (!DA.GetData(4, ref gDir)) return;
+            if (!DA.GetData(5, ref gDir)) return;
 
 
             // WORK ========================================================
 
-            Vine vine = new Vine(basePt, attPts, sLen, pRat, gDir);
+            SpaceColonizer vine = new SpaceColonizer(basePt, attPts, sLen, pRat, gDir, gsteps);
 
             vine.Grow();
+            List<Curve> outCurves = vine.GenerateCurves();
 
 
             // OUTPUT ====================================================
 
-            DA.SetDataList(0, vine.VinePts);
-            DA.SetDataList(1, vine.LeafPts);
-
+            DA.SetDataList(0, outCurves);
         }
 
         //GUID ========================================================================================================
