@@ -127,5 +127,25 @@ namespace SiteReader.Functions
 
             return blankVec;
         }
+
+        /// <summary>
+        /// For a list of point3ds, calculate the average distance between 
+        /// a point and its closest neighbour
+        /// </summary>
+        /// <param name="ptList">Points to calculate average for</param>
+        /// <returns>Average closest neighbour distanc</returns>
+        public static double AveragePtDist(List<Point3d> ptList)
+        {
+            List<double> distList = new List<double>();
+            foreach(Point3d pt in ptList)
+            {
+                var nbrs = ptList.Where(nbr => pt != nbr);
+                var nbrDists = nbrs.Select(nbr => nbr.DistanceTo(pt));
+                distList.Add(nbrDists.Min());
+            }
+
+            double avgDist = distList.Sum() / ptList.Count();
+            return avgDist;
+        }
     }
 }

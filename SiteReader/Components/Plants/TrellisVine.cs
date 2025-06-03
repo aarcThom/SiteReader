@@ -24,8 +24,10 @@ namespace SiteReader.Components.Clouds
         {
             pManager.AddPointParameter("Points", "pts", "A field of attractor points to generate the vine through", GH_ParamAccess.list);
             pManager.AddPointParameter("Base Pt", "bpt", "The base point of your vine.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Segment Length", "sLen", "The avaerage length of vine segments", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Prune Ratio", "pRat", "Value to prune away leaves, must be between 0.01 and 0.99", GH_ParamAccess.item, 0.75);
+            pManager.AddNumberParameter("Segment Factor", "sFac", "Factor of average distance between points in provided attractor points. " +
+                "Should be > 1 to work properly. The larger the number, the less, the branches.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Prune Factor", "pFac", "Factor of 'segment factor' to trim away leaves - ie. How much space " +
+                "do you want between your branches. Must be between 0.01 and 0.99", GH_ParamAccess.item, 0.75);
             pManager.AddIntegerParameter("GrowSteps", "gStp", "Number of iterations of growth.", GH_ParamAccess.item);
             pManager.AddVectorParameter("Growth Direction", "gDir", "The initial growth direction.", GH_ParamAccess.item, new Vector3d(0,0,0));
         }
@@ -45,11 +47,11 @@ namespace SiteReader.Components.Clouds
             Point3d basePt = new Point3d();
             if (!DA.GetData(1, ref basePt)) return;
 
-            Double sLen = 0;
-            if (!DA.GetData(2, ref sLen)) return;
+            Double sFac = 1;
+            if (!DA.GetData(2, ref sFac)) return;
 
-            Double pRat = 0.75;
-            if (!DA.GetData(3, ref pRat)) return;
+            Double pFac = 0.75;
+            if (!DA.GetData(3, ref pFac)) return;
 
             int gsteps = 0;
             if (!DA.GetData(4, ref gsteps)) return;
@@ -60,7 +62,10 @@ namespace SiteReader.Components.Clouds
 
             // WORK ========================================================
 
-            SpaceColonizer vine = new SpaceColonizer(basePt, attPts, sLen, pRat, gDir, gsteps);
+            // calculate the average closest nbr distance in input attractor pts * sFac
+            double sDist = GeoUtility.AveragePtDist(attPts) * sFac;
+
+            SpaceColonizer vine = new SpaceColonizer(basePt, attPts, sDist, pFac, gDir, gsteps);
 
             vine.Grow();
             List<PolylineCurve> outCurves = vine.GenerateCurves();
