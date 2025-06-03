@@ -63,7 +63,7 @@ namespace SiteReader.Components.Clouds
             SpaceColonizer vine = new SpaceColonizer(basePt, attPts, sLen, pRat, gDir, gsteps);
 
             vine.Grow();
-            List<Curve> outCurves = vine.GenerateCurves();
+            List<PolylineCurve> outCurves = vine.GenerateCurves();
 
 
             // OUTPUT ====================================================
