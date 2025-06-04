@@ -49,15 +49,12 @@ namespace SiteReader.Components.Extras
             if (!DA.GetData(2, ref seed)) return;
 
 
-            var initMesh = GeoUtility.ConvertToMesh(geoIn, MeshingParameters.QualityRenderMesh);
-
-            if (initMesh == null)
+            Mesh initMesh = null;
+            if(!GeoUtility.ConvertToMesh(geoIn, MeshingParameters.QualityRenderMesh, ref initMesh, out string wMsg, true))
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "You must provide closed, valid geometry!");
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, wMsg);
                 return;
             }
-
-            initMesh.Faces.ConvertQuadsToTriangles();
 
             //figure out how many points per face
             var faceAreas = initMesh.Faces.Select(i => Meshing.AreaOfTriFace(initMesh, i));

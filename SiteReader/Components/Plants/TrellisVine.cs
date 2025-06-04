@@ -22,61 +22,47 @@ namespace SiteReader.Components.Clouds
         //IO ==========================================================================================================
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddPointParameter("Points", "pts", "A field of attractor points to generate the vine through", GH_ParamAccess.list);
-            pManager.AddPointParameter("Base Pt", "bpt", "The base point of your vine.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Segment Factor", "sFac", "Factor of average distance between points in provided attractor points. " +
-                "Should be > 1 to work properly. The larger the number, the less, the branches.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Prune Factor", "pFac", "Factor of 'segment factor' to trim away leaves - ie. How much space " +
-                "do you want between your branches. Must be between 0.01 and 0.99", GH_ParamAccess.item, 0.75);
-            pManager.AddIntegerParameter("GrowSteps", "gStp", "Number of iterations of growth.", GH_ParamAccess.item);
-            pManager.AddVectorParameter("Growth Direction", "gDir", "The initial growth direction.", GH_ParamAccess.item, new Vector3d(0,0,0));
+            pManager.AddCurveParameter("Guide Curve", "gCrv", "The curve that will guide the main vine across your geometry. " +
+                "It doesn't need to be exact - it will be fit on the surface.", GH_ParamAccess.item);
+            pManager.AddGeometryParameter("Geometry", "Geo", "Provide the Brep(s) / Mesh(s) you want wrap the vine around", GH_ParamAccess.list);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddCurveParameter("vineCrvs", "vCrv", "Vine Curves", GH_ParamAccess.list);
+            pManager.AddMeshParameter("meshtT", "mT", "test", GH_ParamAccess.item);
         }
 
         //SOLVE =======================================================================================================
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             // INPUT =====================================================
-            List<Point3d> attPts = new List<Point3d>();
-            if(!DA.GetDataList(0, attPts)) return;
 
-            Point3d basePt = new Point3d();
-            if (!DA.GetData(1, ref basePt)) return;
+            Curve mainVine = null;
+            if (!DA.GetData(0, ref mainVine)) return;
 
-            Double sFac = 1;
-            if (!DA.GetData(2, ref sFac)) return;
+            List<GeometryBase> geoIn = new List<GeometryBase>();
+            if (!DA.GetDataList(1, geoIn)) return;
 
-            Double pFac = 0.75;
-            if (!DA.GetData(3, ref pFac)) return;
 
-            int gsteps = 0;
-            if (!DA.GetData(4, ref gsteps)) return;
-
-            Vector3d gDir = new Vector3d();
-            if (!DA.GetData(5, ref gDir)) return;
-
+            Mesh initMesh = null;
+            if(!GeoUtility.ConvertToMesh(geoIn, MeshingParameters.QualityRenderMesh, ref initMesh, out string wMsg, true))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, wMsg);
+                return;
+            }
 
             // WORK ========================================================
 
-            // calculate the average closest nbr distance in input attractor pts * sFac
-            double sDist = GeoUtility.AveragePtDist(attPts) * sFac;
-
-            SpaceColonizer vine = new SpaceColonizer(basePt, attPts, sDist, pFac, gDir, gsteps);
-
-            vine.Grow();
-            List<PolylineCurve> outCurves = vine.GenerateCurves();
 
 
             // OUTPUT ====================================================
 
-            DA.SetDataList(0, outCurves);
+            DA.SetData(1, initMesh);
+
         }
 
         //GUID ========================================================================================================
-        public override Guid ComponentGuid => new Guid("188A9C8F-716B-44FE-B290-E3E650FF7549");
+        public override Guid ComponentGuid => new Guid("9F468FFF-F669-4973-B883-623D8FEAAC9B");
     }
 }

@@ -17,7 +17,7 @@ namespace SiteReader.Classes.Plants
 
         // FIELDS =====================================================================================================
         private List<Point3d> _leafPts; // points to grow though
-        private List<Branch> _branches; // the the points that have been grown through into branch objects
+        private List<ScBranch> _branches; // the the points that have been grown through into branch objects
 
         private double _searchDist; // how long a branch section can be - ie. the max search length
         private double _pruneDist; // percentage of search length - how far for pruning
@@ -41,8 +41,8 @@ namespace SiteReader.Classes.Plants
             _pruneDist = pr * _searchDist;
 
             // begin the branches list
-            _branches = new List<Branch>();
-            _branches.Add(new Branch(startPoint, direction));
+            _branches = new List<ScBranch>();
+            _branches.Add(new ScBranch(startPoint, direction));
         }
 
         // UTILITY METHODS =============================================================================================
@@ -63,9 +63,9 @@ namespace SiteReader.Classes.Plants
 
         private void GrowBranches()
         {
-            List<Branch> newBranches = new List<Branch>();
+            List<ScBranch> newBranches = new List<ScBranch>();
 
-            foreach(Branch branch in _branches)
+            foreach(ScBranch branch in _branches)
             {
                 if (!branch.Split)
                 {
@@ -99,7 +99,7 @@ namespace SiteReader.Classes.Plants
                         {
                             Vector3d startVec = newDirVecs[ixCount];
                             Point3d sproutBase = parentPts[ixCount];
-                            Branch newBranch = new Branch(sproutBase, startVec);
+                            ScBranch newBranch = new ScBranch(sproutBase, startVec);
                             newBranch.AddBranchPt(brPt);
                             newBranches.Add(newBranch);
 
@@ -141,7 +141,7 @@ namespace SiteReader.Classes.Plants
         {
             List<Point3d> AllPts = new List<Point3d>();
 
-            foreach(Branch branch in _branches)
+            foreach(ScBranch branch in _branches)
             {
                 AllPts.AddRange(branch.BranchPts);
             }

@@ -1,9 +1,10 @@
-﻿using Rhino.Geometry;
+﻿using Grasshopper.Kernel;
 using Rhino;
-using System.Collections.Generic;
 using Rhino.DocObjects;
-using System.Numerics;
+using Rhino.Geometry;
+using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace SiteReader.Functions
 {
@@ -57,18 +58,33 @@ namespace SiteReader.Functions
         }
 
         /// <summary>
-        /// Converts Breps and Meshes to a single mesh
+        /// Converts a list of breps and/or meshes to a single mesh. Optionally triangulates.
         /// </summary>
-        /// <param name="geometry">A list of meshes and/or breps</param>
-        /// <returns>A single mesh, or null if other geo present or meshes/breps aren't closed</returns>
-        public static Mesh ConvertToMesh(List<GeometryBase> geometry, MeshingParameters meshQuality)
+        /// <param name="geometry">List of breps and/or meshes.</param>
+        /// <param name="meshQuality">Quality of meshing.</param>
+        /// <param name="cMesh">Converted mesh.</param>
+        /// <param name="rtMessage">"Warning message.</param>
+        /// <param name="Triangulate">Triangulate the mesh?</param>
+        /// <returns></returns>
+        public static bool ConvertToMesh(List<GeometryBase> geometry, MeshingParameters meshQuality, 
+            ref Mesh cMesh, out string rtMessage, bool Triangulate = false)
         {
-            if (geometry == null || geometry.Count == 0) return null;
+            if (geometry == null || geometry.Count == 0)
+            {
+                cMesh = null;
+                rtMessage = "You must provide some valid geometry!";
+                return false;
+            }
 
             Mesh mesh = new Mesh();
             foreach (var geo in geometry)
             {
-                if (geo == null) return null;
+                if (geo == null)
+                {
+                    cMesh = null;
+                    rtMessage = "All of your geometry must be closed and valid.";
+                    return false;
+                }
 
                 if (geo.ObjectType == ObjectType.Brep && geo.HasBrepForm && Brep.TryConvertBrep(geo).IsSolid)
                 {
@@ -80,15 +96,26 @@ namespace SiteReader.Functions
                 }
                 else
                 {
-                    return null;
+                    cMesh = null;
+                    rtMessage = "All of your geometry must be closed and valid.";
+                    return false;
                 }
             }
 
-            return mesh;
+            if (!mesh.Faces.ConvertQuadsToTriangles() && Triangulate)
+            {
+                cMesh = null;
+                rtMessage = "Could not triangulate. Double check your geometry.";
+                return true;
+            }
+
+            cMesh = mesh;
+            rtMessage = "Success!";
+            return true;
         }
 
         /// <summary>
-        /// Given a desired of points, reduce a list of points to that number based on distance
+        /// Given a desired number of points, reduce a list of points to that number based on distance
         /// </summary>
         /// <param name="points">points to reduce</param>
         /// <param name="ptCnt">count to reduce to</param>

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SiteReader.Classes.Plants
 {
-    internal class Branch
+    internal class ScBranch
     {
         // Based on 'Modeling Trees with a Space Colonization Algorithm' - Runions, Lane, Prusinkiewicz 2007
         // https://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf
@@ -26,7 +26,7 @@ namespace SiteReader.Classes.Plants
         public bool Split { get; set; }
 
         // CONSTRUCTORS ===============================================================================================
-        public Branch(Point3d startPt, Vector3d startVector)
+        public ScBranch(Point3d startPt, Vector3d startVector)
         {
             _branchPts = new List<Point3d> { startPt };
             _dir = startVector;
