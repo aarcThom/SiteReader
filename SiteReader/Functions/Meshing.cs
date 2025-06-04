@@ -20,7 +20,7 @@ namespace siteReader.Methods
         /// <returns>Mesh composed of only triangular faces</returns>
         public static Mesh TriangulateMesh(Mesh inMesh)
         {
-            foreach (var face in inMesh.Faces)
+            foreach (MeshFace face in inMesh.Faces)
             {
                 if (face.IsQuad)
                 {
@@ -43,7 +43,7 @@ namespace siteReader.Methods
             }
 
             var newFaces = new List<MeshFace>();
-            foreach (var fc in inMesh.Faces)
+            foreach (MeshFace fc in inMesh.Faces)
             {
                 if (fc.IsTriangle) newFaces.Add(fc);
             }
@@ -58,7 +58,7 @@ namespace siteReader.Methods
         {
             var triList = new List<g3.Index3i>();
 
-            foreach (var face in mesh.Faces)
+            foreach (MeshFace face in mesh.Faces)
             {
                 var tri = new g3.Index3i(face.A, face.B, face.C);
                 triList.Add(tri);
@@ -70,7 +70,7 @@ namespace siteReader.Methods
         {
             var vertices = new List<g3.Vector3f>();
 
-            foreach (var vert in mesh.Vertices)
+            foreach (Point3f vert in mesh.Vertices)
             {
                 var coords = new g3.Vector3f(vert.X, vert.Y, vert.Z);
                 vertices.Add(coords);
@@ -82,7 +82,7 @@ namespace siteReader.Methods
         {
             var normals = new List<g3.Vector3f>();
 
-            foreach (var norm in mesh.Normals)
+            foreach (Rhino.Geometry.Vector3f norm in mesh.Normals)
             {
                 var normal = new g3.Vector3f(norm.X, norm.Y, norm.Z);
                 normals.Add(normal);
@@ -95,16 +95,16 @@ namespace siteReader.Methods
         {
             Mesh triMesh = TriangulateMesh(rMesh);
 
-            var faces = GetFaces(triMesh);
-            var vertices = GetVertices(triMesh);
-            var normals = GetNormals(triMesh);
+            List<Index3i> faces = GetFaces(triMesh);
+            List<g3.Vector3f> vertices = GetVertices(triMesh);
+            List<g3.Vector3f> normals = GetNormals(triMesh);
 
-            DMesh3 dMesh = new DMesh3(MeshComponents.VertexNormals);
+            var dMesh = new DMesh3(MeshComponents.VertexNormals);
             for (int i = 0; i < vertices.Count; i++)
             {
                 dMesh.AppendVertex(new NewVertexInfo(vertices[i], normals[i]));
             }
-            foreach (var tri in faces)
+            foreach (Index3i tri in faces)
             {
                 dMesh.AppendTriangle(tri);
             }
@@ -117,18 +117,18 @@ namespace siteReader.Methods
 
             Point3d[] rPts = ptCld.GetPoints();
 
-            var mesh = Mesh.CreateFromTessellation(rPts, null, Plane.WorldXY, false);
+            Mesh mesh = Mesh.CreateFromTessellation(rPts, null, Plane.WorldXY, false);
 
             if (maxLength < 10000000000000000000)
             {
-                var faces = mesh.Faces;
-                var vertices = mesh.Vertices.ToPoint3dArray();
+                Rhino.Geometry.Collections.MeshFaceList faces = mesh.Faces;
+                Point3d[] vertices = mesh.Vertices.ToPoint3dArray();
 
-                List<int> longFaces = new List<int>();
+                var longFaces = new List<int>();
 
                 for (int i = 0; i < faces.Count; i++)
                 {
-                    var face = faces[i];
+                    MeshFace face = faces[i];
                     if (GetFaceLongestEdge(face, vertices) > maxLength)
                     {
                         longFaces.Add(i);
@@ -151,8 +151,8 @@ namespace siteReader.Methods
         /// <returns>area in square units</returns>
         public static double AreaOfTriFace(Mesh fMesh, MeshFace mFace) 
         {
-            
-            var triPts = GetFacePoints(fMesh, mFace);
+
+            List<Point3d> triPts = GetFacePoints(fMesh, mFace);
 
             double a = triPts[0].DistanceTo(triPts[1]);
             double b = triPts[1].DistanceTo(triPts[2]);
@@ -192,9 +192,9 @@ namespace siteReader.Methods
         /// <returns>3 weights for mapping a point on a triangular face</returns>
         public static (double u, double v, double w) GetBaryWeights(Random rand)
         {
-            var u = rand.NextDouble();
-            var v = rand.NextDouble() * (1 - u);
-            var w = 1 - u - v;
+            double u = rand.NextDouble();
+            double v = rand.NextDouble() * (1 - u);
+            double w = 1 - u - v;
 
             return (u, v, w);
         }
@@ -202,7 +202,7 @@ namespace siteReader.Methods
 
         private static double GetFaceLongestEdge(MeshFace face, Point3d[] verts)
         {
-            List<double> distances = new List<double>();
+            var distances = new List<double>();
             distances.Add(DistanceTweenVertices(face.A, face.B, verts));
             distances.Add(DistanceTweenVertices(face.B, face.C, verts));
 
@@ -221,8 +221,8 @@ namespace siteReader.Methods
 
         private static double DistanceTweenVertices(int a, int b, Point3d[] verts)
         {
-            var ptA = verts[a];
-            var ptB = verts[b];
+            Point3d ptA = verts[a];
+            Point3d ptB = verts[b];
 
             return ptA.DistanceTo(ptB);
         }

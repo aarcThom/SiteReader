@@ -65,7 +65,7 @@ namespace SiteReader.Params
                     _iconPath = "SiteReader.Resources.generic.png";
                 }
 
-                var stream = _ghAssembly.GetManifestResourceStream(_iconPath);
+                System.IO.Stream stream = _ghAssembly.GetManifestResourceStream(_iconPath);
                 return new Bitmap(stream);
             }
         }

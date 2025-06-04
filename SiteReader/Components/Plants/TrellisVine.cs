@@ -25,6 +25,8 @@ namespace SiteReader.Components.Clouds
             pManager.AddCurveParameter("Guide Curve", "gCrv", "The curve that will guide the main vine across your geometry. " +
                 "It doesn't need to be exact - it will be fit on the surface.", GH_ParamAccess.item);
             pManager.AddGeometryParameter("Geometry", "Geo", "Provide the Brep(s) / Mesh(s) you want wrap the vine around", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Max Distance", "maxD", "The maximum distance from the mesh that a curve point will reach " +
+                "to attach itself to the trellis", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -41,8 +43,11 @@ namespace SiteReader.Components.Clouds
             Curve mainVine = null;
             if (!DA.GetData(0, ref mainVine)) return;
 
-            List<GeometryBase> geoIn = new List<GeometryBase>();
+            var geoIn = new List<GeometryBase>();
             if (!DA.GetDataList(1, geoIn)) return;
+
+            double maxDist = 0;
+            if (!DA.GetData(2, ref maxDist)) return;
 
 
             Mesh initMesh = null;
@@ -52,13 +57,15 @@ namespace SiteReader.Components.Clouds
                 return;
             }
 
+            Curve pullCrv = GeoUtility.PullCrvToMesh(mainVine, initMesh, maxDist);
+
             // WORK ========================================================
 
 
 
             // OUTPUT ====================================================
 
-            DA.SetData(1, initMesh);
+            DA.SetData(0, pullCrv);
 
         }
 

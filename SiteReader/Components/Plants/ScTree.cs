@@ -65,7 +65,7 @@ namespace SiteReader.Components.Clouds
             // calculate the average closest nbr distance in input attractor pts * sFac
             double sDist = GeoUtility.AveragePtDist(attPts) * sFac;
 
-            SpaceColonizer vine = new SpaceColonizer(basePt, attPts, sDist, pFac, gDir, gsteps);
+            var vine = new SpaceColonizer(basePt, attPts, sDist, pFac, gDir, gsteps);
 
             vine.Grow();
             List<PolylineCurve> outCurves = vine.GenerateCurves();

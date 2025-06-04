@@ -117,7 +117,7 @@ namespace SiteReader.Functions
         {
             string fileExt = Path.GetExtension(path);
 
-            foreach (var type in types)
+            foreach (string type in types)
             {
                 if (fileExt == type)
                 {
@@ -136,7 +136,7 @@ namespace SiteReader.Functions
         /// <returns>True if all values are the same. False if not.</returns>
         public static bool NotAllSameValues<T>(List<T> listIn)
         {
-            var firstVal = listIn.First();
+            T firstVal = listIn.First();
             return listIn.All(x => EqualityComparer<T>.Default.Equals(x, firstVal));
         }
 
@@ -164,14 +164,14 @@ namespace SiteReader.Functions
         /// <returns>x-coordinates of bars.</returns>
         public static List<float> EvenSpacePts(RectangleF bounds, int max, float sideSpace = 0)
         {
-            var from1 = 0f;
-            var from2 = (float)max;
-            var to1 = bounds.Left + sideSpace;
-            var to2 = bounds.Left + bounds.Width - sideSpace;
+            float from1 = 0f;
+            float from2 = (float)max;
+            float to1 = bounds.Left + sideSpace;
+            float to2 = bounds.Left + bounds.Width - sideSpace;
 
-            var xRange = Enumerable.Range(0, max);
-            var xRangeFloat = xRange.Select(x => (float)x);
-            var xRemapped = xRangeFloat.Select(x => x.Remap(from1, from2, to1, to2));
+            IEnumerable<int> xRange = Enumerable.Range(0, max);
+            IEnumerable<float> xRangeFloat = xRange.Select(x => (float)x);
+            IEnumerable<float> xRemapped = xRangeFloat.Select(x => x.Remap(from1, from2, to1, to2));
 
             return xRemapped.ToList();
         }
@@ -185,7 +185,7 @@ namespace SiteReader.Functions
         /// <returns>The count of the selected integer.</returns>
         public static int GetNumCount(List<int> listIn, int selected)
         {
-            var numGroups = listIn.GroupBy(i => i);
+            IEnumerable<IGrouping<int, int>> numGroups = listIn.GroupBy(i => i);
             return numGroups.Single(x => x.Key == selected).Count();
         }
 
@@ -197,10 +197,10 @@ namespace SiteReader.Functions
         /// <returns>The count of the most common integer.</returns>
         public static int GetMaxCountItems(List<int> listIn)
         {
-            var maxVal = 0;
-            var numGroups = listIn.GroupBy(i => i);
+            int maxVal = 0;
+            IEnumerable<IGrouping<int, int>> numGroups = listIn.GroupBy(i => i);
 
-            foreach (var group in numGroups)
+            foreach (IGrouping<int, int> group in numGroups)
             {
                 if (group.Count() > maxVal)
                 {
@@ -234,7 +234,7 @@ namespace SiteReader.Functions
             var listOut = new List<List<T>>();
             int start = 0;
 
-            foreach (var size in chunkSizes)
+            foreach (int size in chunkSizes)
             {
                 List<T> chunk = listIn.Skip(start).Take(size).ToList();
                 listOut.Add(chunk);
@@ -256,7 +256,7 @@ namespace SiteReader.Functions
             var newList = new List<T>();
 
             int filterIx = 0;
-            foreach (var val in listIn)
+            foreach (T val in listIn)
             {
                 if (filter[filterIx]) newList.Add(val);
                 filterIx = filterIx == listIn.Count - 1 ? 0 : filterIx + 1;

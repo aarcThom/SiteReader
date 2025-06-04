@@ -108,7 +108,7 @@ namespace SiteReader.Classes
         /// <param name="pt">Point whose fields are to be added to the dictionary.</param>
         private void AddLasFieldValue(ref SortedDictionary<string, List<int>> lasFieldDict, laszip_point pt)
         {
-            foreach (var pair in lasFieldDict)
+            foreach (KeyValuePair<string, List<int>> pair in lasFieldDict)
             {
                 lasFieldDict[pair.Key].Add(FieldValueAtPoint(pair.Key, pt));
             }
@@ -122,7 +122,7 @@ namespace SiteReader.Classes
         /// <returns></returns>
         private bool FilterLasFields(SortedDictionary<string, double[]> filterDict, laszip_point pt)
         {
-            foreach (var pair in filterDict)
+            foreach (KeyValuePair<string, double[]> pair in filterDict)
             {
                 double[] filter = pair.Value;
                 if (filter != null)
@@ -155,7 +155,7 @@ namespace SiteReader.Classes
         private SortedDictionary<string, List<int>> GetLasFieldDictionary(List<string> fieldNames)
         {
             var fieldDict = new SortedDictionary<string, List<int>>();
-            foreach (var field in fieldNames)
+            foreach (string field in fieldNames)
             {
                 if (!ContainsRgb() && "rgb".Contains(field)) continue; // does not contain RGB 
                 fieldDict.Add(field, new List<int>());
@@ -192,7 +192,7 @@ namespace SiteReader.Classes
             for (int i = 0; i < _filePtCount; i++)
             {
                 _lasReader.read_point();
-                var lasPt = _lasReader.point;
+                laszip_point lasPt = _lasReader.point;
 
                 if (i != filteredCldIndices[filterIx]) continue; // point doesn't meet density filter
 
@@ -233,15 +233,15 @@ namespace SiteReader.Classes
             _lasReader.close_reader();
 
             // We can get rid of lasFields that have all the same value as this means they aren't actually assigned
-            for (var i = lasFieldNames.Count - 1; i >= 0; i--)
+            for (int i = lasFieldNames.Count - 1; i >= 0; i--)
             {
-                var pair = lasFields.ElementAt(i);
+                KeyValuePair<string, List<int>> pair = lasFields.ElementAt(i);
 
                 if (pair.Value.Count == 0 || Utility.NotAllSameValues(pair.Value))
                 {
                     lasFields.Remove(pair.Key);
                 }
-            }
+            } 
 
             return ptCloud;
         }

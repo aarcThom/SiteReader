@@ -20,8 +20,8 @@ namespace SiteReader.Functions
             if (clouds.Count == 0) return null;
             if (clouds.Count == 1) return clouds[0].CloudPropNames;
 
-            List<string> props = new List<string>(clouds[0].CloudPropNames);
-            foreach (var cld in clouds)
+            var props = new List<string>(clouds[0].CloudPropNames);
+            foreach (LasCloud cld in clouds)
             {
                 props = props.Intersect(cld.CloudPropNames).ToList();
             }
@@ -36,8 +36,8 @@ namespace SiteReader.Functions
         /// <returns>Null if field not present, or a list of field values.</returns>
         public static List<int> MergeFieldValues(List<LasCloud> clouds, string field)
         {
-            List<int> fVals = new List<int>();
-            foreach (var cloud in clouds)
+            var fVals = new List<int>();
+            foreach (LasCloud cloud in clouds)
             {
                 try
                 {
@@ -60,7 +60,7 @@ namespace SiteReader.Functions
         {
             var dicOut = new SortedDictionary<string, List<int>>();
 
-            foreach (var pair in dicIn)
+            foreach (KeyValuePair<string, List<int>> pair in dicIn)
             {
                 dicOut.Add(pair.Key, new List<int>(pair.Value));
             }
@@ -76,7 +76,7 @@ namespace SiteReader.Functions
         {
             var dicOut = new SortedDictionary<string, List<int>>();
 
-            foreach (var pair in dicIn)
+            foreach (KeyValuePair<string, List<int>> pair in dicIn)
             {
                 dicOut.Add(pair.Key, new List<int>());
             }
@@ -92,7 +92,7 @@ namespace SiteReader.Functions
         {
             var dicOut = new SortedDictionary<string, double[]>();
 
-            foreach (var pair in dicIn)
+            foreach (KeyValuePair<string, double[]> pair in dicIn)
             {
                 var newArr = new double[2];
 
@@ -122,7 +122,7 @@ namespace SiteReader.Functions
             var newCloud = new PointCloud();
 
             int filterIx = 0;
-            foreach (var pt in cloud)
+            foreach (PointCloudItem pt in cloud)
             {
                 if (filter[filterIx]) newCloud.Add(pt.Location, pt.Color);
                 filterIx = filterIx == cloud.Count - 1 ? 0: filterIx + 1;
@@ -136,17 +136,16 @@ namespace SiteReader.Functions
         /// <param name="dictIn">property dictionary to filter</param>
         /// <param name="filter">ist of booleans. can be repeating.</param>
         /// <returns>a filtered property dictionary</returns>
-        public static SortedDictionary<string, List<int>>
-            FilterPropDicts(SortedDictionary<string, List<int>> dictIn, List<bool> filter)
+        public static SortedDictionary<string, List<int>> FilterPropDicts(SortedDictionary<string, List<int>> dictIn, List<bool> filter)
         {
             var dicOut = new SortedDictionary<string, List<int>>();
 
-            foreach (var pair in dictIn)
+            foreach (KeyValuePair<string, List<int>> pair in dictIn)
             {
                 var newList = new List<int>();
 
                 int filterIx = 0;
-                foreach (var propVal in pair.Value)
+                foreach (int propVal in pair.Value)
                 {
                     if (filter[filterIx])
                     {
@@ -169,9 +168,9 @@ namespace SiteReader.Functions
         /// <returns>A Rhino PointCloud</returns>
         public static PointCloud MergeRhinoClouds(List<LasCloud> clds)
         {
-            PointCloud outCLoud = new PointCloud();
+            var outCLoud = new PointCloud();
 
-            foreach (var cld in clds)
+            foreach (LasCloud cld in clds)
             {
                 Point3d[] pts = cld.PtCloud.GetPoints();
                 Color[] clrs = cld.PtCloud.GetColors();
@@ -188,21 +187,21 @@ namespace SiteReader.Functions
         /// <returns>Vlr key/value pairs</returns>
         public static Dictionary<string, string> VlrDict(LasCloud cld)
         {
-            var lz = cld.FileMethods.LasReader;
-            var path = cld.FileMethods.FilePath;
+            LASzip.Net.laszip lz = cld.FileMethods.LasReader;
+            string path = cld.FileMethods.FilePath;
 
-            Dictionary<string, string> vlrDict = new Dictionary<string, string>();
+            var vlrDict = new Dictionary<string, string>();
 
             lz.open_reader(path, out bool isCompressed);
 
             if (lz.header.vlrs.Count > 0)
             {
-                var vlr = lz.header.vlrs;
+                List<LASzip.Net.laszip_vlr> vlr = lz.header.vlrs;
 
-                foreach (var v in vlr)
+                foreach (LASzip.Net.laszip_vlr v in vlr)
                 {
-                    var line = Encoding.ASCII.GetString(v.data);
-                    var frags = line.Split(',').ToList();
+                    string line = Encoding.ASCII.GetString(v.data);
+                    List<string> frags = line.Split(',').ToList();
 
                     if (frags.Count > 1)
                     {

@@ -46,7 +46,7 @@ namespace SiteReader.Components.Clouds
                 // CHANGE THIS ONCE CROP MESHES ARE MADE TO LIST
                 if (!cropMeshes.Contains(cld.Filters.CropMesh)) cropMeshes.Add(cld.Filters.CropMesh);
 
-                foreach (var pair in cld.Filters.FieldFilters)
+                foreach (KeyValuePair<string, double[]> pair in cld.Filters.FieldFilters)
                 {
                     if (!fields.Contains(pair.Key))
                     {

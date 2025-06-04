@@ -66,7 +66,7 @@ namespace SiteReader.Components.Clouds
 
             // maybe change this so it only solves once--------------------------
             _allPoints = new List<Point3d>();
-            foreach (var cld in Clouds)
+            foreach (LasCloud cld in Clouds)
             {
                 _allPoints.AddRange(cld.PtCloud.GetPoints());
             }
@@ -146,7 +146,7 @@ namespace SiteReader.Components.Clouds
 
             if (_exportClouds != null)
             {
-                foreach (var cld in _exportClouds)
+                foreach (LasCloud cld in _exportClouds)
                 {
                     args.Display.DrawPointCloud(cld.PtCloud, 2);
                 }
@@ -218,7 +218,7 @@ namespace SiteReader.Components.Clouds
             var fieldFilter = new double[] {_leftBounds, _rightBounds};
 
             int filterIx = 0;
-            foreach (var cld in Clouds)
+            foreach (LasCloud cld in Clouds)
             {
                 _exportClouds.Add(new LasCloud(cld, perCldFilter[filterIx], _currentField, fieldFilter));
                 filterIx++;

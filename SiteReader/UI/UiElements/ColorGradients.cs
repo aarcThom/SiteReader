@@ -30,7 +30,7 @@ namespace SiteReader.UI.UiElements
         //returns the color list for a given index
         public static List<Color> GetColorList(int ix, int numOfColors)
         {
-            var blend = GetClrBlend(ix);
+            ColorBlend blend = GetClrBlend(ix);
             var colors = new List<Color>();
 
             for (int i = 0; i < numOfColors; i++)
@@ -51,8 +51,8 @@ namespace SiteReader.UI.UiElements
             ColorBlend clrBlnd = new ColorBlend();
             clrBlnd.Colors = GradColors[ix];
 
-            var cNum = GradColors[ix].Length;
-            var pos = Enumerable.Range(0, cNum).Select(x => (float)x / (cNum - 1)).ToArray();
+            int cNum = GradColors[ix].Length;
+            float[] pos = Enumerable.Range(0, cNum).Select(x => (float)x / (cNum - 1)).ToArray();
             clrBlnd.Positions = pos;
 
             return clrBlnd;

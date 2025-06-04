@@ -56,7 +56,7 @@ namespace SiteReader.Components.Clouds
         {
             _newClouds = new List<LasCloud>();
 
-            foreach (var cld in Clouds)
+            foreach (LasCloud cld in Clouds)
             {
                 _newClouds.Add(new LasCloud(cld, _newDensity));
             }

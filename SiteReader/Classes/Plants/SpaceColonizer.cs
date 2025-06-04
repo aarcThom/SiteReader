@@ -75,12 +75,12 @@ namespace SiteReader.Classes.Plants
 
                     foreach (Point3d branchPt in branch.BranchPts)
                     {
-                        var nbrs = _leafPts.Where(nbr => branchPt.DistanceTo(nbr) <= _searchDist); // find close points
+                        IEnumerable<Point3d> nbrs = _leafPts.Where(nbr => branchPt.DistanceTo(nbr) <= _searchDist); // find close points
                         if (nbrs.Count() == 0) continue;
 
                         parentPts.Add(branchPt); // add the parent point 
 
-                        var nbrVecs = nbrs.Select(nbr => new Vector3d(nbr - branchPt)); // get the vectors
+                        IEnumerable<Vector3d> nbrVecs = nbrs.Select(nbr => new Vector3d(nbr - branchPt)); // get the vectors
                         foreach (Vector3d nbrVec in nbrVecs) { nbrVec.Unitize(); } // unitize the vectors
                         Vector3d sumVec = GeoUtility.SumVectors(nbrVecs, true); // sum the vectors and unitize again
                         newDirVecs.Add(sumVec); // add it to the list
@@ -130,7 +130,7 @@ namespace SiteReader.Classes.Plants
 
             foreach(Point3d lfPt in _leafPts)
             {
-                var vineDist = AllBranchPts.Select(vPt => vPt.DistanceTo(lfPt)).Min(); // get the min distance from branch points
+                double vineDist = AllBranchPts.Select(vPt => vPt.DistanceTo(lfPt)).Min(); // get the min distance from branch points
                 if (vineDist > _pruneDist) { filteredLeaves.Add(lfPt); } // if the leaf point is far away, keep it
             }
 

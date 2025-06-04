@@ -62,7 +62,7 @@ namespace SiteReader.Classes
             _cloudPropNames = new List<string>(CloudProperties.Keys);
 
             //creating the field filters dictionary
-            foreach (var name in _cloudPropNames)
+            foreach (string name in _cloudPropNames)
             {
                 Filters.FieldFilters.Add(name, null);
             }
@@ -191,7 +191,7 @@ namespace SiteReader.Classes
 
         public override IGH_GeometricGoo Morph(SpaceMorph xmorph)
         {
-            var duplicate = m_value.Duplicate();
+            GeometryBase duplicate = m_value.Duplicate();
             xmorph.Morph(duplicate);
             return new LasCloud((PointCloud)duplicate, this);
         }
@@ -202,7 +202,7 @@ namespace SiteReader.Classes
 
         public override IGH_GeometricGoo DuplicateGeometry()
         {
-            var duplicate = m_value.Duplicate();
+            GeometryBase duplicate = m_value.Duplicate();
             return new LasCloud((PointCloud)duplicate, this);
         }
 
@@ -210,7 +210,7 @@ namespace SiteReader.Classes
 
         public override IGH_GeometricGoo Transform(Transform xform)
         {
-            var duplicate = m_value.Duplicate();
+            GeometryBase duplicate = m_value.Duplicate();
             duplicate.Transform(xform);
             return new LasCloud((PointCloud)duplicate, this);
         }
@@ -225,7 +225,7 @@ namespace SiteReader.Classes
         {
             if (Filters.CropMesh == null) return;
 
-            var propertiesOut = CloudUtility.CopyPropDictKeys(_cloudProperties);
+            SortedDictionary<string, List<int>> propertiesOut = CloudUtility.CopyPropDictKeys(_cloudProperties);
             var ptCldOut = new PointCloud();
             var newColors = new List<Color>();
 
@@ -233,16 +233,16 @@ namespace SiteReader.Classes
             {
                 if (Filters.CropMesh.IsPointInside(PtCloud[i].Location, 0.01, false) == inside)
                 {
-                    var color = PtCloud[i].Color;
-                    var location = PtCloud[i].Location;
+                    Color color = PtCloud[i].Color;
+                    Point3d location = PtCloud[i].Location;
 
                     ptCldOut.Add(location, color);
                     newColors.Add(color);
 
-                    foreach (var pair in _cloudProperties)
+                    foreach (KeyValuePair<string, List<int>> pair in _cloudProperties)
                     {
-                        var key = pair.Key;
-                        var value = pair.Value[i];
+                        string key = pair.Key;
+                        int value = pair.Value[i];
 
                         propertiesOut[key].Add(value);
                     }

@@ -47,7 +47,7 @@ namespace SiteReader.Components.Clouds
         {
             if (Clouds == null || Clouds.Count == 0) return;
             
-            foreach (var cloud in Clouds)
+            foreach (LasCloud cloud in Clouds)
             {
                 if (cloud != null && cloud.PtCloud != null && !Locked)
                 {
@@ -62,8 +62,8 @@ namespace SiteReader.Components.Clouds
             {
                 if (Clouds == null || Clouds.Count == 0) return base.ClippingBox;
 
-                var boxes = from cloud in Clouds where cloud != null select cloud.Boundingbox;
-                var box = GeoUtility.MergeBoundingBoxes(boxes);
+                IEnumerable<BoundingBox> boxes = from cloud in Clouds where cloud != null select cloud.Boundingbox;
+                BoundingBox box = GeoUtility.MergeBoundingBoxes(boxes);
 
                 return (box.IsValid) ? box : base.ClippingBox;
             }

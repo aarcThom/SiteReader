@@ -40,7 +40,7 @@ namespace SiteReader.Components.Clouds
         {
             base.SolveInstance(DA);
 
-            List<GeometryBase> geoIn = new List<GeometryBase>();
+            var geoIn = new List<GeometryBase>();
             if (!DA.GetDataList(1, geoIn)) return;
 
 
@@ -57,7 +57,7 @@ namespace SiteReader.Components.Clouds
 
             var cloudsOut = new List<LasCloud>();
 
-            foreach (var cloud in Clouds)
+            foreach (LasCloud cloud in Clouds)
             {
                 var newCloud = new LasCloud(cloud);
 

@@ -39,7 +39,7 @@ namespace SiteReader.Components.Extras
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             
-            List<GeometryBase> geoIn = new List<GeometryBase>();
+            var geoIn = new List<GeometryBase>();
             if (!DA.GetDataList(0, geoIn)) return;
 
             int ptCt = 100;
@@ -57,9 +57,9 @@ namespace SiteReader.Components.Extras
             }
 
             //figure out how many points per face
-            var faceAreas = initMesh.Faces.Select(i => Meshing.AreaOfTriFace(initMesh, i));
-            var totalArea = faceAreas.Sum();
-            var ptCounts = faceAreas.Select(i => (int)Math.Ceiling(i / totalArea * ptCt));
+            IEnumerable<double> faceAreas = initMesh.Faces.Select(i => Meshing.AreaOfTriFace(initMesh, i));
+            double totalArea = faceAreas.Sum();
+            IEnumerable<int> ptCounts = faceAreas.Select(i => (int)Math.Ceiling(i / totalArea * ptCt));
 
 
             var newPts = new List<Point3d>();
@@ -68,21 +68,21 @@ namespace SiteReader.Components.Extras
 
             foreach (var pair in initMesh.Faces.Zip(ptCounts, (face, ptCnt) => new { face, ptCnt }))
             {
-                var face = pair.face;
-                var ptCnt = pair.ptCnt;
+                MeshFace face = pair.face;
+                int ptCnt = pair.ptCnt;
 
-                var facePoints = Meshing.GetFacePoints(initMesh, face);
+                List<Point3d> facePoints = Meshing.GetFacePoints(initMesh, face);
 
                 for (int i = 0; i < ptCnt; i++)
                 {
-                    var bw = Meshing.GetBaryWeights(rand);
-                    var randPt = facePoints[0] * bw.u + facePoints[1] * bw.v + facePoints[2] * bw.w;
+                    (double u, double v, double w) bw = Meshing.GetBaryWeights(rand);
+                    Point3d randPt = facePoints[0] * bw.u + facePoints[1] * bw.v + facePoints[2] * bw.w;
                     newPts.Add(randPt);
 
                 }
             }
 
-            var shuffledPts = newPts.Shuffle();
+            IEnumerable<Point3d> shuffledPts = newPts.Shuffle();
             DA.SetDataList(0, shuffledPts.Take(ptCt));
         }
 

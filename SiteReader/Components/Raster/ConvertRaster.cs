@@ -38,19 +38,19 @@ namespace SiteReader.Components.Raster
         //SOLVE =======================================================================================================
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string file_in = String.Empty;
-            string dir_out = String.Empty;
+            var file_in = String.Empty;
+            var dir_out = String.Empty;
 
             if (!DA.GetData(0, ref file_in)) return;
             if (!DA.GetData(1, ref dir_out)) return;
 
-            List<string> commands = new List<string>()
+            var commands = new List<string>()
             {
                 StandAlone.FormatWinDir(file_in), 
                 StandAlone.FormatWinDir(dir_out) 
             };
 
-            StandAlone app = new StandAlone("raster2jpeg", commands);
+            var app = new StandAlone("raster2jpeg", commands);
 
             string output = app.LaunchCommandLineApp();
 

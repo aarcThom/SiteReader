@@ -88,13 +88,13 @@ namespace SiteReader.UI.UiElements
             if (FieldValues != null)
             {
                 // getting the horizontal positions
-                var barsX = Utility.EvenSpacePts(GraphBounds, FieldValues.Max() + 1, _sliderDia / 2);
+                List<float> barsX = Utility.EvenSpacePts(GraphBounds, FieldValues.Max() + 1, _sliderDia / 2);
 
                 //getting the range for the vertical
-                var maxVert = GraphBounds.Y + 1;
-                var minVert = GraphBounds.Bottom - 1;
+                float maxVert = GraphBounds.Y + 1;
+                float minVert = GraphBounds.Bottom - 1;
 
-                var maxCount = (float)Utility.GetMaxCountItems(FieldValues);
+                float maxCount = (float)Utility.GetMaxCountItems(FieldValues);
 
                 _barsTopPts = new List<PointF>();
                 _barsBotPts = new List<PointF>();
@@ -105,8 +105,8 @@ namespace SiteReader.UI.UiElements
                 {
                     if (FieldValues.Contains(i))
                     {
-                        var numI = (float)Utility.GetNumCount(FieldValues, i);
-                        var topY = numI.Remap(0f, maxCount, minVert, maxVert);
+                        float numI = (float)Utility.GetNumCount(FieldValues, i);
+                        float topY = numI.Remap(0f, maxCount, minVert, maxVert);
 
                         _barsBotPts.Add(new PointF(barsX[i], minVert));
                         _barsTopPts.Add(new PointF(barsX[i], topY));
@@ -155,8 +155,8 @@ namespace SiteReader.UI.UiElements
             }
             else
             {
-                var lastIx = _barsBotPts.Count - 1;
-                var polyPoints = _barsTopPts.Where((x, i) => i % 4 == 0).ToList();
+                int lastIx = _barsBotPts.Count - 1;
+                List<PointF> polyPoints = _barsTopPts.Where((x, i) => i % 4 == 0).ToList();
                 polyPoints.Add(_barsBotPts[lastIx]); // bottom right corner
                 polyPoints.Add(_barsBotPts[0]); // bottom left corner
 
@@ -173,10 +173,10 @@ namespace SiteReader.UI.UiElements
             _rightSlider.Render(g, channel, Palette);
 
             // rendering the slide mid-pt lines
-            var leftLineX = _leftSlider.Bounds.Left + _sliderDia / 2;
-            var rightLineX = _rightSlider.Bounds.Right - _sliderDia / 2;
-            var linesBot = GraphBounds.Bottom - 4;
-            var linesTop = GraphBounds.Top + 4;
+            float leftLineX = _leftSlider.Bounds.Left + _sliderDia / 2;
+            float rightLineX = _rightSlider.Bounds.Right - _sliderDia / 2;
+            float linesBot = GraphBounds.Bottom - 4;
+            float linesTop = GraphBounds.Top + 4;
 
             g.DrawLine(SrPalette.GraphLight, leftLineX, linesBot, leftLineX, linesTop);
             g.DrawLine(SrPalette.GraphLight, rightLineX, linesBot, rightLineX, linesTop);
@@ -185,8 +185,8 @@ namespace SiteReader.UI.UiElements
         // MOUSE EVENTS ===============================================================================================
         public GH_ObjectResponse MouseDown(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)
         {
-            var leftResponse = _leftSlider.MouseDown(sender, e, uiBase);
-            var rightResponse = _rightSlider.MouseDown(sender, e, uiBase);
+            GH_ObjectResponse leftResponse = _leftSlider.MouseDown(sender, e, uiBase);
+            GH_ObjectResponse rightResponse = _rightSlider.MouseDown(sender, e, uiBase);
 
             if (leftResponse != GH_ObjectResponse.Ignore) return leftResponse;
             if (rightResponse != GH_ObjectResponse.Ignore) return rightResponse;
@@ -195,8 +195,8 @@ namespace SiteReader.UI.UiElements
         }
         public GH_ObjectResponse MouseUp(GH_Canvas sender, GH_CanvasMouseEvent e, GH_ComponentAttributes uiBase)
         {
-            var leftResponse = _leftSlider.MouseUp(sender, e, uiBase);
-            var rightResponse = _rightSlider.MouseUp(sender, e, uiBase);
+            GH_ObjectResponse leftResponse = _leftSlider.MouseUp(sender, e, uiBase);
+            GH_ObjectResponse rightResponse = _rightSlider.MouseUp(sender, e, uiBase);
 
             // the normalized positions to return to the main component - expire solution if need be
             LeftBounds = _leftSlider.Position;

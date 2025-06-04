@@ -83,12 +83,12 @@ namespace SiteReader.UI
             //the main component rendering channel
             if (channel == GH_CanvasChannel.Objects)
             {
-                //declare the pens / brushes / pallets we will need to draw the custom objects
-                //- defaults for blank / message levels
+                // declare the pens / brushes / pallets we will need to draw the custom objects
+                // - defaults for blank / message levels
                 Pen outLine = SrPalette.BlankOutline;
                 GH_Palette palette = GH_Palette.Normal;
 
-                //use a switch statement to retrieve the proper pens / brushes from our CompColors class
+                // retrieve the proper pens / brushes from our CompColors class
                 switch (Owner.RuntimeMessageLevel)
                 {
                     case GH_RuntimeMessageLevel.Warning:
@@ -127,7 +127,7 @@ namespace SiteReader.UI
         {
             foreach (var uiComp in ComponentList)
             {
-                var compResponse = uiComp.MouseDown(sender, e, this);
+                GH_ObjectResponse compResponse = uiComp.MouseDown(sender, e, this);
                 if (compResponse != GH_ObjectResponse.Ignore)
                 {
                     return compResponse;
@@ -138,9 +138,9 @@ namespace SiteReader.UI
 
         public override GH_ObjectResponse RespondToMouseUp(GH_Canvas sender, GH_CanvasMouseEvent e)
         {
-            foreach (var uiComp in ComponentList)
+            foreach (IUi uiComp in ComponentList)
             {
-                var compResponse = uiComp.MouseUp(sender, e, this);
+                GH_ObjectResponse compResponse = uiComp.MouseUp(sender, e, this);
                 if (compResponse != GH_ObjectResponse.Ignore)
                 {
                     return compResponse;
@@ -151,9 +151,9 @@ namespace SiteReader.UI
 
         public override GH_ObjectResponse RespondToMouseDoubleClick(GH_Canvas sender, GH_CanvasMouseEvent e)
         {
-            foreach (var uiComp in ComponentList)
+            foreach (IUi uiComp in ComponentList)
             {
-                var compResponse = uiComp.MouseDoubleClick(sender, e, this);
+                GH_ObjectResponse compResponse = uiComp.MouseDoubleClick(sender, e, this);
                 if (compResponse != GH_ObjectResponse.Ignore)
                 {
                     return compResponse;
@@ -164,9 +164,9 @@ namespace SiteReader.UI
 
         public override GH_ObjectResponse RespondToMouseMove(GH_Canvas sender, GH_CanvasMouseEvent e)
         {
-            foreach (var uiComp in ComponentList)
+            foreach (IUi uiComp in ComponentList)
             {
-                var compResponse = uiComp.MouseMove(sender, e, this);
+                GH_ObjectResponse compResponse = uiComp.MouseMove(sender, e, this);
                 if (compResponse != GH_ObjectResponse.Ignore)
                 {
                     return compResponse;

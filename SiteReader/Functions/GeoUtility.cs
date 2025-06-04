@@ -2,6 +2,7 @@
 using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -16,9 +17,9 @@ namespace SiteReader.Functions
         /// <param name="box">bounding box surrounding geo to zoom in on</param>
         public static void ZoomGeo(BoundingBox box)
         {
-            var views = RhinoDoc.ActiveDoc.Views.GetViewList(true, false);
+            Rhino.Display.RhinoView[] views = RhinoDoc.ActiveDoc.Views.GetViewList(true, false);
 
-            foreach (var view in views)
+            foreach (Rhino.Display.RhinoView view in views)
             {
                 view.ActiveViewport.ZoomBoundingBox(box);
                 view.Redraw();
@@ -40,7 +41,7 @@ namespace SiteReader.Functions
             double yMax = double.MinValue;
             double zMax = double.MinValue;
 
-            foreach (var b in bBoxes)
+            foreach (BoundingBox b in bBoxes)
             {
                 xMin = b.Min.X < xMin ? b.Min.X : xMin;
                 yMin = b.Min.Y < yMin ? b.Min.Y : yMin;
@@ -51,8 +52,8 @@ namespace SiteReader.Functions
                 zMax = b.Max.Z > zMax ? b.Max.Z : zMax;
             }
 
-            Point3d minPt = new Point3d(xMin, yMin, zMin);
-            Point3d maxPt = new Point3d(xMax, yMax,  zMax);
+            var minPt = new Point3d(xMin, yMin, zMin);
+            var maxPt = new Point3d(xMax, yMax,  zMax);
 
             return new BoundingBox(minPt, maxPt);
         }
@@ -77,7 +78,7 @@ namespace SiteReader.Functions
             }
 
             Mesh mesh = new Mesh();
-            foreach (var geo in geometry)
+            foreach (GeometryBase geo in geometry)
             {
                 if (geo == null)
                 {
@@ -140,7 +141,7 @@ namespace SiteReader.Functions
         /// <returns>A single summed (and maybe unitized) vector</returns>
         public static Vector3d SumVectors(IEnumerable<Vector3d> vecIn, bool unitize = false)
         {
-            Vector3d blankVec = new Vector3d(0, 0, 0);
+            var blankVec = new Vector3d(0, 0, 0);
 
             foreach(Vector3d vec in vecIn)
             {
@@ -163,16 +164,62 @@ namespace SiteReader.Functions
         /// <returns>Average closest neighbour distanc</returns>
         public static double AveragePtDist(List<Point3d> ptList)
         {
-            List<double> distList = new List<double>();
+            var distList = new List<double>();
             foreach(Point3d pt in ptList)
             {
-                var nbrs = ptList.Where(nbr => pt != nbr);
-                var nbrDists = nbrs.Select(nbr => nbr.DistanceTo(pt));
+                IEnumerable<Point3d> nbrs = ptList.Where(nbr => pt != nbr);
+                IEnumerable<double> nbrDists = nbrs.Select(nbr => nbr.DistanceTo(pt));
                 distList.Add(nbrDists.Min());
             }
 
             double avgDist = distList.Sum() / ptList.Count();
             return avgDist;
         }
+
+        public static Curve PullCrvToMesh(Curve crv, Mesh mesh, double maxDist)
+        {
+            int divs = (int)crv.GetLength() * 2; // might want to replace this with user input resolution
+
+            double[] crvParams = crv.DivideByCount(divs, true);
+            IEnumerable<Point3d> crvPts = crvParams.Select(p => crv.PointAt(p));
+
+            var mPts = new List<Point3d>();
+            foreach(Point3d pt in crvPts)
+            {
+                Point3d tPt = PullClosePtToMesh(mesh, pt, maxDist);
+                tPt = PullInteriorPtToMsh(mesh, tPt);
+                mPts.Add(tPt);
+            }
+
+            Curve tightCrv = Curve.CreateControlPointCurve(mPts);
+            return tightCrv;
+        }
+
+        /// <summary>
+        /// Get closest point on mesh if point is inside.
+        /// </summary>
+        /// <param name="mesh">Mesh to test for pt interiority.</param>
+        /// <param name="pt">Pt to test whether inside.</param>
+        /// <returns>Closest Pt on mesh, is input pt is inside, original pt if not.</returns>
+        public static Point3d PullInteriorPtToMsh(Mesh mesh, Point3d pt)
+        {
+            bool ptInside = mesh.IsPointInside(pt, RhinoDoc.ActiveDoc.ModelAbsoluteTolerance, true);
+            return (ptInside) ? mesh.ClosestPoint(pt) : pt;
+        }
+
+        /// <summary>
+        /// If a point is within the max allowable distance, pull it to a mesh.
+        /// </summary>
+        /// <param name="mesh">Mesh to pull point to.</param>
+        /// <param name="pt">Point to pull.</param>
+        /// <param name="maxDist">The max distance the point can be pulled.</param>
+        /// <returns>The point on mesh if original pt was within maxDist from mesh, otherwise, original point.</returns>
+        public static Point3d PullClosePtToMesh(Mesh mesh, Point3d pt, double maxDist)
+        {
+            Int32 faceIx = mesh.ClosestPoint(pt, out Point3d mPt, maxDist);
+            return (faceIx != -1) ? mPt : pt;
+        }
+
+
     }
 }

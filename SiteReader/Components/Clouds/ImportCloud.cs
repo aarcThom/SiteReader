@@ -40,12 +40,12 @@ namespace SiteReader.Components.Clouds
         //SOLVE =======================================================================================================
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            List<string> paths = new List<string>();
+            var paths = new List<string>();
             if (!DA.GetDataList(0, paths)) return;
 
             var fTypes = new List<string>() { ".las", ".laz" };
 
-            foreach (var path in paths)
+            foreach (string path in paths)
             {
                 if (!Utility.TestFile(path, fTypes, out string msg))
                 {
@@ -60,7 +60,7 @@ namespace SiteReader.Components.Clouds
             if (_importState)
             {
                 Clouds = new List<LasCloud>();
-                foreach (var path in paths)
+                foreach (string path in paths)
                 {
                     Clouds.Add(new LasCloud(path, density));
                 }

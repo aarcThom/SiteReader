@@ -31,7 +31,7 @@ namespace SiteReader.Components.Clouds
             DataTree<string> treeOut = new DataTree<string>();
 
             int treePath = 0;
-            foreach (var cld in Clouds)
+            foreach (Classes.LasCloud cld in Clouds)
             {
                 Dictionary<string, string> cldVlrs = CloudUtility.VlrDict(cld);
                 List<string> vlrsOut = StringDictGhOut(cldVlrs);
@@ -52,7 +52,7 @@ namespace SiteReader.Components.Clouds
         /// <returns>string list for GH output</returns>
         private List<string> StringDictGhOut(Dictionary<string, string> stringDict)
         {
-            List<string> ghOut = new List<string>();
+            var ghOut = new List<string>();
 
             if (stringDict.Count == 0)
             {
