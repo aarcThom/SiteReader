@@ -177,9 +177,19 @@ namespace SiteReader.Functions
             return avgDist;
         }
 
+        /// <summary>
+        /// Trys to project a curve onto a mesh, but allows for blending between original curve and
+        /// attempted projected curve (the smoothing).
+        /// </summary>
+        /// <param name="crv">Curve to project onto mesh</param>
+        /// <param name="mesh">Mesh to project onto</param>
+        /// <param name="numPts">Number of points to use to rebuild the curve</param>
+        /// <param name="smoothing">Value between 0 and 1, where 0 means projected curve, 
+        /// and 1 means original curve</param>
+        /// <returns></returns>
         public static Curve PtTweenCrvNMesh(Curve crv, Mesh mesh, int numPts, double smoothing)
         {
-            smoothing = Utility.Clamp(smoothing, 0, 0.99);
+            smoothing = Utility.Clamp(smoothing, 0, 1);
             List<Point3d> crvPts = UniformPtsOnCrv(crv, numPts);
             IEnumerable<Point3d> exteriorPts = crvPts.Select(pt => PullInteriorPtToMsh(mesh, pt));
             IEnumerable<Point3d> meshPts = exteriorPts.Select(pt => mesh.ClosestPoint(pt));

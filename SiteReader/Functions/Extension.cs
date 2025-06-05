@@ -44,11 +44,13 @@ namespace SiteReader.Functions
         }
 
         /// <summary>
-        /// Shuffles an Ienumerable
+        /// Returns a new sequence containing the elements of the source collection in random order.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <returns></returns>
+        /// <remarks>This method uses a random number generator to shuffle the elements of the source
+        /// collection. The original collection is not modified.</remarks>
+        /// <typeparam name="T">The type of elements in the source collection.</typeparam>
+        /// <param name="source">The collection to shuffle. Cannot be null.</param>
+        /// <returns>An <see cref="IEnumerable{T}"/> containing the elements of the source collection in random order.</returns>
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
         {
             var random = new Random();

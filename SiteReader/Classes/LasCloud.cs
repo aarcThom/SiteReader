@@ -92,7 +92,16 @@ namespace SiteReader.Classes
             m_value = PtCloud;
         }
 
-        // GH components transforming the LASCloud object
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LasCloud"/> class by transforming an existing point cloud and
+        /// copying properties from another <see cref="LasCloud"/> instance.
+        /// </summary>
+        /// <remarks>This constructor creates a new <see cref="LasCloud"/> object by associating it with a
+        /// transformed point cloud and copying relevant properties, filters, and metadata from the specified <paramref
+        /// name="cldIn"/> instance. The <paramref name="cldIn"/> parameter must contain valid data, as its properties
+        /// are deeply copied into the new instance.</remarks>
+        /// <param name="transformedCloud">The transformed point cloud to associate with this instance.</param>
+        /// <param name="cldIn">An existing <see cref="LasCloud"/> instance from which properties and metadata will be copied.</param>
         public LasCloud(PointCloud transformedCloud, LasCloud cldIn)
         {
             FileMethods = new LasFile(cldIn.FileMethods.FilePath);

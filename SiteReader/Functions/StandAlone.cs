@@ -19,6 +19,12 @@ namespace SiteReader.Functions
 
         // CONSTRUCTORS ===============================================================================================
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StandAlone"/> class with the specified sub-parser and command
+        /// list.
+        /// </summary>
+        /// <param name="subParser">The name of the sub-parser to be used. Cannot be null or empty.</param>
+        /// <param name="commands">A list of commands to be processed. Cannot be null and must contain at least one command.</param>
         public StandAlone(string subParser, List<string> commands)
         {
             _subParser = subParser;

@@ -7,6 +7,7 @@ using Rhino.Geometry;
 using SiteReader.Functions;
 using SiteReader.Components.Plants;
 using SiteReader.Classes.Plants;
+using System.Linq;
 
 namespace SiteReader.Components.Clouds
 {
@@ -22,8 +23,8 @@ namespace SiteReader.Components.Clouds
         //IO ==========================================================================================================
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddCurveParameter("Guide Curve", "gCrv", "The curve that will guide the main vine across your geometry. " +
-                "It doesn't need to be exact - it will be fit on the surface.", GH_ParamAccess.item);
+            pManager.AddCurveParameter("Guide Curves", "gCrvs", "The curves that will guide the main vine across your geometry. " +
+                "They doesn't need to be exact - it will be fit on the surface.", GH_ParamAccess.list);
             pManager.AddGeometryParameter("Geometry", "Geo", "Provide the Brep(s) / Mesh(s) you want wrap the vine around", GH_ParamAccess.list);
             pManager.AddIntegerParameter("VinePt Num", "vPt#", "The number of points on your central vine curve. A higher number, " +
                 "will add more resolution. A lower number will smooth out your vine.", GH_ParamAccess.item);
@@ -41,8 +42,8 @@ namespace SiteReader.Components.Clouds
         {
             // INPUT =====================================================
 
-            Curve mainVine = null;
-            if (!DA.GetData(0, ref mainVine)) return;
+            var vinesIn = new List<Curve>();
+            if (!DA.GetDataList(0, vinesIn)) return;
 
             var geoIn = new List<GeometryBase>();
             if (!DA.GetDataList(1, geoIn)) return;
@@ -63,12 +64,18 @@ namespace SiteReader.Components.Clouds
                 return;
             }
             // WORK ========================================================
-            Curve pullCrv = GeoUtility.PtTweenCrvNMesh(mainVine, initMesh, ptCnt, smoothing);
+
+            // get main vines
+            List<Curve> cntrlCrvs = vinesIn.Select(v => GeoUtility.PtTweenCrvNMesh(v, initMesh, ptCnt, smoothing)).ToList();
+
+            //Inflate Mesh
+
+
 
 
             // OUTPUT ====================================================
 
-            DA.SetData(0, pullCrv);
+            DA.SetDataList(0, cntrlCrvs);
 
         }
 

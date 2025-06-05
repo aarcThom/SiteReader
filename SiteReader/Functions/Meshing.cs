@@ -54,6 +54,15 @@ namespace siteReader.Methods
             return inMesh;
         }
 
+        /// <summary>
+        /// Retrieves a list of triangular faces from the specified mesh.
+        /// </summary>
+        /// <remarks>This method iterates through all faces in the provided mesh and converts them into 
+        /// triangular representations using vertex indices. The resulting list can be used for  further geometric
+        /// processing or analysis.</remarks>
+        /// <param name="mesh">The mesh from which to extract triangular faces. Must not be null.</param>
+        /// <returns>A list of triangular faces represented as <see cref="g3.Index3i"/> objects,  where each object contains the
+        /// indices of the vertices that form a triangle.</returns>
         public static List<g3.Index3i> GetFaces(Mesh mesh)
         {
             var triList = new List<g3.Index3i>();
@@ -66,6 +75,12 @@ namespace siteReader.Methods
             return triList;
         }
 
+        /// <summary>
+        /// Extracts the vertices from the specified mesh and returns them as a list of 3D vectors.
+        /// </summary>
+        /// <param name="mesh">The mesh from which to extract vertices. Cannot be null.</param>
+        /// <returns>A list of 3D vectors representing the vertices of the mesh. The list will be empty if the mesh contains no
+        /// vertices.</returns>
         public static List<g3.Vector3f> GetVertices(Mesh mesh)
         {
             var vertices = new List<g3.Vector3f>();
@@ -78,6 +93,11 @@ namespace siteReader.Methods
             return vertices;
         }
 
+        /// <summary>
+        /// Converts the normals of a Rhino <see cref="Mesh"/> to a list of <see cref="g3.Vector3f"/>.
+        /// </summary>
+        /// <param name="mesh">The Rhino <see cref="Mesh"/> whose normals are to be converted. Must not be <see langword="null"/>.</param>
+        /// <returns>A list of <see cref="g3.Vector3f"/> representing the normals of the input <paramref name="mesh"/>.</returns>
         public static List<g3.Vector3f> GetNormals(Mesh mesh)
         {
             var normals = new List<g3.Vector3f>();
@@ -90,7 +110,15 @@ namespace siteReader.Methods
             return normals;
         }
 
-
+        /// <summary>
+        /// Converts a <see cref="Mesh"/> object into a <see cref="DMesh3"/> representation.
+        /// </summary>
+        /// <remarks>This method performs triangulation on the input mesh to ensure it is suitable for
+        /// conversion. The resulting <see cref="DMesh3"/> includes vertex normals, which are derived from the input
+        /// mesh.</remarks>
+        /// <param name="rMesh">The input mesh to be converted. Must be a valid mesh object.</param>
+        /// <returns>A <see cref="DMesh3"/> instance containing the vertices, normals, and faces of the input mesh. The resulting
+        /// mesh includes vertex normals as part of its components.</returns>
         public static DMesh3 MeshtoDMesh(Mesh rMesh)
         {
             Mesh triMesh = TriangulateMesh(rMesh);
@@ -112,6 +140,19 @@ namespace siteReader.Methods
             return dMesh;
         }
 
+        /// <summary>
+        /// Creates a mesh by tessellating the points in the specified point cloud.
+        /// </summary>
+        /// <remarks>This method uses the points from the provided point cloud to generate a mesh.  If
+        /// <paramref name="maxLength"/> is set to a value smaller than the default,  the method filters out faces with
+        /// edges longer than the specified length.</remarks>
+        /// <param name="ptCld">The point cloud containing the points to tessellate.</param>
+        /// <param name="maxLength">The maximum allowable length for the edges of the mesh faces.  If the length of an edge exceeds this value,
+        /// the corresponding face is removed.  Defaults to a very large value, effectively disabling edge length
+        /// filtering.</param>
+        /// <returns>A <see cref="Mesh"/> object created from the tessellated points in the point cloud. If <paramref
+        /// name="maxLength"/> is specified and smaller than the default value,  faces with edges exceeding the
+        /// specified length are removed.</returns>
         public static Mesh TesselatePoints(PointCloud ptCld, double maxLength = 10000000000000000000)
         {
 
@@ -199,7 +240,15 @@ namespace siteReader.Methods
             return (u, v, w);
         }
 
-
+        
+        /// <summary>
+        /// Calculates the length of the longest edge of a given mesh face.
+        /// </summary>
+        /// <remarks>For triangular faces, the method considers the three edges formed by the vertices.
+        /// For quadrilateral faces, the method considers all four edges.</remarks>
+        /// <param name="face">The mesh face whose edges are to be analyzed.</param>
+        /// <param name="verts">An array of vertices representing the mesh. Each vertex is indexed by the face.</param>
+        /// <returns>The length of the longest edge of the specified mesh face.</returns>
         private static double GetFaceLongestEdge(MeshFace face, Point3d[] verts)
         {
             var distances = new List<double>();
@@ -219,6 +268,14 @@ namespace siteReader.Methods
             return distances.Max();
         }
 
+        /// <summary>
+        /// Calculates the Euclidean distance between two vertices in a 3D space.
+        /// </summary>
+        /// <param name="a">The index of the first vertex in the <paramref name="verts"/> array.</param>
+        /// <param name="b">The index of the second vertex in the <paramref name="verts"/> array.</param>
+        /// <param name="verts">An array of 3D points representing the vertices. Must contain valid indices for <paramref name="a"/> and
+        /// <paramref name="b"/>.</param>
+        /// <returns>The Euclidean distance between the vertices at indices <paramref name="a"/> and <paramref name="b"/>.</returns>
         private static double DistanceTweenVertices(int a, int b, Point3d[] verts)
         {
             Point3d ptA = verts[a];

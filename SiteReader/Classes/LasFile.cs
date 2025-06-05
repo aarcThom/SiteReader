@@ -41,6 +41,13 @@ namespace SiteReader.Classes
         }
 
         // METHODS ====================================================================================================
+        
+        /// <summary>
+        /// Initializes the internal state by reading metadata from the specified LAS file.
+        /// </summary>
+        /// <remarks>This method opens the LAS file, retrieves the point count and point data format,  and
+        /// then closes the file. It is intended to be used internally to prepare the  object for further
+        /// operations.</remarks>
         private void Construct()
         {
             _lasReader.open_reader(_filePath, out bool isCompressed);
