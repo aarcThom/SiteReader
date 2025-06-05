@@ -11,6 +11,7 @@ namespace SiteReader.Functions
 {
     public static class GeoUtility
     {
+        // GLOBAL VARIABLES ======================================================================================
         /// <summary>
         /// Zooms in on given bounding box
         /// </summary>
@@ -176,23 +177,15 @@ namespace SiteReader.Functions
             return avgDist;
         }
 
-        public static Curve PullCrvToMesh(Curve crv, Mesh mesh, double maxDist)
+        public static Curve PtTweenCrvNMesh(Curve crv, Mesh mesh, int numPts, double smoothing)
         {
-            int divs = (int)crv.GetLength() * 2; // might want to replace this with user input resolution
+            smoothing = Utility.Clamp(smoothing, 0, 0.99);
+            List<Point3d> crvPts = UniformPtsOnCrv(crv, numPts);
+            IEnumerable<Point3d> exteriorPts = crvPts.Select(pt => PullInteriorPtToMsh(mesh, pt));
+            IEnumerable<Point3d> meshPts = exteriorPts.Select(pt => mesh.ClosestPoint(pt));
+            IEnumerable<Point3d> smoothPts = meshPts.Zip(exteriorPts, (mPt, ePt) => mPt * (1 - smoothing) + ePt * smoothing);
 
-            double[] crvParams = crv.DivideByCount(divs, true);
-            IEnumerable<Point3d> crvPts = crvParams.Select(p => crv.PointAt(p));
-
-            var mPts = new List<Point3d>();
-            foreach(Point3d pt in crvPts)
-            {
-                Point3d tPt = PullClosePtToMesh(mesh, pt, maxDist);
-                tPt = PullInteriorPtToMsh(mesh, tPt);
-                mPts.Add(tPt);
-            }
-
-            Curve tightCrv = Curve.CreateControlPointCurve(mPts);
-            return tightCrv;
+            return Curve.CreateControlPointCurve(smoothPts);
         }
 
         /// <summary>
@@ -208,18 +201,19 @@ namespace SiteReader.Functions
         }
 
         /// <summary>
-        /// If a point is within the max allowable distance, pull it to a mesh.
+        /// Given a point count, return evenly spaced (by parameter) points across curve.
         /// </summary>
-        /// <param name="mesh">Mesh to pull point to.</param>
-        /// <param name="pt">Point to pull.</param>
-        /// <param name="maxDist">The max distance the point can be pulled.</param>
-        /// <returns>The point on mesh if original pt was within maxDist from mesh, otherwise, original point.</returns>
-        public static Point3d PullClosePtToMesh(Mesh mesh, Point3d pt, double maxDist)
+        /// <param name="crv">Curve to space points on.</param>
+        /// <param name="ptCnt">Point count.</param>
+        /// <returns>Evenly spaced points.</returns>
+        public static List<Point3d> UniformPtsOnCrv(Curve crv, int ptCnt)
         {
-            Int32 faceIx = mesh.ClosestPoint(pt, out Point3d mPt, maxDist);
-            return (faceIx != -1) ? mPt : pt;
+            double[] crvParams = crv.DivideByCount(ptCnt, true);
+            return crvParams.Select(p => crv.PointAt(p)).ToList();
         }
+
 
 
     }
 }
+

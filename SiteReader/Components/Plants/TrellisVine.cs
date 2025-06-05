@@ -25,8 +25,9 @@ namespace SiteReader.Components.Clouds
             pManager.AddCurveParameter("Guide Curve", "gCrv", "The curve that will guide the main vine across your geometry. " +
                 "It doesn't need to be exact - it will be fit on the surface.", GH_ParamAccess.item);
             pManager.AddGeometryParameter("Geometry", "Geo", "Provide the Brep(s) / Mesh(s) you want wrap the vine around", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Max Distance", "maxD", "The maximum distance from the mesh that a curve point will reach " +
-                "to attach itself to the trellis", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("VinePt Num", "vPt#", "The number of points on your central vine curve. A higher number, " +
+                "will add more resolution. A lower number will smooth out your vine.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Smoothing", "smt", "A number between 0-1 (inclusive) for a post-processing, smoothing.", GH_ParamAccess.item, 0.2);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -46,8 +47,13 @@ namespace SiteReader.Components.Clouds
             var geoIn = new List<GeometryBase>();
             if (!DA.GetDataList(1, geoIn)) return;
 
-            double maxDist = 0;
-            if (!DA.GetData(2, ref maxDist)) return;
+            int ptCnt = 0;
+            if (!DA.GetData(2, ref ptCnt)) return;
+
+            double smoothing = 0.2;
+            DA.GetData(3, ref smoothing);
+
+
 
 
             Mesh initMesh = null;
@@ -56,11 +62,8 @@ namespace SiteReader.Components.Clouds
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, wMsg);
                 return;
             }
-
-            Curve pullCrv = GeoUtility.PullCrvToMesh(mainVine, initMesh, maxDist);
-
             // WORK ========================================================
-
+            Curve pullCrv = GeoUtility.PtTweenCrvNMesh(mainVine, initMesh, ptCnt, smoothing);
 
 
             // OUTPUT ====================================================
