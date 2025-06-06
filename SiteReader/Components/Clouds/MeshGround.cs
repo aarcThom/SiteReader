@@ -2,7 +2,6 @@
 using Rhino.Geometry;
 using System;
 using SiteReader.Functions;
-using siteReader.Methods;
 
 namespace SiteReader.Components.Clouds
 {
@@ -44,11 +43,11 @@ namespace SiteReader.Components.Clouds
             double maxLen = 0;
             if (!DA.GetData(1, ref maxLen))
             {
-                _outMesh = Meshing.TesselatePoints(mergedCld);
+                _outMesh = RMeshing.TesselatePoints(mergedCld);
             }
             else
             {
-                _outMesh = Meshing.TesselatePoints(mergedCld, maxLen);
+                _outMesh = RMeshing.TesselatePoints(mergedCld, maxLen);
             }
 
             DA.SetData(0, _outMesh);

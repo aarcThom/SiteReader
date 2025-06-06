@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Rhino.Geometry;
 using SiteReader.Functions;
-using siteReader.Methods;
 
 namespace SiteReader.Components.Extras
 {

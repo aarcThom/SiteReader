@@ -9,7 +9,6 @@ using SiteReader.Components.Plants;
 using SiteReader.Classes.Plants;
 using System.Linq;
 using NiC = Rhino.NodeInCode;
-using siteReader.Methods;
 
 namespace SiteReader.Components.Clouds
 {
@@ -74,14 +73,12 @@ namespace SiteReader.Components.Clouds
             // WORK ========================================================
 
             //get offset mesh
-            Mesh inflateMesh = Meshing.InflateMeshOut(initMesh, vineRad);
+            Mesh inflateMesh = RMeshing.InflateMeshOut(initMesh, vineRad);
             if (inflateMesh == null) { inflateMesh = initMesh; }
 
             // get main vines
             List<Curve> cntrlCrvs = vinesIn.Select(v => GeoUtility.PtTweenCrvNMesh(v, inflateMesh, ptCnt, smoothing)).ToList();
             // get points for secondary vines
-
-            Mesh testMesh = Meshing.DiyShrnkWrap(initMesh, vineRad);
 
 
 
@@ -89,7 +86,6 @@ namespace SiteReader.Components.Clouds
             // OUTPUT ====================================================
 
             DA.SetDataList(0, cntrlCrvs);
-            DA.SetData(1, testMesh);
 
         }
 

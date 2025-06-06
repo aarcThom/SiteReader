@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using SiteReader.Functions;
-using siteReader.Methods;
 
 namespace SiteReader.Functions
 {
@@ -240,7 +239,7 @@ namespace SiteReader.Functions
         public static List<Point3d> RandomPtsOnMesh(Mesh initMesh, int seed, int ptCt)
         {
             //figure out how many points per face
-            IEnumerable<double> faceAreas = initMesh.Faces.Select(i => Meshing.AreaOfTriFace(initMesh, i));
+            IEnumerable<double> faceAreas = initMesh.Faces.Select(i => RMeshing.AreaOfTriFace(initMesh, i));
             double totalArea = faceAreas.Sum();
             IEnumerable<int> ptCounts = faceAreas.Select(i => (int)Math.Ceiling(i / totalArea * ptCt));
 
@@ -254,11 +253,11 @@ namespace SiteReader.Functions
                 MeshFace face = pair.face;
                 int ptCnt = pair.ptCnt;
 
-                List<Point3d> facePoints = Meshing.GetFacePoints(initMesh, face);
+                List<Point3d> facePoints = RMeshing.GetFacePoints(initMesh, face);
 
                 for (int i = 0; i < ptCnt; i++)
                 {
-                    (double u, double v, double w) bw = Meshing.GetBaryWeights(rand);
+                    (double u, double v, double w) bw = RMeshing.GetBaryWeights(rand);
                     Point3d randPt = facePoints[0] * bw.u + facePoints[1] * bw.v + facePoints[2] * bw.w;
                     newPts.Add(randPt);
 
