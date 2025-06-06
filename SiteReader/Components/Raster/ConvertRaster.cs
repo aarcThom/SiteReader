@@ -1,15 +1,8 @@
 ﻿using Grasshopper.Kernel;
-using SiteReader.Classes;
-using SiteReader.Params;
+using SiteReader.Functions;
 using System;
 using System.Collections.Generic;
-using Rhino.Geometry;
-using SiteReader.Functions;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Globalization;
-using System.Threading;
 
 namespace SiteReader.Components.Raster
 {

@@ -1,12 +1,10 @@
-﻿using System;
-using System.Drawing;
-using System.Windows.Forms;
-using Aardvark.Base;
+﻿using Aardvark.Base;
 using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
-using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
-using Rhino.Input.Custom;
+using System;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace SiteReader.UI.UiElements
 {

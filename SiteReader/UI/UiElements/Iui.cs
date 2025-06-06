@@ -1,8 +1,8 @@
-﻿using System.Drawing;
-using Grasshopper.GUI;
+﻿using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
+using System.Drawing;
 
 namespace SiteReader.UI.UiElements
 {

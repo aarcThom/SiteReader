@@ -1,12 +1,9 @@
-﻿using Grasshopper.Kernel;
-using Rhino;
+﻿using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using SiteReader.Functions;
 
 namespace SiteReader.Functions
 {

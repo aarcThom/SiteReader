@@ -1,13 +1,8 @@
 ﻿using g3;
-using RG = Rhino.Geometry;
-using Rhino.Render.ChangeQueue;
-using Rhino.Runtime;
-using SiteReader.Classes;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mesh = Rhino.Geometry.Mesh;
-using SiteReader.Functions;
+using RG = Rhino.Geometry;
 
 namespace SiteReader.Functions
 {

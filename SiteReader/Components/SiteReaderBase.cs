@@ -1,6 +1,6 @@
-﻿using System.Reflection;
-using Grasshopper.Kernel;
+﻿using Grasshopper.Kernel;
 using System.Drawing;
+using System.Reflection;
 
 namespace SiteReader.Components
 {

@@ -1,14 +1,10 @@
 ﻿using Grasshopper.Kernel;
-using SiteReader.Classes;
-using SiteReader.Params;
+using Rhino.Geometry;
+using SiteReader.Components.Plants;
+using SiteReader.Functions;
 using System;
 using System.Collections.Generic;
-using Rhino.Geometry;
-using SiteReader.Functions;
-using SiteReader.Components.Plants;
-using SiteReader.Classes.Plants;
 using System.Linq;
-using NiC = Rhino.NodeInCode;
 
 namespace SiteReader.Components.Clouds
 {

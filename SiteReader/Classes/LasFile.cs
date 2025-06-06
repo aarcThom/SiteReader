@@ -1,11 +1,11 @@
-﻿using System;
+﻿using LASzip.Net;
+using Rhino.Geometry;
+using SiteReader.Functions;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
-using LASzip.Net;
-using Rhino.Geometry;
-using SiteReader.Functions;
 
 namespace SiteReader.Classes
 {

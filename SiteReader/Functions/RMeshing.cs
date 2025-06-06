@@ -1,6 +1,4 @@
 ﻿using Rhino.Geometry;
-using Rhino.Runtime;
-using SiteReader.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;

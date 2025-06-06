@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
+using Rhino;
+using Rhino.DocObjects;
+using Rhino.Geometry;
+using SiteReader.Functions;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
-using Grasshopper.Kernel.Types;
-using Grasshopper.Kernel;
-using Rhino.Geometry;
-using Rhino.DocObjects;
-using Rhino;
-using SiteReader.Functions;
 
 namespace SiteReader.Classes
 {

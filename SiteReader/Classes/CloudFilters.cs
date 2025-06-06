@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Rhino.Geometry;
+﻿using Rhino.Geometry;
 using SiteReader.Functions;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SiteReader.Classes
 {

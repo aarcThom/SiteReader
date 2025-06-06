@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using Grasshopper.Kernel;
+﻿using Grasshopper.Kernel;
 using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
 using SiteReader.Classes;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Reflection;
 
