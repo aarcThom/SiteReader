@@ -1,9 +1,12 @@
 ﻿using g3;
-using Rhino.Geometry;
+using RG = Rhino.Geometry;
+using Rhino.Render.ChangeQueue;
+using Rhino.Runtime;
 using SiteReader.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Mesh = Rhino.Geometry.Mesh;
 
 namespace siteReader.Methods
 {
@@ -20,7 +23,7 @@ namespace siteReader.Methods
         /// <returns>Mesh composed of only triangular faces</returns>
         public static Mesh TriangulateMesh(Mesh inMesh)
         {
-            foreach (MeshFace face in inMesh.Faces)
+            foreach (RG.MeshFace face in inMesh.Faces)
             {
                 if (face.IsQuad)
                 {
@@ -42,8 +45,8 @@ namespace siteReader.Methods
                 }
             }
 
-            var newFaces = new List<MeshFace>();
-            foreach (MeshFace fc in inMesh.Faces)
+            var newFaces = new List<RG.MeshFace>();
+            foreach (RG.MeshFace fc in inMesh.Faces)
             {
                 if (fc.IsTriangle) newFaces.Add(fc);
             }
@@ -67,7 +70,7 @@ namespace siteReader.Methods
         {
             var triList = new List<g3.Index3i>();
 
-            foreach (MeshFace face in mesh.Faces)
+            foreach (RG.MeshFace face in mesh.Faces)
             {
                 var tri = new g3.Index3i(face.A, face.B, face.C);
                 triList.Add(tri);
@@ -85,7 +88,7 @@ namespace siteReader.Methods
         {
             var vertices = new List<g3.Vector3f>();
 
-            foreach (Point3f vert in mesh.Vertices)
+            foreach (RG.Point3f vert in mesh.Vertices)
             {
                 var coords = new g3.Vector3f(vert.X, vert.Y, vert.Z);
                 vertices.Add(coords);
@@ -153,23 +156,23 @@ namespace siteReader.Methods
         /// <returns>A <see cref="Mesh"/> object created from the tessellated points in the point cloud. If <paramref
         /// name="maxLength"/> is specified and smaller than the default value,  faces with edges exceeding the
         /// specified length are removed.</returns>
-        public static Mesh TesselatePoints(PointCloud ptCld, double maxLength = 10000000000000000000)
+        public static Mesh TesselatePoints(RG.PointCloud ptCld, double maxLength = 10000000000000000000)
         {
 
-            Point3d[] rPts = ptCld.GetPoints();
+            RG.Point3d[] rPts = ptCld.GetPoints();
 
-            Mesh mesh = Mesh.CreateFromTessellation(rPts, null, Plane.WorldXY, false);
+            Mesh mesh = Mesh.CreateFromTessellation(rPts, null, RG.Plane.WorldXY, false);
 
             if (maxLength < 10000000000000000000)
             {
-                Rhino.Geometry.Collections.MeshFaceList faces = mesh.Faces;
-                Point3d[] vertices = mesh.Vertices.ToPoint3dArray();
+                RG.Collections.MeshFaceList faces = mesh.Faces;
+                RG.Point3d[] vertices = mesh.Vertices.ToPoint3dArray();
 
                 var longFaces = new List<int>();
 
                 for (int i = 0; i < faces.Count; i++)
                 {
-                    MeshFace face = faces[i];
+                    RG.MeshFace face = faces[i];
                     if (GetFaceLongestEdge(face, vertices) > maxLength)
                     {
                         longFaces.Add(i);
@@ -190,10 +193,10 @@ namespace siteReader.Methods
         /// <param name="fMesh">Mesh that contains the face</param>
         /// <param name="mFace">The triangular face</param>
         /// <returns>area in square units</returns>
-        public static double AreaOfTriFace(Mesh fMesh, MeshFace mFace) 
+        public static double AreaOfTriFace(Mesh fMesh, RG.MeshFace mFace) 
         {
 
-            List<Point3d> triPts = GetFacePoints(fMesh, mFace);
+            List<RG.Point3d> triPts = GetFacePoints(fMesh, mFace);
 
             double a = triPts[0].DistanceTo(triPts[1]);
             double b = triPts[1].DistanceTo(triPts[2]);
@@ -210,13 +213,13 @@ namespace siteReader.Methods
         /// <param name="fMesh">Mesh that contains the face</param>
         /// <param name="mFace">The face</param>
         /// <returns>A list of Point 3ds - 3 pts for triangles, 4 pts for quads.</returns>
-        public static List<Point3d> GetFacePoints(Mesh fMesh, MeshFace mFace)
+        public static List<RG.Point3d> GetFacePoints(Mesh fMesh, RG.MeshFace mFace)
         {
-            Point3d ptA = fMesh.Vertices[mFace.A];
-            Point3d ptB = fMesh.Vertices[mFace.B];
-            Point3d ptC = fMesh.Vertices[mFace.C];
+            RG.Point3d ptA = fMesh.Vertices[mFace.A];
+            RG.Point3d ptB = fMesh.Vertices[mFace.B];
+            RG.Point3d ptC = fMesh.Vertices[mFace.C];
 
-            var ptList = new List<Point3d>() { ptA, ptB, ptC };
+            var ptList = new List<RG.Point3d>() { ptA, ptB, ptC };
 
             if (mFace.IsQuad)
             {
@@ -249,7 +252,7 @@ namespace siteReader.Methods
         /// <param name="face">The mesh face whose edges are to be analyzed.</param>
         /// <param name="verts">An array of vertices representing the mesh. Each vertex is indexed by the face.</param>
         /// <returns>The length of the longest edge of the specified mesh face.</returns>
-        private static double GetFaceLongestEdge(MeshFace face, Point3d[] verts)
+        private static double GetFaceLongestEdge(RG.MeshFace face, RG.Point3d[] verts)
         {
             var distances = new List<double>();
             distances.Add(DistanceTweenVertices(face.A, face.B, verts));
@@ -276,13 +279,157 @@ namespace siteReader.Methods
         /// <param name="verts">An array of 3D points representing the vertices. Must contain valid indices for <paramref name="a"/> and
         /// <paramref name="b"/>.</param>
         /// <returns>The Euclidean distance between the vertices at indices <paramref name="a"/> and <paramref name="b"/>.</returns>
-        private static double DistanceTweenVertices(int a, int b, Point3d[] verts)
+        private static double DistanceTweenVertices(int a, int b, RG.Point3d[] verts)
         {
-            Point3d ptA = verts[a];
-            Point3d ptB = verts[b];
+            RG.Point3d ptA = verts[a];
+            RG.Point3d ptB = verts[b];
 
             return ptA.DistanceTo(ptB);
         }
 
+        /// <summary>
+        /// Creates an inflated version of the input mesh by applying a positive or negative offset and returns the mesh
+        /// with the larger volume.
+        /// </summary>
+        /// <remarks>This method calculates two offset meshes: one inflated outward and one inward. It
+        /// compares their volumes and returns the mesh with the larger volume.</remarks>
+        /// <param name="meshIn">The input <see cref="Mesh"/> to be inflated.</param>
+        /// <param name="offset">The offset value used to inflate the mesh. Positive values expand the mesh outward, while negative values
+        /// shrink it inward.</param>
+        /// <returns>A <see cref="Mesh"/> object representing the inflated version of the input mesh. The returned mesh is the
+        /// one with the larger volume after applying the offset.</returns>
+        public static Mesh InflateMeshOut(Mesh meshIn, double offset)
+        {
+            if(offset == 0)
+            {
+                return meshIn;
+            }
+
+            Mesh m1 = meshIn.Offset(offset);
+            Mesh m2 = meshIn.Offset(-offset);
+
+            return (m1.Volume() > m2.Volume()) ? m1 : m2;
+        }
+
+        public static DMesh3 signDistanceMesh (Mesh meshIn, double offset = 0)
+        {
+            DMesh3 dMesh = MeshtoDMesh(meshIn);
+
+            int num_cells = 128;
+            double cell_size = dMesh.CachedBounds.MaxDim / num_cells;
+
+            MeshSignedDistanceGrid sdf = new MeshSignedDistanceGrid(dMesh, cell_size);
+            sdf.Compute();
+
+            var iso = new DenseGridTrilinearImplicit(sdf.Grid, sdf.GridOrigin, sdf.CellSize);
+
+
+            ImplicitOffset3d imp = new ImplicitOffset3d() { A = iso, Offset = offset };
+
+            
+            
+            MarchingCubes c = new MarchingCubes();
+            c.Implicit = imp;
+            c.Bounds = imp.Bounds();
+            c.CubeSize = c.Bounds.MaxDim / 128;
+            c.Bounds.Expand(3 * c.CubeSize);
+            c.ParallelCompute = true;
+
+
+            /*
+            MarchingCubes c = new MarchingCubes();
+            c.Implicit = imp;
+            c.Bounds = dMesh.CachedBounds;
+            c.CubeSize = c.Bounds.MaxDim / 128;
+            c.Bounds.Expand(3 * c.CubeSize);
+            c.ParallelCompute = true;
+            */
+
+            c.Generate();
+            return c.Mesh;
+        }
+
+        public static DMesh3 ShrinkMeshSDF(DMesh3 meshIn, double shrinkAmnt, int resolution = 64)
+        {
+            if (meshIn == null || shrinkAmnt <= 0)
+            {
+                return null;
+            }
+            // Calculate cell_size based on mesh bounds and desired resolution
+            AxisAlignedBox3d bounds = meshIn.CachedBounds;
+            double maxDim = bounds.MaxDim;
+            double cellSize = maxDim / resolution;
+
+            // Create the MeshSignedDistanceGrid
+            MeshSignedDistanceGrid meshSDF = new MeshSignedDistanceGrid(meshIn, cellSize);
+
+            // Compute the SDF values. This fills the voxel grid with signed distances.
+            meshSDF.Compute();
+
+            // Step 2: Create an ImplicitOffset3d from the SDF
+            // This allows you to apply the offset (shrink or expand) to the implicit surface.
+            // For shrinking, the Offset value will be negative.
+            // The shrinkAmount you provide should be a positive value, so we negate it here.
+            ImplicitOffset3d offsetImplicit = new ImplicitOffset3d()
+            {
+                A = new DenseGridTrilinearImplicit(meshSDF.Grid, meshSDF.GridOrigin, meshSDF.CellSize),
+                Offset = -shrinkAmnt // Negative offset for shrinking
+            };
+
+            // Step 3: Convert the offset Implicit Function back to a DMesh3 using Marching Cubes
+            // Marching Cubes extracts the zero-level set (the surface) from the implicit function.
+            MarchingCubes mc = new MarchingCubes();
+            mc.Implicit = offsetImplicit;
+
+            // Set the bounds for Marching Cubes. It should be the same as the SDF bounds,
+            // or slightly expanded to ensure the entire offset surface is captured.
+            // Adding a small epsilon or the offset amount to the bounds is a good idea.
+            mc.Bounds = bounds.Expanded(shrinkAmnt + cellSize); // Expand bounds by shrinkAmount and a cell size
+
+            // Set the resolution for Marching Cubes. This should match the SDF grid resolution.
+            // The CubeSize property in MarchingCubes is equivalent to the cell_size we calculated.
+            mc.CubeSize = cellSize;
+
+            // Optional: Enable parallel computation for faster meshing
+            mc.ParallelCompute = true;
+
+            // Generate the mesh
+            mc.Generate();
+            return mc.Mesh;
+
+        }
+
+
+        public static Mesh DMesh2RMesh(DMesh3 dMesh)
+        {
+            var verts = dMesh.Vertices();
+            var rVerts = verts.Select(v => new RG.Point3d(v.x, v.y, v.z));
+
+            var faces = dMesh.Triangles();
+            var rFaces = faces.Select(f => new RG.MeshFace(f.a, f.b, f.c));
+
+            Mesh rMesh = new Mesh();
+            rMesh.Vertices.AddVertices(rVerts);
+            rMesh.Faces.AddFaces(rFaces);
+
+            if (dMesh.HasVertexNormals)
+            {
+                foreach(int ix in dMesh.VertexIndices())
+                {
+                    g3.Vector3f gNorm = dMesh.GetVertexNormal(ix);
+                    rMesh.Normals.Add(new RG.Vector3f(gNorm.x, gNorm.y, gNorm.z));
+                }
+            }
+
+            return rMesh;
+        }
+
+        public static Mesh DiyShrnkWrap(Mesh meshIn, double amt)
+        {
+
+            DMesh3 filled = signDistanceMesh(meshIn, amt);
+
+            return DMesh2RMesh(filled);
+        }
     }
 }

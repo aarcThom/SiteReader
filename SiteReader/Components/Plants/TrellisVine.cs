@@ -8,6 +8,8 @@ using SiteReader.Functions;
 using SiteReader.Components.Plants;
 using SiteReader.Classes.Plants;
 using System.Linq;
+using NiC = Rhino.NodeInCode;
+using siteReader.Methods;
 
 namespace SiteReader.Components.Clouds
 {
@@ -28,13 +30,16 @@ namespace SiteReader.Components.Clouds
             pManager.AddGeometryParameter("Geometry", "Geo", "Provide the Brep(s) / Mesh(s) you want wrap the vine around", GH_ParamAccess.list);
             pManager.AddIntegerParameter("VinePt Num", "vPt#", "The number of points on your central vine curve. A higher number, " +
                 "will add more resolution. A lower number will smooth out your vine.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Smoothing", "smt", "A number between 0-1 (inclusive) for a post-processing, smoothing.", GH_ParamAccess.item, 0.2);
+            pManager.AddNumberParameter("Smoothing", "smt", "A number between 0-1 (inclusive) for a post-processing, smoothing.", 
+                GH_ParamAccess.item, 0.2);
+            pManager.AddNumberParameter("Vine Radius", "vRad", "The maximum radius of the main vine.", GH_ParamAccess.item, 1);
+            pManager.AddIntegerParameter("Seed", "sd", "Seed for random vine tendrils.", GH_ParamAccess.item, 1);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddCurveParameter("vineCrvs", "vCrv", "Vine Curves", GH_ParamAccess.list);
-            pManager.AddMeshParameter("meshtT", "mT", "test", GH_ParamAccess.item);
+            pManager.AddMeshParameter("msh", "msh", "test", GH_ParamAccess.item);
         }
 
         //SOLVE =======================================================================================================
@@ -54,8 +59,11 @@ namespace SiteReader.Components.Clouds
             double smoothing = 0.2;
             DA.GetData(3, ref smoothing);
 
+            double vineRad = 1;
+            DA.GetData(4, ref vineRad);
 
-
+            int seed = 1;
+            DA.GetData(5, ref seed);
 
             Mesh initMesh = null;
             if(!GeoUtility.ConvertToMesh(geoIn, MeshingParameters.QualityRenderMesh, ref initMesh, out string wMsg, true))
@@ -65,10 +73,15 @@ namespace SiteReader.Components.Clouds
             }
             // WORK ========================================================
 
-            // get main vines
-            List<Curve> cntrlCrvs = vinesIn.Select(v => GeoUtility.PtTweenCrvNMesh(v, initMesh, ptCnt, smoothing)).ToList();
+            //get offset mesh
+            Mesh inflateMesh = Meshing.InflateMeshOut(initMesh, vineRad);
+            if (inflateMesh == null) { inflateMesh = initMesh; }
 
-            //Inflate Mesh
+            // get main vines
+            List<Curve> cntrlCrvs = vinesIn.Select(v => GeoUtility.PtTweenCrvNMesh(v, inflateMesh, ptCnt, smoothing)).ToList();
+            // get points for secondary vines
+
+            Mesh testMesh = Meshing.DiyShrnkWrap(initMesh, vineRad);
 
 
 
@@ -76,6 +89,7 @@ namespace SiteReader.Components.Clouds
             // OUTPUT ====================================================
 
             DA.SetDataList(0, cntrlCrvs);
+            DA.SetData(1, testMesh);
 
         }
 

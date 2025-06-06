@@ -56,34 +56,8 @@ namespace SiteReader.Components.Extras
                 return;
             }
 
-            //figure out how many points per face
-            IEnumerable<double> faceAreas = initMesh.Faces.Select(i => Meshing.AreaOfTriFace(initMesh, i));
-            double totalArea = faceAreas.Sum();
-            IEnumerable<int> ptCounts = faceAreas.Select(i => (int)Math.Ceiling(i / totalArea * ptCt));
-
-
-            var newPts = new List<Point3d>();
-
-            var rand = new Random(seed);
-
-            foreach (var pair in initMesh.Faces.Zip(ptCounts, (face, ptCnt) => new { face, ptCnt }))
-            {
-                MeshFace face = pair.face;
-                int ptCnt = pair.ptCnt;
-
-                List<Point3d> facePoints = Meshing.GetFacePoints(initMesh, face);
-
-                for (int i = 0; i < ptCnt; i++)
-                {
-                    (double u, double v, double w) bw = Meshing.GetBaryWeights(rand);
-                    Point3d randPt = facePoints[0] * bw.u + facePoints[1] * bw.v + facePoints[2] * bw.w;
-                    newPts.Add(randPt);
-
-                }
-            }
-
-            IEnumerable<Point3d> shuffledPts = newPts.Shuffle();
-            DA.SetDataList(0, shuffledPts.Take(ptCt));
+            List<Point3d> randomPts = GeoUtility.RandomPtsOnMesh(initMesh, seed, ptCt);
+            DA.SetDataList(0, randomPts);
         }
 
         //GUID ========================================================================================================

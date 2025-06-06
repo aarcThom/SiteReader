@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using SiteReader.Functions;
+using siteReader.Methods;
 
 namespace SiteReader.Functions
 {
@@ -220,6 +222,51 @@ namespace SiteReader.Functions
         {
             double[] crvParams = crv.DivideByCount(ptCnt, true);
             return crvParams.Select(p => crv.PointAt(p)).ToList();
+        }
+
+
+   
+        /// <summary>
+        /// Generates a specified number of random points distributed across the surface of a mesh.
+        /// </summary>
+        /// <remarks>The points are distributed proportionally to the area of each face of the mesh,
+        /// ensuring that larger faces receive more points. The method uses barycentric coordinates to generate points
+        /// within individual faces. The resulting list of points is shuffled and trimmed to the specified count
+        /// (<paramref name="ptCt"/>).</remarks>
+        /// <param name="initMesh">The mesh on which the random points will be generated. Must be a valid, non-null mesh.</param>
+        /// <param name="seed">The seed value for the random number generator, ensuring reproducibility of the point distribution.</param>
+        /// <param name="ptCt">The total number of random points to generate. Must be a positive integer.</param>
+        /// <returns>A list of <see cref="Point3d"/> objects representing the generated random points on the mesh surface.</returns>
+        public static List<Point3d> RandomPtsOnMesh(Mesh initMesh, int seed, int ptCt)
+        {
+            //figure out how many points per face
+            IEnumerable<double> faceAreas = initMesh.Faces.Select(i => Meshing.AreaOfTriFace(initMesh, i));
+            double totalArea = faceAreas.Sum();
+            IEnumerable<int> ptCounts = faceAreas.Select(i => (int)Math.Ceiling(i / totalArea * ptCt));
+
+
+            var newPts = new List<Point3d>();
+
+            var rand = new Random(seed);
+
+            foreach (var pair in initMesh.Faces.Zip(ptCounts, (face, ptCnt) => new { face, ptCnt }))
+            {
+                MeshFace face = pair.face;
+                int ptCnt = pair.ptCnt;
+
+                List<Point3d> facePoints = Meshing.GetFacePoints(initMesh, face);
+
+                for (int i = 0; i < ptCnt; i++)
+                {
+                    (double u, double v, double w) bw = Meshing.GetBaryWeights(rand);
+                    Point3d randPt = facePoints[0] * bw.u + facePoints[1] * bw.v + facePoints[2] * bw.w;
+                    newPts.Add(randPt);
+
+                }
+            }
+
+            IEnumerable<Point3d> shuffledPts = newPts.Shuffle();
+            return shuffledPts.Take(ptCt).ToList();
         }
 
 
