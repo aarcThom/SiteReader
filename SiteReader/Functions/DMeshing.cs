@@ -1,4 +1,5 @@
 ﻿using g3;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mesh = Rhino.Geometry.Mesh;
@@ -6,7 +7,7 @@ using RG = Rhino.Geometry;
 
 namespace SiteReader.Functions
 {
-    public static class Meshing
+    public static class DMeshing
     {
         //MESHING METHODS =============================================================================================
         //The methods contained within this class relate to meshing with Geometry3#
@@ -80,7 +81,7 @@ namespace SiteReader.Functions
             return dMesh;
         }
 
-        //INPUT / OUTPUT HELPERS =======================================================================================
+        // HELPERS =====================================================================================================
         // =============================================================================================================
 
         /// <summary>
@@ -144,96 +145,87 @@ namespace SiteReader.Functions
             return triList;
         }
 
+        /// <summary>
+        /// Converts a 3D mesh into an implicit representation using a signed distance field.
+        /// </summary>
+        /// <remarks>The resolution of the implicit representation is determined by the <paramref
+        /// name="numCells"/> parameter, which affects the size of each grid cell. The <paramref name="maxOffset"/>
+        /// parameter controls the band width around the mesh surface where the signed distance field is computed
+        /// accurately.</remarks>
+        /// <param name="meshIn">The input 3D mesh to be converted into an implicit representation.</param>
+        /// <param name="numCells">The number of grid cells along the largest dimension of the mesh. Determines the resolution of the implicit
+        /// representation.</param>
+        /// <param name="maxOffset">The maximum distance, in world units, from the mesh surface for which the signed distance field will be
+        /// accurately computed.</param>
+        /// <returns>A <see cref="DenseGridTrilinearImplicit"/> object representing the implicit signed distance field of the
+        /// input mesh.</returns>
+        private static DenseGridTrilinearImplicit mesh2ImplicitF(DMesh3 meshIn, int numCells, double maxOffset)
+        {
+            double meshCellSize = meshIn.CachedBounds.MaxDim / numCells; // meshcell size for grid
+            var grid = new MeshSignedDistanceGrid(meshIn, meshCellSize); // set up the grid
+
+            // computes the radius in cell count around the surface in
+            // which the distance field will be calculated accurately
+            grid.ExactBandWidth = (int)(maxOffset / meshCellSize) + 1;
+            grid.Compute();
+
+            return new DenseGridTrilinearImplicit(grid.Grid, grid.GridOrigin, grid.CellSize);
+        }
+
+        /// <summary>
+        /// Generates a 3D mesh representation of a bounded implicit function using the marching cubes algorithm.
+        /// </summary>
+        /// <remarks>This method uses the marching cubes algorithm to approximate the surface of the
+        /// implicit function. The resolution of the mesh is determined by the <paramref name="numCells"/> parameter,
+        /// and the algorithm performs additional root-finding steps to improve surface accuracy.</remarks>
+        /// <param name="impF">The bounded implicit function to be converted into a mesh.</param>
+        /// <param name="numCells">The number of cells along the largest dimension of the bounding box.  Higher values result in finer mesh
+        /// resolution but may increase computation time.</param>
+        /// <returns>A <see cref="DMesh3"/> object representing the generated 3D mesh.</returns>
+        private static DMesh3 ImpFunc2DMesh(BoundedImplicitFunction3d impF, int numCells)
+        {
+            
+            // set up marching cubes around the implicit function
+            MarchingCubes mc = new MarchingCubes();
+            mc.Implicit = impF;
+            mc.Bounds = impF.Bounds();
+            mc.CubeSize = mc.Bounds.MaxDim / numCells;
+            mc.Bounds.Expand(3 * mc.CubeSize); // the buffer around the edges
+            mc.ParallelCompute = true;
+
+            mc.Generate();
+            return mc.Mesh;
+        }
+
+
+
         //PUBLIC UTILITY ===============================================================================================
         // =============================================================================================================
 
-
-        public static DMesh3 signDistanceMesh (Mesh meshIn, double offset = 0)
+        /// <summary>
+        /// Creates a new <see cref="DMesh3"/> by applying an offset to the input mesh.
+        /// </summary>
+        /// <remarks>This method generates a new mesh by converting the input mesh into an implicit
+        /// representation,  applying the specified offset, and then converting the result back into a mesh. The
+        /// resolution of the implicit representation is fixed at 128.</remarks>
+        /// <param name="dMesh">The input mesh to be offset. Cannot be null.</param>
+        /// <param name="offset">The offset distance to apply to the mesh. Positive values expand the mesh outward,  while negative values
+        /// shrink it inward. Defaults to 0.</param>
+        /// <returns>A new <see cref="DMesh3"/> representing the offset version of the input mesh.</returns>
+        public static DMesh3 OffSetDMesh (DMesh3 dMesh, double offset = 0)
         {
-            DMesh3 dMesh = RMesh2DMesh(meshIn);
+            BoundedImplicitFunction3d meshImplicit = mesh2ImplicitF(dMesh, 128, offset);
 
-            int num_cells = 128;
-            double cell_size = dMesh.CachedBounds.MaxDim / num_cells;
-
-            MeshSignedDistanceGrid sdf = new MeshSignedDistanceGrid(dMesh, cell_size);
-            sdf.Compute();
-
-            var iso = new DenseGridTrilinearImplicit(sdf.Grid, sdf.GridOrigin, sdf.CellSize);
-
-
-            ImplicitOffset3d imp = new ImplicitOffset3d() { A = iso, Offset = offset };
-
-            
-            
-            MarchingCubes c = new MarchingCubes();
-            c.Implicit = imp;
-            c.Bounds = imp.Bounds();
-            c.CubeSize = c.Bounds.MaxDim / 128;
-            c.Bounds.Expand(3 * c.CubeSize);
-            c.ParallelCompute = true;
-
-
-            /*
-            MarchingCubes c = new MarchingCubes();
-            c.Implicit = imp;
-            c.Bounds = dMesh.CachedBounds;
-            c.CubeSize = c.Bounds.MaxDim / 128;
-            c.Bounds.Expand(3 * c.CubeSize);
-            c.ParallelCompute = true;
-            */
-
-            c.Generate();
-            return c.Mesh;
-        }
-
-        public static DMesh3 ShrinkMeshSDF(DMesh3 meshIn, double shrinkAmnt, int resolution = 64)
-        {
-            if (meshIn == null || shrinkAmnt <= 0)
+            var offsetImplicit = new ImplicitOffset3d()
             {
-                return null;
-            }
-            // Calculate cell_size based on mesh bounds and desired resolution
-            AxisAlignedBox3d bounds = meshIn.CachedBounds;
-            double maxDim = bounds.MaxDim;
-            double cellSize = maxDim / resolution;
-
-            // Create the MeshSignedDistanceGrid
-            MeshSignedDistanceGrid meshSDF = new MeshSignedDistanceGrid(meshIn, cellSize);
-
-            // Compute the SDF values. This fills the voxel grid with signed distances.
-            meshSDF.Compute();
-
-            // Step 2: Create an ImplicitOffset3d from the SDF
-            // This allows you to apply the offset (shrink or expand) to the implicit surface.
-            // For shrinking, the Offset value will be negative.
-            // The shrinkAmount you provide should be a positive value, so we negate it here.
-            ImplicitOffset3d offsetImplicit = new ImplicitOffset3d()
-            {
-                A = new DenseGridTrilinearImplicit(meshSDF.Grid, meshSDF.GridOrigin, meshSDF.CellSize),
-                Offset = -shrinkAmnt // Negative offset for shrinking
+                A = meshImplicit,
+                Offset = offset
             };
 
-            // Step 3: Convert the offset Implicit Function back to a DMesh3 using Marching Cubes
-            // Marching Cubes extracts the zero-level set (the surface) from the implicit function.
-            MarchingCubes mc = new MarchingCubes();
-            mc.Implicit = offsetImplicit;
+            DMesh3 outMesh = ImpFunc2DMesh(offsetImplicit, 128);
 
-            // Set the bounds for Marching Cubes. It should be the same as the SDF bounds,
-            // or slightly expanded to ensure the entire offset surface is captured.
-            // Adding a small epsilon or the offset amount to the bounds is a good idea.
-            mc.Bounds = bounds.Expanded(shrinkAmnt + cellSize); // Expand bounds by shrinkAmount and a cell size
-
-            // Set the resolution for Marching Cubes. This should match the SDF grid resolution.
-            // The CubeSize property in MarchingCubes is equivalent to the cell_size we calculated.
-            mc.CubeSize = cellSize;
-
-            // Optional: Enable parallel computation for faster meshing
-            mc.ParallelCompute = true;
-
-            // Generate the mesh
-            mc.Generate();
-            return mc.Mesh;
-
+            return outMesh;
         }
+
     }
 }

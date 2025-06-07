@@ -1,7 +1,11 @@
 ﻿using Rhino.Geometry;
+using Rhino.Geometry.Collections;
+using Rhino.Geometry.Intersect;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Geosharp = g3;
+using SiteReader.Functions;
 
 namespace SiteReader.Functions
 {
@@ -105,8 +109,8 @@ namespace SiteReader.Functions
         /// <returns>area in square units</returns>
         public static double AreaOfTriFace(Mesh fMesh, MeshFace mFace) 
         {
-
-            List<Point3d> triPts = GetFacePoints(fMesh, mFace);
+            List<int> __ = null;
+            List<Point3d> triPts = GetFacePoints(fMesh, mFace, out __);
 
             double a = triPts[0].DistanceTo(triPts[1]);
             double b = triPts[1].DistanceTo(triPts[2]);
@@ -118,26 +122,87 @@ namespace SiteReader.Functions
 
 
         /// <summary>
-        /// Returns the vertices of a mesh face as Points
+        /// Retrieves the 3D points corresponding to the vertices of a specified face in a mesh.
         /// </summary>
-        /// <param name="fMesh">Mesh that contains the face</param>
-        /// <param name="mFace">The face</param>
-        /// <returns>A list of Point 3ds - 3 pts for triangles, 4 pts for quads.</returns>
-        public static List<Point3d> GetFacePoints(Mesh fMesh, MeshFace mFace)
+        /// <remarks>The method converts the vertex coordinates from <see cref="Point3f"/> to <see
+        /// cref="Point3d"/>. This ensures compatibility with APIs or operations that require double-precision
+        /// points.</remarks>
+        /// <param name="fMesh">The mesh containing the face whose vertex points are to be retrieved.</param>
+        /// <param name="mFace">The face within the mesh for which vertex points are to be retrieved.</param>
+        /// <param name="faceIx">Outputs the indices of the vertices that define the specified face. This list will contain the vertex
+        /// indices in the order they appear in the face.</param>
+        /// <returns>A list of <see cref="Point3d"/> objects representing the 3D coordinates of the vertices that define the
+        /// specified face.</returns>
+        public static List<Point3d> GetFacePoints(Mesh fMesh, MeshFace mFace, out List<int> faceIx)
         {
-            Point3d ptA = fMesh.Vertices[mFace.A];
-            Point3d ptB = fMesh.Vertices[mFace.B];
-            Point3d ptC = fMesh.Vertices[mFace.C];
+            List<int> vIx = GetFaceVertIx(mFace);
+            IEnumerable<Point3f> fPts =  vIx.Select(v => fMesh.Vertices[v]);
 
-            var ptList = new List<Point3d>() { ptA, ptB, ptC };
+            faceIx = vIx;
+            return fPts.Select(p => new Point3d(p.X, p.Y, p.Z)).ToList();
+        }
 
-            if (mFace.IsQuad)
+        /// <summary>
+        /// Retrieves the vertex indices of a given mesh face.
+        /// </summary>
+        /// <remarks>This method determines the number of vertices in the face based on whether it is a
+        /// triangle or quadrilateral. It then retrieves the indices of those vertices and returns them as a
+        /// list.</remarks>
+        /// <param name="face">The <see cref="MeshFace"/> object representing the mesh face. Must not be null.</param>
+        /// <returns>A list of integers containing the vertex indices of the specified mesh face. The list will contain 3 indices
+        /// if the face is a triangle, or 4 indices if the face is a quadrilateral.</returns>
+        private static List<int> GetFaceVertIx(MeshFace face)
+        {
+            var vertIx = new List<int>();
+            int vertCnt = (face.IsTriangle) ? 3 : 4;
+            for(int i = 0; i < vertCnt; i++)
             {
-                ptList.Add(fMesh.Vertices[mFace.D]);
+                vertIx.Add(face[i]);
+            }
+            return vertIx;
+        }
+
+
+        /// <summary>
+        /// Calculates the average of a collection of 3D points.
+        /// </summary>
+        /// <remarks>This method computes the average by summing all points in the collection and dividing
+        /// the result by the number of points. Each <see cref="Point3d"/> in the collection is expected to support
+        /// addition and scalar division.</remarks>
+        /// <param name="pts">The collection of <see cref="Point3d"/> objects to average. Cannot be null or empty.</param>
+        /// <returns>A <see cref="Point3d"/> representing the average position of all points in the collection. If the collection
+        /// is empty, the method will throw an exception.</returns>
+        public static Point3d AveragePts(IEnumerable<Point3d> pts)
+        {
+            var basePt = new Point3d(0, 0, 0);
+
+            foreach(Point3d pt in pts)
+            {
+                basePt += pt;
             }
 
-            return ptList;
+            return basePt / pts.Count();
         }
+
+
+        /// <summary>
+        /// Calculates the center points of all faces in the specified mesh.
+        /// </summary>
+        /// <param name="meshIn">The input mesh from which face centers are calculated. Cannot be null.</param>
+        /// <returns>A list of <see cref="Point3d"/> objects representing the center points of each face in the mesh. The list
+        /// will be empty if the mesh has no faces.</returns>
+        public static List<Point3d> GetFaceCenters(Mesh meshIn)
+        {
+            var ctrs = new List<Point3d>();
+            foreach(MeshFace face in meshIn.Faces)
+            {
+                List<int> __ = null;
+                List<Point3d> facePts = GetFacePoints(meshIn, face, out __);
+                ctrs.Add(AveragePts(facePts));
+            }
+            return ctrs;
+        }
+
 
         /// <summary>
         /// Gets 3 randomized barycentric weights
@@ -219,6 +284,156 @@ namespace SiteReader.Functions
             Mesh m2 = meshIn.Offset(-offset);
 
             return (m1.Volume() > m2.Volume()) ? m1 : m2;
+        }
+
+        /// <summary>
+        /// Calculates the shortest edge length in the given mesh.
+        /// </summary>
+        /// <remarks>This method iterates through all edges of the mesh and computes their lengths to
+        /// determine the shortest edge. The input mesh should contain valid vertices and faces for accurate
+        /// results.</remarks>
+        /// <param name="meshIn">The input mesh to analyze. Must not be null.</param>
+        /// <returns>The length of the shortest edge in the mesh. Returns <see langword="double.MaxValue"/> if the mesh has no
+        /// edges.</returns>
+        public static double MeshShortestEdgeLen(Mesh meshIn)
+        {
+            double shortLen = 9999999; //arbitrarly large num
+
+            Point3d[] verts = meshIn.Vertices.ToPoint3dArray();
+            foreach(MeshFace face in meshIn.Faces)
+            {
+                int crnrCnt = (face.IsTriangle) ? 3 : 4;
+
+                for (int i = 0; i < crnrCnt; i++)
+                {
+                    int nbrIx = Utility.WrapIndex(i, 1, crnrCnt); // get next wrapped index within face
+                    int nbrVIx = face[nbrIx]; // get vertex index for neighbour
+                    int vIx = face[i]; // base point vertex index
+
+                    double dist = DistanceTweenVertices(vIx, nbrVIx, verts);
+
+                    shortLen = (dist < shortLen) ? dist : shortLen; // update the shortest length value
+                }
+            }
+
+            return shortLen;
+        }
+
+
+        public static Mesh ExtrudeMeshFace(Mesh parent, int faceIx, Vector3d extrusion)
+        {
+            MeshFace face = parent.Faces[faceIx];
+            List<int> __ = null;
+            List<Point3d> vertPts = GetFacePoints(parent, face, out __);
+
+            Mesh faceMesh = new Mesh();
+            faceMesh.Vertices.AddVertices(vertPts);
+
+            if (face.IsTriangle)
+            {
+                faceMesh.Faces.AddFace(0, 1, 2);
+            }
+            else
+            {
+                faceMesh.Faces.AddFace(0, 1, 2, 3);
+            }
+
+            Transform exTrans = Transform.Translation(extrusion);
+            var componentIndex = new ComponentIndex(ComponentIndexType.MeshFace, 0);
+            List<ComponentIndex> componentsToExtrude = new List<ComponentIndex> { componentIndex };
+            Mesh extrudedMesh = null;
+
+            using (MeshExtruder extruder = new MeshExtruder(faceMesh, componentsToExtrude))
+            {
+                // Set properties for the extrusion
+                extruder.Transform = exTrans;
+                extruder.KeepOriginalFaces = true; // Keep the original mesh faces or just the extruded part
+
+                // Perform the extrusion
+                if (extruder.ExtrudedMesh(out extrudedMesh))
+                {
+                    // Optionally, ensure normals are consistent
+                    extrudedMesh.Normals.ComputeNormals();
+                    extrudedMesh.FaceNormals.ComputeFaceNormals();
+                    extrudedMesh.Compact();
+                }
+            }
+
+            extrudedMesh.FillHoles();
+
+            return extrudedMesh;
+        }
+
+        /// <summary>
+        /// Generates a new mesh by filling gaps in the input mesh through extrusion and interpolation.
+        /// </summary>
+        /// <remarks>This method identifies gaps in the input <see cref="Mesh"/> and fills them by
+        /// extruding selected faces based on their normals and performing interpolation using a signed distance
+        /// function. The resulting mesh includes the original mesh with the added gap-filling geometry.  The method
+        /// assumes that the input mesh has valid face normals. If the face normals are not computed, they will be
+        /// calculated and unitized internally. The gap-filling process involves ray intersection tests to determine
+        /// which faces should be extruded, followed by mesh interpolation to finalize the geometry.</remarks>
+        /// <param name="meshIn">The input <see cref="Mesh"/> to process. Must be a valid mesh with faces.</param>
+        /// <param name="fillAmt">The amount by which faces are extruded to fill gaps. This value determines the extrusion distance along the
+        /// face normals.</param>
+        /// <param name="mOffset">The offset value used during signed distance function interpolation. This affects the final geometry of the
+        /// gap-filled mesh.</param>
+        /// <returns>A new <see cref="Mesh"/> that includes the original mesh and the gap-filling geometry.</returns>
+        public static Mesh GapFillerMesh (Mesh meshIn, double fillAmt, double mOffset)
+        {
+            // unitized face normals
+
+            if (meshIn.FaceNormals.Count == 0)
+            {
+                meshIn.FaceNormals.ComputeFaceNormals();
+            }
+
+            MeshFaceNormalList fcNrmls = meshIn.FaceNormals;
+            fcNrmls.UnitizeFaceNormals();
+            List<Vector3d> norms3d = fcNrmls.Select(n => new Vector3d(n.X, n.Y, n.Z) * fillAmt).ToList();
+
+            // face centers as Point3ds
+            List<Point3d> ctrs = GetFaceCenters(meshIn);
+
+
+            // test gap filling
+            var moveFaces = new List<int>();
+            double faceOffset = Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance * 2;
+            for (int i = 0; i < ctrs.Count; i++)
+            {
+                Point3d mvPt = ctrs[i] + norms3d[i] * faceOffset;
+                var ray = new Ray3d(mvPt, norms3d[i]);
+
+                double rXM = Intersection.MeshRay(meshIn, ray);
+
+                if (rXM >= 0 && mvPt.DistanceTo(ray.PointAt(rXM)) <= fillAmt)
+                {
+                    moveFaces.Add(i);
+                }
+            }
+
+            // extruding the faces that should fill gaps
+            var extrudedMeshes = new List<Mesh>();
+            for (int i = 0; i < moveFaces.Count; i++)
+            {
+                int faceIx = moveFaces[i];
+                Vector3d extDir = norms3d[moveFaces[i]];
+
+                Mesh fExtrusion = ExtrudeMeshFace(meshIn, faceIx, extDir);
+                extrudedMeshes.Add(fExtrusion);
+            }
+
+            foreach(Mesh m in extrudedMeshes)
+            {
+                meshIn.Append(m);
+            }
+
+            // get MC interpolation from SDF
+            Geosharp.DMesh3 dMesh = DMeshing.RMesh2DMesh(meshIn);
+            Geosharp.DMesh3 mcMesh = DMeshing.OffSetDMesh(dMesh, mOffset);
+            Mesh finalMesh = DMeshing.DMesh2RMesh(mcMesh);
+
+            return finalMesh;
         }
     }
 }

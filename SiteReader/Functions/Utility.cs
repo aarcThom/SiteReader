@@ -140,11 +140,14 @@ namespace SiteReader.Functions
 
 
         /// <summary>
-        /// Returns the non-wrapped index for a wrapped input index
+        /// Adjusts an index by applying a shift and ensures the result wraps within the bounds of a list.
         /// </summary>
-        /// <param name="shift"> index - can be less than zero, or greater than list len</param>
-        /// <param name="listLen"> the length of the list</param>
-        /// <returns></returns>
+        /// <remarks>This method ensures that the resulting index remains within the valid bounds of the
+        /// list, even if the shift causes the index to exceed the list's range or fall below zero.</remarks>
+        /// <param name="shift">The amount by which to shift the index. Can be positive or negative.</param>
+        /// <param name="index">The initial index to be adjusted.</param>
+        /// <param name="listLen">The length of the list. Must be greater than zero.</param>
+        /// <returns>The adjusted index, wrapped within the range [0, <paramref name="listLen"/> - 1].</returns>
         public static int WrapIndex(int shift, int index, int listLen)
         {
             if (shift + index < 0) return listLen - (-1 * shift) % listLen;

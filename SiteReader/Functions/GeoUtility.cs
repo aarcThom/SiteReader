@@ -3,6 +3,7 @@ using Rhino.DocObjects;
 using Rhino.Geometry;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 namespace SiteReader.Functions
@@ -250,7 +251,8 @@ namespace SiteReader.Functions
                 MeshFace face = pair.face;
                 int ptCnt = pair.ptCnt;
 
-                List<Point3d> facePoints = RMeshing.GetFacePoints(initMesh, face);
+                List<int> __ = null;
+                List<Point3d> facePoints = RMeshing.GetFacePoints(initMesh, face, out __);
 
                 for (int i = 0; i < ptCnt; i++)
                 {
