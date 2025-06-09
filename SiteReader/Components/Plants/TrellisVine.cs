@@ -1,4 +1,5 @@
-﻿using Grasshopper.Kernel;
+﻿using g3;
+using Grasshopper.Kernel;
 using Rhino.Geometry;
 using SiteReader.Components.Plants;
 using SiteReader.Functions;
@@ -62,7 +63,10 @@ namespace SiteReader.Components.Clouds
             // WORK ========================================================
 
             //get offset mesh
-            Mesh meshOut = RMeshing.GapFillerMesh(initMesh, gapFill, vineRad);
+            // Mesh meshOut = RMeshing.GapFillerMesh(initMesh, gapFill, vineRad);
+            DMesh3 dMesh = DMeshing.RMesh2DMesh(initMesh);
+            DMesh3 test = DMeshing.TestMesh(dMesh);
+            Mesh meshOut = DMeshing.DMesh2RMesh(test);
 
             // get vine curves
             var vineCrvs = vinesIn.Select(v => GeoUtility.PtTweenCrvNMesh(v, meshOut, 1000, 0.1));

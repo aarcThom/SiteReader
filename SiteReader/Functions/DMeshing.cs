@@ -198,6 +198,63 @@ namespace SiteReader.Functions
         }
 
 
+        /// <summary>
+        /// Calculates the search radius in grid cells based on the specified search distance.
+        /// </summary>
+        /// <remarks>The method determines the number of grid cells that correspond to the given search
+        /// distance by dividing the search distance by the dimensions of individual grid cells. The resulting values
+        /// are rounded down to the nearest integer.</remarks>
+        /// <param name="impF">The implicit function containing the dense grid and its bounds.</param>
+        /// <param name="searchDist">The search distance, in world units, to be converted into grid cell dimensions.</param>
+        /// <returns>A <see cref="Vector3i"/> representing the search radius in terms of grid cells along the X, Y, and Z
+        /// dimensions.</returns>
+        private static Vector3i GetSearchRadius(DenseGridTrilinearImplicit impF, double searchDist)
+        {
+            DenseGrid3f sourceGrid = impF.Grid; // get the gridcell count in each dimension
+            var gridCnts = new Vector3i(sourceGrid.ni, sourceGrid.nj, sourceGrid.nk);
+
+            // get the dimensions of a cell
+            double cellWidth = impF.Bounds().Width / gridCnts.x;
+            double cellHeight = impF.Bounds().Height / gridCnts.y;
+            double cellDepth = impF.Bounds().Depth / gridCnts.z;
+            var cellDims = new Vector3d(cellWidth, cellDepth, cellHeight);
+
+            // get the seach distance in terms of cells
+            var searchX = (int)(Math.Floor(searchDist / cellDims.x));
+            var searchY = (int)(Math.Floor(searchDist / cellDims.y));
+            var searchZ = (int)(Math.Floor(searchDist / cellDims.z));
+            
+            return new Vector3i(searchX, searchY, searchZ);
+        }
+
+        private static DenseGridTrilinearImplicit IterateImplicitFuncGrid(DenseGridTrilinearImplicit impF, Vector3i searchRad)
+        {
+            DenseGrid3f sourceGrid = impF.Grid; // get the gridcell count in each dimension
+            var gridCnts = new Vector3i(sourceGrid.ni, sourceGrid.nj, sourceGrid.nk);
+
+            // the max indices we want to check within the grid, where searchRad is the minimum
+            // ie. we want a padding of searchRad that we don't search in on the exterior of the grid
+            Vector3i maxIx = new Vector3i(gridCnts.x - searchRad.x, gridCnts.y - searchRad.y, gridCnts.z - searchRad.z);
+
+            for (int z = searchRad.z; z < maxIx.z; z++)
+            {
+                for (int y = searchRad.y; y < maxIx.y; y++)
+                {
+                    for (int x = searchRad.z; z < maxIx.z; z++)
+                    {
+                        var currentCell = new Vector3i(x, y, z);
+                        float check = impF.Grid[currentCell];
+                        impF.Grid[currentCell] = -10;
+
+                        float check2 = impF.Grid[currentCell];
+                    }
+                }
+            }
+
+            return impF;
+        }
+
+
 
         //PUBLIC UTILITY ===============================================================================================
         // =============================================================================================================
@@ -225,6 +282,15 @@ namespace SiteReader.Functions
             DMesh3 outMesh = ImpFunc2DMesh(offsetImplicit, 128);
 
             return outMesh;
+        }
+
+
+        public static DMesh3 TestMesh(DMesh3 dMesh, double searchRad = 10)
+        {
+            DenseGridTrilinearImplicit triImpF = mesh2ImplicitF(dMesh, 128, searchRad);
+            Vector3i searchGrid = GetSearchRadius(triImpF, searchRad);
+            DenseGridTrilinearImplicit test = IterateImplicitFuncGrid(triImpF, searchGrid);
+            return ImpFunc2DMesh(test, 128);
         }
 
     }
