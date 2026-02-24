@@ -21,6 +21,7 @@ namespace SiteReader.Components.Raster
         {
             pManager.AddTextParameter("File In", "in", "The .ecw / .sid file to convert", GH_ParamAccess.item);
             pManager.AddTextParameter("Folder Out", "out", "The folder you want to export to", GH_ParamAccess.item);
+            pManager.AddBooleanParameter("Run", "Run", "Set True to start the import", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -31,16 +32,20 @@ namespace SiteReader.Components.Raster
         //SOLVE =======================================================================================================
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            var file_in = String.Empty;
-            var dir_out = String.Empty;
+            var fileIn = String.Empty;
+            var dirOut = String.Empty;
+            var run = false;
 
-            if (!DA.GetData(0, ref file_in)) return;
-            if (!DA.GetData(1, ref dir_out)) return;
+            if (!DA.GetData(0, ref fileIn)) return;
+            if (!DA.GetData(1, ref dirOut)) return;
+            if (!DA.GetData(2, ref run)) return;
+            
+            if (run == false) return;
 
             var commands = new List<string>()
             {
-                StandAlone.FormatWinDir(file_in), 
-                StandAlone.FormatWinDir(dir_out) 
+                StandAlone.FormatWinDir(fileIn), 
+                StandAlone.FormatWinDir(dirOut) 
             };
 
             var app = new StandAlone("raster2jpeg", commands);
@@ -54,10 +59,10 @@ namespace SiteReader.Components.Raster
             string lowerRight = $"{outList[2].Trim()},{outList[3].Trim()},0";
 
             // getting the jpeg version of the output file and running 'picture' in Rhino
-            string outputJpeg = $"{dir_out}{Path.GetFileNameWithoutExtension(@file_in)}.jpg";
+            string outputJpeg = $"{dirOut}{Path.GetFileNameWithoutExtension(fileIn)}.jpg";
 
             //formatting for picture command if file in contains spaces
-            if (file_in.Trim().Contains(" "))
+            if (fileIn.Trim().Contains(" "))
             {
                 outputJpeg = $"\"{outputJpeg}\"";
             }
