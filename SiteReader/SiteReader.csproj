@@ -7,7 +7,15 @@
     <Description>Description of SiteReader</Description>
     <TargetExt>.gha</TargetExt>
     <UseWindowsForms>true</UseWindowsForms>
+	  
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
+	
+  <ItemGroup>
+    <Compile Remove="Components\Plants\**" />
+    <EmbeddedResource Remove="Components\Plants\**" />
+    <None Remove="Components\Plants\**" />
+  </ItemGroup>
 	
   <ItemGroup>
     <None Remove="Resources\cloud.png" />
